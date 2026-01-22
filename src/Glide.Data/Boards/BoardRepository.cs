@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Threading.Tasks;
 
@@ -18,6 +19,18 @@ public class BoardRepository(IDbConnectionFactory connectionFactory)
         await conn.ExecuteAsync(statement, new { Id = id, Name = name, ProjectId = projectId });
 
         return new Board(id, name, projectId);
+    }
+
+    public async Task<IEnumerable<Board>> GetByProjectIdAsync(string projectId)
+    {
+        const string query = """
+                             SELECT id AS Id, name AS Name, project_id AS ProjectId
+                             FROM boards
+                             WHERE project_id = @ProjectId
+                             """;
+
+        IDbConnection conn = connectionFactory.CreateConnection();
+        return await conn.QueryAsync<Board>(query, new { ProjectId = projectId });
     }
 }
 

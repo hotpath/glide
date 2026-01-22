@@ -1,0 +1,24 @@
+@using Glide.Data.Projects
+@using Glide.Web.Features.Shared
+<HtmxLayout Title="Boards" BodyClass="boards-page">
+    <main>
+        <section class="boards-section">
+            <div class="section-header">
+                <h2>@Model?.Name - Boards</h2>
+                <form id="board-create-form" class="board-create-form" hx-post="/projects/@Model?.Id/boards"
+                      hx-target="#boards-grid" hx-swap="beforeend">
+                    <input type="text" name="name" placeholder="New board name" aria-label="Board name" required/>
+                    <button type="submit">Create Board</button>
+                </form>
+            </div>
+            <div id="boards-list" hx-get="/projects/@Model?.Id/boards" hx-trigger="load" hx-swap="innerHTML">
+                <div class="loading">Loading boards...</div>
+            </div>
+        </section>
+    </main>
+</HtmxLayout>
+
+@code
+{
+    [Parameter] public Project? Model { get; set; }
+}

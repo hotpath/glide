@@ -49,12 +49,6 @@ public class ProjectsController(
         // first, create the project
         Project project = await projectRepository.CreateAsync(name, userId);
 
-        // create a default board
-        Board board = await boardRepository.CreateAsync("Main Board", project.Id);
-
-        // create default swimlanes
-        await swimlaneRepository.CreateDefaultSwimlanesAsync(board.Id);
-
         return new RazorComponentResult<ProjectSingle>(new Dictionary<string, object?> { { "Project", project } });
     }
 
@@ -103,5 +97,22 @@ public class ProjectsController(
         }
 
         return new RazorComponentResult<ProjectSingle>();
+    }
+
+    [HttpGet("{id}/projectBoards")]
+    [Authorize]
+    public async Task<RazorComponentResult<ProjectBoards>> BoardsAsync([FromRoute] string id)
+    {
+        Project? project = await projectRepository.GetByIdAsync(id);
+
+        return new RazorComponentResult<ProjectBoards>(new Dictionary<string, object?> { { "Model", project } });
+    }
+
+    [HttpGet("{id}/boards")]
+    [Authorize]
+    public async Task<RazorComponentResult<BoardList>> BoardListAsync([FromRoute] string id)
+    {
+        IEnumerable<Board> boards = await boardRepository.GetByProjectIdAsync(id);
+        return new RazorComponentResult<BoardList>(new Dictionary<string, object?> { { "Boards", boards } });
     }
 }
