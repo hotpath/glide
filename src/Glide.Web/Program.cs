@@ -3,6 +3,9 @@ using System.Threading;
 
 using DotNetEnv;
 
+using FluentMigrator.Runner;
+
+using Glide.Data.Migrations;
 using Glide.Web.Auth;
 using Glide.Web.Features;
 
@@ -42,7 +45,24 @@ builder.Services.AddHttpClient("ForgejoOAuth", (sp, client) =>
     client.BaseAddress = config.BaseUri;
 });
 
+// DB Migrations
+string? dbPath = Environment.GetEnvironmentVariable("GLIDE_DATABASE_PATH") ?? "/app/glide.db";
+
+builder.Services
+    .AddFluentMigratorCore()
+    .ConfigureRunner(rb => rb
+        .AddSQLite()
+        .WithGlobalConnectionString($"Data Source={dbPath}")
+        .ScanIn(typeof(CreateInitialSchema).Assembly).For.All())
+    .AddLogging(lb => lb.AddFluentMigratorConsole());
+
 WebApplication app = builder.Build();
+
+using (IServiceScope scope = app.Services.CreateScope())
+{
+    IMigrationRunner runner = scope.ServiceProvider.GetRequiredService<IMigrationRunner>();
+    runner.MigrateUp();
+}
 
 app.UseStaticFiles();
 

@@ -6,6 +6,7 @@
     <File Path="README.md" />
   </Folder>
   <Folder Name="/src/">
+    <Project Path="src/Glide.Data/Glide.Data.csproj" />
     <Project Path="src/Glide.Web/Glide.Web.csproj" />
   </Folder>
 </Solution>
