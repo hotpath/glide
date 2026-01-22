@@ -8,7 +8,7 @@ namespace Glide.Data.Sessions;
 
 public class SessionRepository(IDbConnectionFactory connectionFactory)
 {
-    public async Task<Session> Create(string userId, long durationSeconds)
+    public async Task<Session> CreateAsync(string userId, long durationSeconds)
     {
         string sessionId = Guid.CreateVersion7().ToString();
 
@@ -29,7 +29,7 @@ public class SessionRepository(IDbConnectionFactory connectionFactory)
         return session;
     }
 
-    public async Task<SessionUser?> Get(string sessionId)
+    public async Task<SessionUser?> GetAsync(string sessionId)
     {
         const string query = """
                              SELECT s.id, s.user_id AS UserId, s.expires_at, u.email, u.display_name AS DisplayName
@@ -42,7 +42,7 @@ public class SessionRepository(IDbConnectionFactory connectionFactory)
             new { SessionId = sessionId, Now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() });
     }
 
-    public async Task Delete(string sessionId)
+    public async Task DeleteAsync(string sessionId)
     {
         const string statement = "DELETE FROM sessions WHERE id = @SessionId";
         IDbConnection conn = connectionFactory.CreateConnection();

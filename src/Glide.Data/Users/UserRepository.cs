@@ -9,7 +9,7 @@ namespace Glide.Data.Users;
 
 public class UserRepository(IDbConnectionFactory connectionFactory)
 {
-    public async Task<User?> Get(string provider, string providerId, CancellationToken cancellationToken = default)
+    public async Task<User?> GetAsync(string provider, string providerId, CancellationToken cancellationToken = default)
     {
         const string query = """
                              SELECT * FROM users
@@ -34,7 +34,7 @@ public class UserRepository(IDbConnectionFactory connectionFactory)
         await conn.ExecuteAsync(insertStatement, user);
     }
 
-    public async Task Update(User user)
+    public async Task UpdateAsync(User user)
     {
         IDbConnection conn = connectionFactory.CreateConnection();
 
@@ -48,11 +48,11 @@ public class UserRepository(IDbConnectionFactory connectionFactory)
         await conn.ExecuteAsync(updateStatement, updatedUser);
     }
 
-    public async Task<User> CreateOrUpdateFromOAuth(string provider, string providerId, string displayName,
+    public async Task<User> CreateOrUpdateFromOAuthAsync(string provider, string providerId, string displayName,
         string email)
     {
         // check if user exists by oauth id
-        User? existingUser = await Get(provider, providerId);
+        User? existingUser = await GetAsync(provider, providerId);
 
         if (existingUser == null)
         {
@@ -77,7 +77,7 @@ public class UserRepository(IDbConnectionFactory connectionFactory)
         // update existing
         User updatedUser = existingUser with { DisplayName = displayName, Email = email };
 
-        await Update(updatedUser);
+        await UpdateAsync(updatedUser);
 
         return updatedUser;
     }

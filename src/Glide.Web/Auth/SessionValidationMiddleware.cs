@@ -16,7 +16,7 @@ public class SessionValidationMiddleware(RequestDelegate next)
 
         if (!string.IsNullOrEmpty(sessionId))
         {
-            SessionUser? session = await sessionRepository.Get(sessionId);
+            SessionUser? session = await sessionRepository.GetAsync(sessionId);
 
             if (session is not null)
             {

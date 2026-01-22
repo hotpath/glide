@@ -79,13 +79,14 @@ public class AuthController(
 
         logger.LogTrace("Retrieved user {oAuthUser}", oAuthUser);
 
-        User user = await userRepository.CreateOrUpdateFromOAuth("forgejo", oAuthUser.Id.ToString(), oAuthUser.FullName,
+        User user = await userRepository.CreateOrUpdateFromOAuthAsync("forgejo", oAuthUser.Id.ToString(),
+            oAuthUser.FullName,
             oAuthUser.Email);
 
         logger.LogTrace("Created or updated user {user}", user);
 
         Session session =
-            await sessionRepository.Create(user.Id, authContext.ForgejoOAuthConfig.SessionDurationSeconds);
+            await sessionRepository.CreateAsync(user.Id, authContext.ForgejoOAuthConfig.SessionDurationSeconds);
 
         logger.LogTrace("Session created: {session}", session.Id);
 
@@ -102,14 +103,14 @@ public class AuthController(
         return Redirect("/dashboard");
     }
 
-    [HttpPost("/logout")]
+    [HttpPost("logout")]
     public async Task<IActionResult> Logout()
     {
         string? sessionId = HttpContext.Request.Cookies["glide_session"];
 
         if (!string.IsNullOrEmpty(sessionId))
         {
-            await sessionRepository.Delete(sessionId);
+            await sessionRepository.DeleteAsync(sessionId);
         }
 
         HttpContext.Response.Cookies.Delete("glide_session");
