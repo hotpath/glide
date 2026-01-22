@@ -15,28 +15,7 @@ else
     <div id="projects-grid" class="projects-grid">
         @foreach (var project in Projects)
         {
-            <div class="project-card" id="project-@project.Id">
-                <div class="project-view">
-                    <a href="/projects/@project.Id/projectBoards" class="project-name-link"><h3
-                            class="project-name">@project.Name</h3></a>
-                    <div class="project-actions">
-                        <button class="btn-edit" data-project-id="@project.Id">Edit</button>
-                        <button class="btn-delete" hx-delete="/projects/@project.Id" hx-target="#project-@project.Id"
-                                hx-swap="delete"
-                                hx-confirm="Are you sure you want to delete this project?">Delete
-                        </button>
-                    </div>
-                </div>
-                <form class="project-edit-form" style="display: none;" hx-put="/projects/@project.Id"
-                      hx-target="#project-@project.Id"
-                      hx-swap="outerHTML">
-                    <input type="text" name="name" value="@project.Name" aria-label="Project name" required>
-                    <div class="edit-actions">
-                        <button type="submit" class="btn-save">Save</button>
-                        <button type="button" class="btn-cancel" data-project-id="@project.Id">Cancel</button>
-                    </div>
-                </form>
-            </div>
+            <ProjectCard Project="@project"/>
         }
     </div>
     <div id="welcome-banner" hx-swap-oob="true" style="display: none;"></div>

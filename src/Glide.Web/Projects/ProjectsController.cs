@@ -37,19 +37,19 @@ public class ProjectsController(
 
     [HttpPost]
     [Authorize]
-    public async Task<RazorComponentResult<ProjectSingle>> CreateAsync([FromForm] string name)
+    public async Task<RazorComponentResult<ProjectCard>> CreateAsync([FromForm] string name)
     {
         string? userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
         if (string.IsNullOrWhiteSpace(userId) || string.IsNullOrWhiteSpace(name))
         {
-            return new RazorComponentResult<ProjectSingle>();
+            return new RazorComponentResult<ProjectCard>();
         }
 
         // first, create the project
         Project project = await projectRepository.CreateAsync(name, userId);
 
-        return new RazorComponentResult<ProjectSingle>(new Dictionary<string, object?> { { "Project", project } });
+        return new RazorComponentResult<ProjectCard>(new Dictionary<string, object?> { { "Project", project } });
     }
 
     [HttpDelete("{id}")]
@@ -74,17 +74,17 @@ public class ProjectsController(
 
     [HttpPut("{id}")]
     [Authorize]
-    public async Task<RazorComponentResult<ProjectSingle>> UpdateAsync([FromRoute] string id, [FromForm] string name)
+    public async Task<RazorComponentResult<ProjectCard>> UpdateAsync([FromRoute] string id, [FromForm] string name)
     {
         if (string.IsNullOrWhiteSpace(id) || string.IsNullOrWhiteSpace(name))
         {
-            return new RazorComponentResult<ProjectSingle>();
+            return new RazorComponentResult<ProjectCard>();
         }
 
         Project? existing = await projectRepository.GetByIdAsync(id);
         if (existing is null)
         {
-            return new RazorComponentResult<ProjectSingle>();
+            return new RazorComponentResult<ProjectCard>();
         }
 
         await projectRepository.UpdateAsync(id, name);
@@ -92,20 +92,21 @@ public class ProjectsController(
         Project? updated = await projectRepository.GetByIdAsync(id);
         if (updated is not null)
         {
-            return new RazorComponentResult<ProjectSingle>(
+            return new RazorComponentResult<ProjectCard>(
                 new Dictionary<string, object?> { { "Project", updated } });
         }
 
-        return new RazorComponentResult<ProjectSingle>();
+        return new RazorComponentResult<ProjectCard>();
     }
 
-    [HttpGet("{id}/projectBoards")]
+    [HttpGet("{id}/dashboard")]
     [Authorize]
-    public async Task<RazorComponentResult<ProjectBoards>> BoardsAsync([FromRoute] string id)
+    public async Task<RazorComponentResult<ProjectDashboard>> BoardsAsync([FromRoute] string id)
     {
         Project? project = await projectRepository.GetByIdAsync(id);
 
-        return new RazorComponentResult<ProjectBoards>(new Dictionary<string, object?> { { "Model", project } });
+        return new RazorComponentResult<ProjectDashboard>(
+            new Dictionary<string, object?> { { "Project", project } });
     }
 
     [HttpGet("{id}/boards")]
