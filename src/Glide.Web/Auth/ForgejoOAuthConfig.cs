@@ -8,7 +8,8 @@ public record ForgejoOAuthConfig(
     string ClientId,
     string ClientSecret,
     Uri RedirectUri,
-    Uri BaseUri)
+    Uri BaseUri,
+    long SessionDurationSeconds)
 {
     public static ForgejoOAuthConfig FromConfig(IConfiguration config)
     {
@@ -18,6 +19,10 @@ public record ForgejoOAuthConfig(
                           new Uri("http://localhost:8080/auth/callback");
         Uri baseUri = config.GetValue<Uri>("FORGEJO_BASE_URI") ?? new Uri("https://codeberg.org");
 
-        return new ForgejoOAuthConfig(clientId, clientSecret, redirectUri, baseUri);
+        long durationHours = config.GetValue<long>("SESSION_DURATION_HOURS");
+        TimeSpan duration = TimeSpan.FromHours(durationHours);
+        long durationSeconds = (long)duration.TotalSeconds;
+
+        return new ForgejoOAuthConfig(clientId, clientSecret, redirectUri, baseUri, durationSeconds);
     }
 }

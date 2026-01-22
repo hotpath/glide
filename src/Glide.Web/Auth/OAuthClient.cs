@@ -55,7 +55,7 @@ public class OAuthClient(IHttpClientFactory clientFactory, ForgejoOAuthConfig au
     }
 }
 
-public class ForgejoUser
+public record ForgejoUser
 {
     public long Id { get; init; }
     public required string Login { get; init; }

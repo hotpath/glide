@@ -6,6 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Dapper" Version="2.1.66"/>
     <PackageReference Include="FluentMigrator.Runner.SQLite" Version="8.0.1"/>
     <PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.2"/>
   </ItemGroup>

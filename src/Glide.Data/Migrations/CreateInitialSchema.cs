@@ -63,7 +63,7 @@ public class CreateInitialSchema : Migration
 
         Create.Table("sessions")
             .WithColumn("id").AsString().NotNullable().PrimaryKey()
-            .WithColumn("user_id").AsString().NotNullable().ForeignKey("fk_user_id_users", "users", "user_id")
+            .WithColumn("user_id").AsString().NotNullable().ForeignKey("fk_user_id_users", "users", "id")
             .OnDelete(Rule.Cascade)
             .Indexed("idx_sessions_user_id")
             .WithColumn("created_at").AsInt64().NotNullable()

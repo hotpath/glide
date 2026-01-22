@@ -5,7 +5,10 @@ using DotNetEnv;
 
 using FluentMigrator.Runner;
 
+using Glide.Data;
 using Glide.Data.Migrations;
+using Glide.Data.Sessions;
+using Glide.Data.Users;
 using Glide.Web.Auth;
 using Glide.Web.Features;
 
@@ -48,6 +51,10 @@ builder.Services.AddHttpClient("ForgejoOAuth", (sp, client) =>
 // DB Migrations
 string? dbPath = Environment.GetEnvironmentVariable("GLIDE_DATABASE_PATH") ?? "/app/glide.db";
 
+builder.Services.AddSingleton<IDbConnectionFactory>(new SqliteConnectionFactory($"Data Source={dbPath}"));
+builder.Services.AddSingleton<UserRepository>();
+builder.Services.AddSingleton<SessionRepository>();
+
 builder.Services
     .AddFluentMigratorCore()
     .ConfigureRunner(rb => rb
@@ -89,14 +96,14 @@ app.MapGet("/auth/callback", async (
     [FromServices] OAuthClient oAuthClient,
     [FromServices] AuthContext authContext,
     [FromServices] ILogger<Program> logger,
+    [FromServices] UserRepository userRepository,
+    [FromServices] SessionRepository sessionRepository,
     [FromQuery] string code,
     [FromQuery] string state,
+    HttpContext context,
     CancellationToken cancellationToken = default) =>
 {
-    if (logger.IsEnabled(LogLevel.Trace))
-    {
-        logger.LogTrace("Validating CSRF state {}", state);
-    }
+    logger.LogTrace("Validating CSRF state {}", state);
 
     bool stateValid = false;
     using (authContext.StateLock.EnterScope())
@@ -106,10 +113,7 @@ app.MapGet("/auth/callback", async (
 
     if (!stateValid)
     {
-        if (logger.IsEnabled(LogLevel.Debug))
-        {
-            logger.LogDebug("State {} is not valid", state);
-        }
+        logger.LogDebug("State {} is not valid", state);
 
         return Results.Forbid();
     }
@@ -118,27 +122,41 @@ app.MapGet("/auth/callback", async (
 
     if (string.IsNullOrWhiteSpace(token))
     {
-        if (logger.IsEnabled(LogLevel.Debug))
-        {
-            logger.LogDebug("Failed to exchange authorization code {} for token", code);
-        }
+        logger.LogDebug("Failed to exchange authorization code {} for token", code);
 
         return Results.Forbid();
     }
 
-    ForgejoUser? user = await oAuthClient.GetUserInfo(token, cancellationToken);
+    ForgejoUser? oAuthUser = await oAuthClient.GetUserInfo(token, cancellationToken);
 
-    if (user is null)
+    if (oAuthUser is null)
     {
-        if (logger.IsEnabled(LogLevel.Debug))
-        {
-            logger.LogDebug("Failed to fetch user information");
-        }
+        logger.LogDebug("Failed to fetch user information for code {code}", code);
 
         return Results.Forbid();
     }
 
+    logger.LogTrace("Retrieved user {oAuthUser}", oAuthUser);
 
-    return Results.Ok(user.Email);
+    User user = await userRepository.CreateOrUpdateFromOAuth("forgejo", oAuthUser.Id.ToString(), oAuthUser.FullName,
+        oAuthUser.Email);
+
+    logger.LogTrace("Created or updated user {user}", user);
+
+    Session session = await sessionRepository.Create(user.Id, authContext.ForgejoOAuthConfig.SessionDurationSeconds);
+
+    logger.LogTrace("Session created: {session}", session.Id);
+
+    context.Response.Cookies.Append("glide_session", session.Id,
+        new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = context.Request.IsHttps,
+            SameSite = SameSiteMode.Lax,
+            MaxAge = TimeSpan.FromSeconds(authContext.ForgejoOAuthConfig.SessionDurationSeconds),
+            Path = "/"
+        });
+
+    return Results.Redirect("/");
 });
 await app.RunAsync();
