@@ -1,16 +1,17 @@
 @using Glide.Web.Features.Shared
-@layout HtmxLayout
 
-<div class="login-container">
-    <div class="logo">📋</div>
-    <h1>Glide</h1>
-    <p class="subtitle">Simple Kanban Board Management</p>
+<HtmxLayout Title="Login" BodyClass="login-page">
+    <div class="login-container">
+        <div class="logo">📋</div>
+        <h1>Glide</h1>
+        <p class="subtitle">Simple Kanban Board Management</p>
 
-    <div id="login-form">
-        <a href="/auth/login" class="oauth-button">
-            Login with Codeberg
-        </a>
+        <div id="login-form">
+            <a href="/auth/login" class="oauth-button">
+                Login with Codeberg
+            </a>
+        </div>
+
+        <div id="error-message"></div>
     </div>
-
-    <div id="error-message"></div>
-</div>
+</HtmxLayout>
