@@ -21,6 +21,14 @@ public class ProjectRepository(IDbConnectionFactory connectionFactory)
         return await conn.QueryAsync<Project>(query, new { UserId = userId });
     }
 
+    public async Task<Project?> GetByIdAsync(string id)
+    {
+        const string query = "SELECT * FROM projects where id = @Id";
+
+        IDbConnection conn = connectionFactory.CreateConnection();
+        return await conn.QuerySingleOrDefaultAsync<Project>(query, new { Id = id });
+    }
+
     public async Task<Project> CreateAsync(string name, string userId)
     {
         string newId = Guid.CreateVersion7().ToString();
@@ -36,6 +44,26 @@ public class ProjectRepository(IDbConnectionFactory connectionFactory)
         await conn.ExecuteAsync(relationshipStatement, new { ProjectId = newId, UserId = userId });
 
         return new Project(newId, name);
+    }
+
+    public async Task DeleteAsync(string id)
+    {
+        const string query = "DELETE FROM projects where id = @Id";
+
+        IDbConnection conn = connectionFactory.CreateConnection();
+        await conn.ExecuteAsync(query, new { Id = id });
+    }
+
+    public async Task UpdateAsync(string id, string name)
+    {
+        const string statement = """
+                                 UPDATE projects
+                                 SET name = @Name
+                                 WHERE id = @Id
+                                 """;
+
+        IDbConnection conn = connectionFactory.CreateConnection();
+        await conn.ExecuteAsync(statement, new { Id = id, Name = name });
     }
 }
 

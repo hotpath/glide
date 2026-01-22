@@ -28,8 +28,10 @@ public class CreateInitialSchema : Migration
 
         Create.Table("projects_users")
             .WithColumn("project_id").AsString().NotNullable().ForeignKey("fk_project_id_projects", "projects", "id")
+            .OnDelete(Rule.Cascade)
             .Indexed("idx_projects_users_project_id")
             .WithColumn("user_id").AsString().NotNullable().ForeignKey("fk_user_id_users", "users", "id")
+            .OnDelete(Rule.Cascade)
             .Indexed("idx_projects_users_user_id");
 
         Create.UniqueConstraint("uniq_projects_users").OnTable("projects_users").Columns("project_id", "user_id");
@@ -39,13 +41,14 @@ public class CreateInitialSchema : Migration
             .WithColumn("id").AsString().NotNullable().PrimaryKey()
             .WithColumn("name").AsString().NotNullable()
             .WithColumn("project_id").AsString().NotNullable()
-            .ForeignKey("fk_project_id_projects", "projects", "id")
+            .ForeignKey("fk_project_id_projects", "projects", "id").OnDelete(Rule.Cascade)
             .Indexed("idx_boards_project_id");
 
         Create.Table("swimlanes")
             .WithColumn("id").AsString().NotNullable().PrimaryKey()
             .WithColumn("name").AsString().NotNullable()
             .WithColumn("board_id").AsString().NotNullable().ForeignKey("fk_board_id_boards", "boards", "id")
+            .OnDelete(Rule.Cascade)
             .Indexed("idx_swimlanes_board_id")
             .WithColumn("position").AsInt32().NotNullable().WithDefaultValue(0);
 
@@ -54,6 +57,7 @@ public class CreateInitialSchema : Migration
             .WithColumn("title").AsString().NotNullable()
             .WithColumn("description").AsString().NotNullable()
             .WithColumn("board_id").AsString().NotNullable().ForeignKey("fk_board_id_boards", "boards", "id")
+            .OnDelete(Rule.Cascade)
             .Indexed("idx_boards_board_id")
             .WithColumn("assigned_to").AsString().ForeignKey("fk_assigned_to_users", "users", "id")
             .WithColumn("swimlane_id").AsString().ForeignKey("fk_swimlane_id_swimlanes", "swimlanes", "id")

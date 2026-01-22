@@ -41,12 +41,7 @@ public class ProjectsController(
     {
         string? userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-        if (string.IsNullOrWhiteSpace(userId))
-        {
-            return new RazorComponentResult<ProjectSingle>();
-        }
-
-        if (string.IsNullOrWhiteSpace(name))
+        if (string.IsNullOrWhiteSpace(userId) || string.IsNullOrWhiteSpace(name))
         {
             return new RazorComponentResult<ProjectSingle>();
         }
@@ -61,5 +56,52 @@ public class ProjectsController(
         await swimlaneRepository.CreateDefaultSwimlanesAsync(board.Id);
 
         return new RazorComponentResult<ProjectSingle>(new Dictionary<string, object?> { { "Project", project } });
+    }
+
+    [HttpDelete("{id}")]
+    [Authorize]
+    public async Task<IActionResult> DeleteAsync([FromRoute] string id)
+    {
+        if (string.IsNullOrWhiteSpace(id))
+        {
+            return BadRequest("Project not found");
+        }
+
+        Project? existing = await projectRepository.GetByIdAsync(id);
+        if (existing is null)
+        {
+            return NotFound("Project not found");
+        }
+
+        await projectRepository.DeleteAsync(id);
+
+        return Ok("");
+    }
+
+    [HttpPut("{id}")]
+    [Authorize]
+    public async Task<RazorComponentResult<ProjectSingle>> UpdateAsync([FromRoute] string id, [FromForm] string name)
+    {
+        if (string.IsNullOrWhiteSpace(id) || string.IsNullOrWhiteSpace(name))
+        {
+            return new RazorComponentResult<ProjectSingle>();
+        }
+
+        Project? existing = await projectRepository.GetByIdAsync(id);
+        if (existing is null)
+        {
+            return new RazorComponentResult<ProjectSingle>();
+        }
+
+        await projectRepository.UpdateAsync(id, name);
+
+        Project? updated = await projectRepository.GetByIdAsync(id);
+        if (updated is not null)
+        {
+            return new RazorComponentResult<ProjectSingle>(
+                new Dictionary<string, object?> { { "Project", updated } });
+        }
+
+        return new RazorComponentResult<ProjectSingle>();
     }
 }
