@@ -17,14 +17,14 @@ public class UserRepository(IDbConnectionFactory connectionFactory)
                              AND oauth_provider_id = @ProviderId
                              """;
 
-        IDbConnection conn = connectionFactory.CreateConnection();
+        using IDbConnection conn = connectionFactory.CreateConnection();
         return await conn.QueryFirstOrDefaultAsync<User>(query,
             new { Provider = provider, ProviderId = providerId });
     }
 
     public async Task Create(User user)
     {
-        IDbConnection conn = connectionFactory.CreateConnection();
+        using IDbConnection conn = connectionFactory.CreateConnection();
 
         string insertStatement = """
                                  INSERT INTO users (id,display_name,email,oauth_provider,oauth_provider_id,created_at,updated_at)
@@ -36,7 +36,7 @@ public class UserRepository(IDbConnectionFactory connectionFactory)
 
     public async Task UpdateAsync(User user)
     {
-        IDbConnection conn = connectionFactory.CreateConnection();
+        using IDbConnection conn = connectionFactory.CreateConnection();
 
         string updateStatement = """
                                  UPDATE users

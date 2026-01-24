@@ -22,27 +22,20 @@ public class CreateInitialSchema : Migration
             .OnColumn("oauth_provider_id");
 
 
-        Create.Table("projects")
+        Create.Table("boards")
             .WithColumn("id").AsString().NotNullable().PrimaryKey()
             .WithColumn("name").AsString().NotNullable();
 
-        Create.Table("projects_users")
-            .WithColumn("project_id").AsString().NotNullable().ForeignKey("fk_project_id_projects", "projects", "id")
+        Create.Table("boards_users")
+            .WithColumn("board_id").AsString().NotNullable().ForeignKey("fk_board_id_boards", "boards", "id")
             .OnDelete(Rule.Cascade)
-            .Indexed("idx_projects_users_project_id")
+            .Indexed("idx_boards_users_board_id")
             .WithColumn("user_id").AsString().NotNullable().ForeignKey("fk_user_id_users", "users", "id")
             .OnDelete(Rule.Cascade)
-            .Indexed("idx_projects_users_user_id");
+            .Indexed("idx_boards_users_user_id")
+            .WithColumn("is_owner").AsInt16().NotNullable().WithDefaultValue(0).Indexed("idx_boards_users_is_owner");
 
-        Create.UniqueConstraint("uniq_projects_users").OnTable("projects_users").Columns("project_id", "user_id");
-
-
-        Create.Table("boards")
-            .WithColumn("id").AsString().NotNullable().PrimaryKey()
-            .WithColumn("name").AsString().NotNullable()
-            .WithColumn("project_id").AsString().NotNullable()
-            .ForeignKey("fk_project_id_projects", "projects", "id").OnDelete(Rule.Cascade)
-            .Indexed("idx_boards_project_id");
+        Create.UniqueConstraint("uniq_boards_users").OnTable("boards_users").Columns("board_id", "user_id");
 
         Create.Table("swimlanes")
             .WithColumn("id").AsString().NotNullable().PrimaryKey()
@@ -105,9 +98,8 @@ public class CreateInitialSchema : Migration
         Delete.Table("tasks");
         Delete.Table("swimlanes");
         Delete.Table("boards");
-        Delete.UniqueConstraint("uniq_projects_users").FromTable("projects_users");
-        Delete.Table("projects_users");
-        Delete.Table("projects");
+        Delete.UniqueConstraint("uniq_boards_users").FromTable("boards_users");
+        Delete.Table("boards_users");
         Delete.Index("idx_users_oauth_provider");
         Delete.Table("users");
     }

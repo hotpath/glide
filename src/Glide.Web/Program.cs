@@ -7,7 +7,6 @@ using FluentMigrator.Runner;
 using Glide.Data;
 using Glide.Data.Boards;
 using Glide.Data.Migrations;
-using Glide.Data.Projects;
 using Glide.Data.Sessions;
 using Glide.Data.Swimlanes;
 using Glide.Data.Users;
@@ -51,12 +50,11 @@ builder.Services.AddHttpClient("ForgejoOAuth", (sp, client) =>
 });
 
 // DB Migrations
-string? dbPath = Environment.GetEnvironmentVariable("GLIDE_DATABASE_PATH") ?? "/app/glide.db";
+string dbPath = Environment.GetEnvironmentVariable("GLIDE_DATABASE_PATH") ?? "/app/glide.db";
 
 builder.Services.AddSingleton<IDbConnectionFactory>(new SqliteConnectionFactory($"Data Source={dbPath}"))
     .AddSingleton<UserRepository>()
     .AddSingleton<SessionRepository>()
-    .AddSingleton<ProjectRepository>()
     .AddSingleton<BoardRepository>()
     .AddSingleton<SwimlaneRepository>();
 

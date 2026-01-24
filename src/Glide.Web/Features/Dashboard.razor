@@ -3,20 +3,20 @@
     <main>
         <div id="welcome-banner" class="welcome-message">
             <h3>Welcome to Glide!</h3>
-            <p>Your simple kanban board management system. Get started by creating your first project.</p>
+            <p>Your simple kanban board management system. Get started by creating your first board.</p>
         </div>
 
-        <section class="projects-section">
+        <section class="boards-section">
             <div class="section-header">
-                <h2>Projects</h2>
-                <form id="create-project-form" class="create-project-form" hx-post="/projects"
-                      hx-target="#projects-grid" hx-swap="beforeend">
-                    <input type="text" name="name" placeholder="New project name" aria-label="Project name" required>
-                    <button type="submit">Create Project</button>
+                <h2>Boards</h2>
+                <form id="create-board-form" class="create-board-form" hx-post="/boards"
+                      hx-target="#boards-grid" hx-swap="beforeend">
+                    <input type="text" name="name" placeholder="New board name" aria-label="board name" required>
+                    <button type="submit">Create Board</button>
                 </form>
             </div>
-            <div id="projects-list" hx-get="/projects" hx-trigger="load" hx-swap="innerHTML">
-                <div class="loading">Loading projects...</div>
+            <div id="boards-list" hx-get="/boards" hx-trigger="load" hx-swap="innerHTML">
+                <div class="loading">Loading Boards...</div>
             </div>
         </section>
     </main>
@@ -34,7 +34,7 @@
         }
 
         function showEmptyStateIfNeeded() {
-            const grid = document.getElementById('projects-grid');
+            const grid = document.getElementById('boards-grid');
             const emptyState = document.getElementById('empty-state');
 
             if (grid && grid.children.length === 0 && emptyState) {
@@ -42,8 +42,8 @@
             }
         }
 
-        // Handle successful project creation
-        document.getElementById('create-project-form').addEventListener('htmx:afterRequest', function (event) {
+        // Handle successful board creation
+        document.getElementById('create-board-form').addEventListener('htmx:afterRequest', function (event) {
             if (event.detail.successful) {
                 this.reset();
                 hideEmptyState();
@@ -60,24 +60,24 @@
         });
 
         // Event delegation for edit/cancel buttons
-        document.getElementById('projects-list').addEventListener('click', function (event) {
+        document.getElementById('boards-list').addEventListener('click', function (event) {
             const editBtn = event.target.closest('.btn-edit');
             const cancelBtn = event.target.closest('.btn-cancel');
 
             if (editBtn) {
-                const projectId = editBtn.dataset.projectId;
-                const card = document.getElementById('project-' + projectId);
+                const boardId = editBtn.dataset.boardId;
+                const card = document.getElementById('board-' + boardId);
                 if (card) {
-                    card.querySelector('.project-view').style.display = 'none';
-                    card.querySelector('.project-edit-form').style.display = 'flex';
-                    card.querySelector('.project-edit-form input').focus();
+                    card.querySelector('.board-view').style.display = 'none';
+                    card.querySelector('.board-edit-form').style.display = 'flex';
+                    card.querySelector('.board-edit-form input').focus();
                 }
             } else if (cancelBtn) {
-                const projectId = cancelBtn.dataset.projectId;
-                const card = document.getElementById('project-' + projectId);
+                const boardId = cancelBtn.dataset.boardId;
+                const card = document.getElementById('board-' + boardId);
                 if (card) {
-                    card.querySelector('.project-view').style.display = 'flex';
-                    card.querySelector('.project-edit-form').style.display = 'none';
+                    card.querySelector('.board-view').style.display = 'flex';
+                    card.querySelector('.board-edit-form').style.display = 'none';
                 }
             }
         });

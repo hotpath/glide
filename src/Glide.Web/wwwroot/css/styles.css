@@ -183,7 +183,7 @@ main h2 {
     font-size: 2rem;
 }
 
-#projects-list {
+#boards-list {
     background: var(--bg-surface);
     padding: 2rem;
     border-radius: 8px;
@@ -230,8 +230,8 @@ main h2 {
     line-height: 1.6;
 }
 
-/* Projects section */
-.projects-section {
+/* boards section */
+.boards-section {
     margin-top: 2rem;
 }
 
@@ -248,12 +248,12 @@ main h2 {
     margin-bottom: 0;
 }
 
-.create-project-form {
+.create-board-form {
     display: flex;
     gap: 0.5rem;
 }
 
-.create-project-form input {
+.create-board-form input {
     padding: 0.5rem 1rem;
     border: 1px solid var(--border-color);
     border-radius: 4px;
@@ -263,25 +263,25 @@ main h2 {
     color: var(--text-primary);
 }
 
-.create-project-form input:focus {
+.create-board-form input:focus {
     outline: none;
     border-color: var(--accent-blue);
     box-shadow: 0 0 0 2px rgba(97, 175, 239, 0.2);
 }
 
-.create-project-form input::placeholder {
+.create-board-form input::placeholder {
     color: var(--text-muted);
 }
 
-/* Projects grid */
-.projects-grid {
+/* boards grid */
+.boards-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     gap: 1rem;
 }
 
-/* Project card */
-.project-card {
+/* board card */
+.board-card {
     background: var(--bg-surface);
     border-radius: 8px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
@@ -290,19 +290,19 @@ main h2 {
     border: 1px solid var(--border-color);
 }
 
-.project-card:hover {
+.board-card:hover {
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
     border-color: var(--border-light);
 }
 
-.project-view {
+.board-view {
     display: flex;
     justify-content: space-between;
     align-items: center;
     gap: 1rem;
 }
 
-.project-name {
+.board-name {
     color: var(--text-bright);
     font-size: 1.25rem;
     font-weight: 600;
@@ -310,7 +310,7 @@ main h2 {
     word-break: break-word;
 }
 
-.project-actions {
+.board-actions {
     display: flex;
     gap: 0.5rem;
     flex-shrink: 0;
@@ -362,14 +362,14 @@ main h2 {
     background: var(--border-light);
 }
 
-/* Project edit form */
-.project-edit-form {
+/* board edit form */
+.board-edit-form {
     display: none;
     flex-direction: column;
     gap: 0.75rem;
 }
 
-.project-edit-form input {
+.board-edit-form input {
     padding: 0.5rem;
     border: 1px solid var(--border-color);
     border-radius: 4px;
@@ -378,7 +378,7 @@ main h2 {
     color: var(--text-primary);
 }
 
-.project-edit-form input:focus {
+.board-edit-form input:focus {
     outline: none;
     border-color: var(--accent-blue);
     box-shadow: 0 0 0 2px rgba(97, 175, 239, 0.2);
@@ -390,13 +390,13 @@ main h2 {
     justify-content: flex-end;
 }
 
-/* Project name link */
-.project-name-link {
+/* board name link */
+.board-name-link {
     text-decoration: none;
     color: inherit;
 }
 
-.project-name-link:hover .project-name {
+.board-name-link:hover .board-name {
     color: var(--accent-blue);
 }
 
