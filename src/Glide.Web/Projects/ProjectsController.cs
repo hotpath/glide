@@ -116,4 +116,14 @@ public class ProjectsController(
         IEnumerable<Board> boards = await boardRepository.GetByProjectIdAsync(id);
         return new RazorComponentResult<BoardList>(new Dictionary<string, object?> { { "Boards", boards } });
     }
+
+    [HttpPost("{id}/boards")]
+    [Authorize]
+    public async Task<RazorComponentResult<BoardCard>> CreateBoardAsync(
+        [FromRoute] string id,
+        [FromForm] string name)
+    {
+        Board board = await boardRepository.CreateAsync(name, id);
+        return new RazorComponentResult<BoardCard>(new Dictionary<string, object?> { { "Board", board } });
+    }
 }
