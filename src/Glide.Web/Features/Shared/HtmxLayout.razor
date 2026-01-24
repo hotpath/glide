@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <base href="/"/>
+    <meta name="htmx-config" content='{"refreshOnHistoryMiss":"true"}'/>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Glide@(string.IsNullOrEmpty(Title) ? "" : $" - {Title}")</title>
+    <link rel="stylesheet" href="@Assets["css/styles.css"]"/>
+    <script src="https://unpkg.com/htmx.org@2.0.8"></script>
+</head>
+<body class="@BodyClass">
+@ChildContent
+</body>
+</html>
+
+@code
+{
+    [Parameter]
+    public string Title { get; set; } = "";
+
+    [Parameter]
+    public string BodyClass { get; set; } = "";
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+}
