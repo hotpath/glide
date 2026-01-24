@@ -77,4 +77,12 @@ public class BoardController(BoardRepository boardRepository) : ControllerBase
 
         return new RazorComponentResult<BoardCard>(new { Board = updated });
     }
+
+    [HttpGet("{id}")]
+    [Authorize]
+    public async Task<RazorComponentResult<BoardDetail>> GetByIdAsync([FromRoute] string id)
+    {
+        Board? board = await boardRepository.GetByIdAsync(id);
+        return new RazorComponentResult<BoardDetail>(new { Board = board });
+    }
 }
