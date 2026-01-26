@@ -1,0 +1,24 @@
+@using Task = Glide.Data.Tasks.Task
+<form class="modal-task-form" hx-put="/tasks/@Task.Id" hx-swap="none"
+      hx-on::after-request="if(event.detail.successful) closeModal()">
+    <div class="form-group">
+        <label for="task-title">Title</label>
+        <input type="text" id="task-title" name="title" value="@Task.Title" required>
+    </div>
+    <div class="form-group">
+        <label for="task-description">Description</label>
+        <textarea id="task-description" name="description"
+                  placeholder="Add a description...">@Task.Description</textarea>
+    </div>
+    <div class="form-actions">
+        <button type="button" class="btn-delete" hx-delete="/tasks/@Task.Id" hx-swap="none"
+                hx-on::after-request="if(event.detail.successful) closeModal()" hx-confirm="Delete this task?">Delete
+        </button>
+        <button type="button" class="btn-cancel" onclick="closeModal()">Cancel</button>
+        <button type="submit" class="btn-save">Save</button>
+    </div>
+</form>
+
+@code{
+    [Parameter] public required Task Task { get; set; }
+}

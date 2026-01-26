@@ -1,5 +1,7 @@
 using System;
 
+using Dapper;
+
 using DotNetEnv;
 
 using FluentMigrator.Runner;
@@ -9,6 +11,7 @@ using Glide.Data.Boards;
 using Glide.Data.Migrations;
 using Glide.Data.Sessions;
 using Glide.Data.Swimlanes;
+using Glide.Data.Tasks;
 using Glide.Data.Users;
 using Glide.Web.Auth;
 using Glide.Web.Features;
@@ -23,6 +26,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 Env.Load();
+
+// Configure Dapper to honor snake_case columns
+DefaultTypeMap.MatchNamesWithUnderscores = true;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 builder.Configuration.AddEnvironmentVariables();
@@ -56,7 +62,8 @@ builder.Services.AddSingleton<IDbConnectionFactory>(new SqliteConnectionFactory(
     .AddSingleton<UserRepository>()
     .AddSingleton<SessionRepository>()
     .AddSingleton<BoardRepository>()
-    .AddSingleton<SwimlaneRepository>();
+    .AddSingleton<SwimlaneRepository>()
+    .AddSingleton<TaskRepository>();
 
 builder.Services
     .AddFluentMigratorCore()

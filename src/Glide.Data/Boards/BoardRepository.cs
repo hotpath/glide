@@ -68,7 +68,7 @@ public class BoardRepository(IDbConnectionFactory connectionFactory)
                              SELECT b.id AS Id, b.name AS Name,
                                     bu.board_id AS BoardId, bu.user_id AS UserId, bu.is_owner AS IsOwner
                              FROM boards b
-                             JOIN main.boards_users bu on b.id = bu.board_id
+                             LEFT JOIN main.boards_users bu on b.id = bu.board_id
                              where b.id = @BoardId
                              """;
 

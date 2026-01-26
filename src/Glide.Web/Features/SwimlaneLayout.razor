@@ -1,0 +1,26 @@
+@using Glide.Data.Swimlanes
+@foreach (var lane in Swimlanes)
+{
+    <div class="swimlane-column" data-swimlane-id="@lane.Id" ondrop="dropTask(event)" ondragover="allowDrop(event)">
+        <div class="swimlane-header">
+            <h3>@lane.Name</h3>
+            <span class="task-count">@lane.Tasks.Count()</span>
+        </div>
+        <div class="swimlane-tasks" id="swimlane-tasks-@lane.Id">
+            @foreach (var t in lane.Tasks)
+            {
+                <TaskCard Task="@t"/>
+            }
+        </div>
+        <form class="add-task-form" hx-post="/boards/@lane.BoardId/tasks" hx-target="#swimlane-tasks-@lane.Id"
+              hx-swap="beforeend">
+            <input type="hidden" name="swimlane_id" value="@lane.Id">
+            <input type="text" name="title" placeholder="+ Add task" class="add-task-input" required>
+        </form>
+    </div>
+}
+
+@code
+{
+    [Parameter] public required IEnumerable<Swimlane> Swimlanes { get; set; }
+}

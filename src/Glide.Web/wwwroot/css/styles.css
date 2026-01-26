@@ -521,8 +521,8 @@ body.board-page {
 }
 
 .task-title {
-    font-size: 0.875rem;
     color: var(--text-primary);
+    font-weight: bolder;
     word-break: break-word;
 }
 
