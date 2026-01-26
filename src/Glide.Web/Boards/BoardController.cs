@@ -7,6 +7,7 @@ using Glide.Data.Boards;
 using Glide.Data.Swimlanes;
 using Glide.Data.Tasks;
 using Glide.Web.Features;
+using Glide.Web.Tasks;
 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;

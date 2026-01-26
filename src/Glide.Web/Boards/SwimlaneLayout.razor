@@ -1,4 +1,5 @@
 @using Glide.Data.Swimlanes
+@using Glide.Web.Tasks
 @foreach (var lane in Swimlanes)
 {
     <div class="swimlane-column" data-swimlane-id="@lane.Id" ondrop="dropTask(event)" ondragover="allowDrop(event)">
