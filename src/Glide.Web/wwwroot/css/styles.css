@@ -612,6 +612,18 @@ body.board-page {
     word-break: break-word;
 }
 
+.task-description p, .markdown-preview p {
+    margin: 1em 0;
+}
+
+.task-description p:first-child, .markdown-preview p:first-child {
+    margin-top: 0;
+}
+
+.task-description p:last-child, .markdown-preview p:last-child {
+    margin-bottom: 0;
+}
+
 /* Expanded task card */
 .task-card-expanded {
     cursor: default;
@@ -622,6 +634,10 @@ body.board-page {
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
+}
+
+textarea#task-description {
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace;
 }
 
 .task-title-input {

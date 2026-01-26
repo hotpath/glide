@@ -229,6 +229,42 @@
                 }
             });
         }
+
+        let markdownDebounceTimer = null;
+
+        function updateMarkdownPreview() {
+            clearTimeout(markdownDebounceTimer);
+
+            markdownDebounceTimer = setTimeout(() => {
+                const textarea = document.getElementById('task-description');
+                const previewContent = document.getElementById('preview-content');
+                const markdown = textarea.value.trim();
+
+                if (!markdown) {
+                    previewContent.innerHTML = '';
+                    return;
+                }
+
+                // Show loading state
+                previewContent.innerHTML = '<em>Loading preview...</em>';
+
+                const formData = new FormData();
+                formData.append('markdown', markdown);
+
+                fetch('/tasks/markdown', {
+                    method: 'POST',
+                    body: formData
+                })
+                    .then(response => response.text())
+                    .then(html => {
+                        previewContent.innerHTML = html;
+                    })
+                    .catch(error => {
+                        previewContent.innerHTML = '<em style="color: red;">Failed to load preview</em>';
+                    });
+
+            }, 500);
+        }
     </script>
 </HtmxLayout>
 

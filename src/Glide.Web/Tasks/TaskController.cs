@@ -1,7 +1,8 @@
 using System.Threading.Tasks;
 
 using Glide.Data.Tasks;
-using Glide.Web.Features;
+
+using Markdig;
 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -16,6 +17,13 @@ namespace Glide.Web.Tasks;
 [ApiController]
 public class TaskController(TaskRepository taskRepository) : ControllerBase
 {
+    public static readonly MarkdownPipeline Pipeline =
+        new MarkdownPipelineBuilder()
+            .UseAdvancedExtensions()
+            .UseEmojiAndSmiley()
+            .UseSoftlineBreakAsHardlineBreak()
+            .Build();
+
     [HttpGet("{id}/edit")]
     [Authorize]
     public async Task<IResult> EditAsync([FromRoute] string id)
@@ -53,5 +61,12 @@ public class TaskController(TaskRepository taskRepository) : ControllerBase
         }
 
         return new RazorComponentResult<TaskCard>(new { Task = updated });
+    }
+
+    [HttpPost("markdown")]
+    [Authorize]
+    public IResult ConvertToHtml([FromForm] string markdown)
+    {
+        return Results.Text(Markdown.ToHtml(markdown, Pipeline), "text/html");
     }
 }

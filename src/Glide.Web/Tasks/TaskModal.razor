@@ -1,5 +1,6 @@
+@using Markdig
 @using Task = Glide.Data.Tasks.Task
-<form class="modal-task-form" hx-put="/tasks/@Task.Id" hx-swap="none"
+<form class="modal-task-form" hx-put="/tasks/@Task.Id" hx-swap="outerHTML" hx-target="#task-@Task.Id"
       hx-on::after-request="if(event.detail.successful) closeModal()">
     <div class="form-group">
         <label for="task-title">Title</label>
@@ -7,8 +8,17 @@
     </div>
     <div class="form-group">
         <label for="task-description">Description</label>
-        <textarea id="task-description" name="description"
+        <textarea id="task-description" name="description" oninput="updateMarkdownPreview()"
                   placeholder="Add a description...">@Task.Description</textarea>
+        <div class="markdown-preview-label">Preview:</div>
+        <div id="markdown-preview" class="markdown-preview">
+            <div id="preview-content">
+                @if (!string.IsNullOrWhiteSpace(Task.Description))
+                {
+                    @((MarkupString)Markdown.ToHtml(Task.Description, TaskController.Pipeline))
+                }
+            </div>
+        </div>
     </div>
     <div class="form-actions">
         <button type="button" class="btn-delete" hx-delete="/tasks/@Task.Id" hx-swap="none"
