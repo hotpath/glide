@@ -63,6 +63,22 @@ public class TaskController(TaskRepository taskRepository) : ControllerBase
         return new RazorComponentResult<TaskCard>(new { Task = updated });
     }
 
+    [HttpDelete("{id}")]
+    [Authorize]
+    public async Task<IResult> DeleteAsync([FromRoute] string id)
+    {
+        // TODO: Make sure the board belongs to the user for this task
+        Task? existing = await taskRepository.GetByIdAsync(id);
+        if (existing is null)
+        {
+            return Results.NotFound("task not found");
+        }
+
+        await taskRepository.DeleteAsync(id);
+
+        return Results.Ok();
+    }
+
     [HttpPost("markdown")]
     [Authorize]
     public IResult ConvertToHtml([FromForm] string markdown)

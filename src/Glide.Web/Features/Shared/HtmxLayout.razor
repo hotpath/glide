@@ -8,6 +8,23 @@
     <title>Glide@(string.IsNullOrEmpty(Title) ? "" : $" - {Title}")</title>
     <link rel="stylesheet" href="@Assets["css/styles.css"]"/>
     <script src="https://unpkg.com/htmx.org@2.0.8"></script>
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css"/>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', (event) => {
+            document.querySelectorAll('pre code').forEach((el) => {
+                hljs.highlightElement(el);
+            });
+        });
+
+        // Also highlight after HTMX swaps
+        document.addEventListener('htmx:afterSwap', function (evt) {
+            evt.detail.target.querySelectorAll('pre code').forEach((el) => {
+                hljs.highlightElement(el);
+            });
+        });
+    </script>
 </head>
 <body class="@BodyClass">
 @ChildContent
@@ -16,12 +33,9 @@
 
 @code
 {
-    [Parameter]
-    public string Title { get; set; } = "";
+    [Parameter] public string Title { get; set; } = "";
 
-    [Parameter]
-    public string BodyClass { get; set; } = "";
+    [Parameter] public string BodyClass { get; set; } = "";
 
-    [Parameter]
-    public RenderFragment? ChildContent { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
 }

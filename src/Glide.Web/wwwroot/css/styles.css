@@ -624,6 +624,10 @@ body.board-page {
     margin-bottom: 0;
 }
 
+textarea#task-description {
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace;
+}
+
 /* Expanded task card */
 .task-card-expanded {
     cursor: default;
@@ -634,10 +638,6 @@ body.board-page {
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
-}
-
-textarea#task-description {
-    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace;
 }
 
 .task-title-input {

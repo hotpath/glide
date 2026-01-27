@@ -41,6 +41,14 @@ public class TaskRepository(IDbConnectionFactory connectionFactory)
         using IDbConnection conn = connectionFactory.CreateConnection();
         await conn.ExecuteAsync(statement, new { Id = id, Title = title, Description = description });
     }
+
+    public async System.Threading.Tasks.Task DeleteAsync(string id)
+    {
+        const string statement = "DELETE FROM tasks WHERE id = @Id";
+
+        using IDbConnection conn = connectionFactory.CreateConnection();
+        await conn.ExecuteAsync(statement, new { Id = id });
+    }
 }
 
 public record Task
