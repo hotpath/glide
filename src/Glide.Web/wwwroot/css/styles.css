@@ -605,11 +605,39 @@ body.board-page {
 
 /* Task description on card */
 .task-description {
+    display: block;
     font-size: 0.75rem;
     color: var(--text-muted);
     margin-top: 0.5rem;
     line-height: 1.4;
     word-break: break-word;
+    max-height: 4.2rem; /* ~3 lines at 1.4 line-height */
+    overflow: hidden;
+    position: relative;
+}
+
+.task-card .task-description::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 1.4rem;
+    background: linear-gradient(to bottom, rgba(30, 30, 30, 0), #1e1e1e);
+    pointer-events: none;
+}
+
+/* Hide code blocks and other complex elements on cards - show in modal only */
+/*.task-card .task-description pre {
+    display: none;
+}*/
+
+.task-card .task-description > *:first-child {
+    margin-top: 0;
+}
+
+.task-card .task-description > *:last-child {
+    margin-bottom: 0;
 }
 
 .task-description p, .markdown-preview p {
