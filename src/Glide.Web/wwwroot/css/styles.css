@@ -405,6 +405,11 @@ body.board-page {
     background: var(--bg-main);
 }
 
+body.board-page main {
+    max-width: 95%;
+    width: 100%;
+}
+
 .board-header {
     display: flex;
     align-items: center;
@@ -428,6 +433,96 @@ body.board-page {
     font-size: 1.75rem;
     color: var(--text-bright);
     margin: 0;
+    flex: 1;
+}
+
+.board-menu {
+    position: relative;
+}
+
+.board-menu-button {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    line-height: 1;
+}
+
+.board-menu-button:hover {
+    background: var(--bg-elevated);
+    color: var(--text-primary);
+}
+
+.board-menu-dropdown {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: calc(100% + 0.5rem);
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    padding: 0.5rem;
+    min-width: 150px;
+    z-index: 100;
+}
+
+.board-menu-dropdown.show {
+    display: block;
+}
+
+.board-menu-item {
+    display: block;
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    background: transparent;
+    border: none;
+    color: var(--text-primary);
+    text-align: left;
+    cursor: pointer;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    transition: background 0.2s ease;
+}
+
+.board-menu-item:hover {
+    background: var(--bg-elevated);
+}
+
+.add-column-form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 0.25rem;
+}
+
+.add-column-input {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-size: 0.875rem;
+    background: var(--bg-dark);
+    color: var(--text-primary);
+}
+
+.add-column-input:focus {
+    outline: none;
+    border-color: var(--accent-blue);
+    box-shadow: 0 0 0 2px rgba(97, 175, 239, 0.2);
+}
+
+.add-column-input::placeholder {
+    color: var(--text-muted);
+}
+
+.add-column-actions {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-end;
 }
 
 /* Kanban board layout */
@@ -437,6 +532,17 @@ body.board-page {
     overflow-x: auto;
     padding-bottom: 1rem;
     min-height: calc(100vh - 200px);
+    width: 100%;
+}
+
+.kanban-board::before,
+.kanban-board::after {
+    content: '';
+    margin: auto;
+}
+
+.kanban-board > .swimlane-column {
+    flex-shrink: 0;
 }
 
 /* Swimlane columns */

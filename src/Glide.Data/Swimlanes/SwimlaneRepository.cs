@@ -28,6 +28,24 @@ public class SwimlaneRepository(IDbConnectionFactory connectionFactory)
         await CreateAsync("Done", boardId, 2);
     }
 
+    public async Task<int> GetMaxPositionAsync(string boardId)
+    {
+        const string query = """
+                             SELECT MAX(position) as maxPosition, COUNT(id) as count
+                             FROM swimlanes
+                             WHERE board_id = @BoardId
+                             """;
+        using IDbConnection conn = connectionFactory.CreateConnection();
+
+        MaxResult result = await conn.QuerySingleAsync<MaxResult>(query, new { BoardId = boardId });
+        if (result.Count == 0)
+        {
+            return -1;
+        }
+
+        return (int)result.MaxPosition; // we know that this is a 32-bit val
+    }
+
     public async Task<Swimlane?> GetByIdAsync(string id)
     {
         string query = """
@@ -100,6 +118,8 @@ public class SwimlaneRepository(IDbConnectionFactory connectionFactory)
 
         return swimlaneLookup.Values;
     }
+
+    private record MaxResult(long MaxPosition, long Count);
 }
 
 public record Swimlane

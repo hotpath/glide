@@ -143,6 +143,36 @@ public class BoardController(
         return new RazorComponentResult<SwimlaneLayout>(new { Swimlanes = swimlanes });
     }
 
+    [HttpPost("{boardId}/swimlanes")]
+    [Authorize]
+    public async Task<IResult> CreateSwimlane([FromRoute] string boardId, [FromForm] string name)
+    {
+        if (string.IsNullOrEmpty(name))
+        {
+            return Results.BadRequest("name is required");
+        }
+
+        // verify that the board exists and belongs to the user
+        string? userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrWhiteSpace(userId))
+        {
+            return Results.Unauthorized();
+        }
+
+        Board? board = await boardRepository.GetByIdAsync(boardId);
+        if (board is null || board.BoardUsers.All(x => x.UserId != userId))
+        {
+            return Results.NotFound("board not found");
+        }
+
+        int existingPosition = await swimlaneRepository.GetMaxPositionAsync(boardId);
+
+        await swimlaneRepository.CreateAsync(name, boardId, existingPosition + 1);
+
+        IEnumerable<Swimlane> allBoards = await swimlaneRepository.GetAllByBoardIdAsync(boardId);
+        return new RazorComponentResult<SwimlaneLayout>(new { Swimlanes = allBoards });
+    }
+
     [HttpPost("{boardId}/tasks")]
     [Authorize]
     public async Task<IResult> CreateTaskAsync(

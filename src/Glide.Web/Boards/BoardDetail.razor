@@ -5,6 +5,27 @@
         <div class="board-header">
             <a href="/dashboard" class="back-link" title="Back to Dashboard">←</a>
             <h2 class="board-title">@Board.Name</h2>
+            <div class="board-menu">
+                <button class="board-menu-button" onclick="toggleBoardMenu(event)">⋮</button>
+                <div class="board-menu-dropdown" id="board-menu-dropdown">
+                    <div id="add-column-menu-item">
+                        <button class="board-menu-item" onclick="showAddColumnForm(event)">Add column</button>
+                    </div>
+                    <form id="add-column-form" class="add-column-form" style="display: none;"
+                          novalidate
+                          hx-post="/boards/@Board.Id/swimlanes"
+                          hx-target="#kanban-board"
+                          hx-swap="innerHTML"
+                          hx-on::after-request="handleAddColumnResponse(event)">
+                        <input type="text" name="name" placeholder="Column name" required autocomplete="off"
+                               class="add-column-input">
+                        <div class="add-column-actions">
+                            <button type="submit" class="btn-save">Add</button>
+                            <button type="button" class="btn-cancel" onclick="hideAddColumnForm()">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
 
         <div class="kanban-board" id="kanban-board"
@@ -344,6 +365,70 @@
                     });
 
             }, 500);
+        }
+
+        // Board menu toggle
+        function toggleBoardMenu(event) {
+            event.stopPropagation();
+            const dropdown = document.getElementById('board-menu-dropdown');
+            const form = document.getElementById('add-column-form');
+
+            // Don't close menu if form is visible
+            if (form.style.display === 'block') {
+                return;
+            }
+
+            dropdown.classList.toggle('show');
+        }
+
+        // Close board menu when clicking outside
+        document.addEventListener('click', function (event) {
+            const dropdown = document.getElementById('board-menu-dropdown');
+            const form = document.getElementById('add-column-form');
+
+            // Don't close if form is visible
+            if (form && form.style.display === 'block') {
+                return;
+            }
+
+            if (dropdown && dropdown.classList.contains('show')) {
+                dropdown.classList.remove('show');
+            }
+        });
+
+        // Add column form functions
+        function showAddColumnForm(event) {
+            event.preventDefault();
+            event.stopPropagation();
+
+            document.getElementById('add-column-menu-item').style.display = 'none';
+            const form = document.getElementById('add-column-form');
+            form.style.display = 'block';
+
+            // Focus the input
+            const input = form.querySelector('input[name="name"]');
+            setTimeout(() => input.focus(), 0);
+        }
+
+        function hideAddColumnForm() {
+            const form = document.getElementById('add-column-form');
+            const dropdown = document.getElementById('board-menu-dropdown');
+
+            form.style.display = 'none';
+            form.reset();
+            document.getElementById('add-column-menu-item').style.display = 'block';
+
+            // Close the menu dropdown as well
+            dropdown.classList.remove('show');
+        }
+
+        function handleAddColumnResponse(event) {
+            if (event.detail.successful) {
+                // Close menu and reset form
+                const dropdown = document.getElementById('board-menu-dropdown');
+                dropdown.classList.remove('show');
+                hideAddColumnForm();
+            }
         }
     </script>
 </HtmxLayout>
