@@ -42,6 +42,29 @@ public class TaskRepository(IDbConnectionFactory connectionFactory)
         await conn.ExecuteAsync(statement, new { Id = id, Title = title, Description = description });
     }
 
+    private async Task<int> GetNextPositionForSwimlane(string swimlaneId)
+    {
+        const string query = "SELECT MAX(position) as Position FROM tasks WHERE swimlane_id = @SwimlaneId";
+        using IDbConnection conn = connectionFactory.CreateConnection();
+
+        int? maxPosition = await conn.QuerySingleOrDefaultAsync<int?>(query, new { SwimlaneId = swimlaneId });
+        return maxPosition.HasValue ? maxPosition.Value + 1 : 0;
+    }
+
+    public async System.Threading.Tasks.Task MoveToSwimlaneAsync(string id, string swimlaneId)
+    {
+        int position = await GetNextPositionForSwimlane(swimlaneId);
+        const string statement = """
+                                 UPDATE tasks
+                                 SET swimlane_id=@SwimlaneId, position=@Position
+                                 WHERE id = @Id
+                                 """;
+
+        using IDbConnection conn = connectionFactory.CreateConnection();
+
+        await conn.ExecuteAsync(statement, new { SwimlaneId = swimlaneId, Position = position, Id = id });
+    }
+
     public async System.Threading.Tasks.Task DeleteAsync(string id)
     {
         const string statement = "DELETE FROM tasks WHERE id = @Id";

@@ -1,5 +1,6 @@
 using System.Threading.Tasks;
 
+using Glide.Data.Swimlanes;
 using Glide.Data.Tasks;
 
 using Markdig;
@@ -15,7 +16,7 @@ namespace Glide.Web.Tasks;
 
 [Route("/tasks")]
 [ApiController]
-public class TaskController(TaskRepository taskRepository) : ControllerBase
+public class TaskController(TaskRepository taskRepository, SwimlaneRepository swimlaneRepository) : ControllerBase
 {
     public static readonly MarkdownPipeline Pipeline =
         new MarkdownPipelineBuilder()
@@ -77,6 +78,34 @@ public class TaskController(TaskRepository taskRepository) : ControllerBase
         await taskRepository.DeleteAsync(id);
 
         return Results.Ok();
+    }
+
+    [HttpPut("{id}/move")]
+    [Authorize]
+    public async Task<IResult> MoveAsync([FromRoute] string id, [FromForm(Name = "swimlane_id")] string swimlaneId)
+    {
+        // TODO: Make sure the board belongs to the user for this task
+        Task? existing = await taskRepository.GetByIdAsync(id);
+        if (existing is null)
+        {
+            return Results.NotFound("task not found");
+        }
+
+        Swimlane? swimlane = await swimlaneRepository.GetByIdAsync(swimlaneId);
+        if (swimlane is null)
+        {
+            return Results.NotFound("swimlane not found");
+        }
+
+        await taskRepository.MoveToSwimlaneAsync(id, swimlaneId);
+
+        Task? moved = await taskRepository.GetByIdAsync(id);
+        if (moved is null)
+        {
+            return Results.InternalServerError("could not retrieve moved task");
+        }
+
+        return new RazorComponentResult<TaskCard>(new { Task = moved });
     }
 
     [HttpPost("markdown")]

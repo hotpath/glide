@@ -28,6 +28,22 @@ public class SwimlaneRepository(IDbConnectionFactory connectionFactory)
         await CreateAsync("Done", boardId, 2);
     }
 
+    public async Task<Swimlane?> GetByIdAsync(string id)
+    {
+        string query = """
+                       SELECT s.id, s.name, s.board_id, s.position,
+                              t.id, t.title, t.description, t.board_id, t.swimlane_id, t.assigned_to, t.position
+                       FROM swimlanes AS s
+                       LEFT JOIN tasks AS t ON s.id = t.swimlane_id
+                       WHERE s.id = @Id     
+                       """;
+
+        using IDbConnection conn = connectionFactory.CreateConnection();
+
+        return await conn.QuerySingleAsync<Swimlane>(query,
+            new { Id = id });
+    }
+
     public async Task<IEnumerable<Swimlane>> GetAllByBoardIdAsync(string boardId)
     {
         string query = """
