@@ -51,9 +51,22 @@ public class TaskRepository(IDbConnectionFactory connectionFactory)
         return maxPosition.HasValue ? maxPosition.Value + 1 : 0;
     }
 
-    public async System.Threading.Tasks.Task MoveToSwimlaneAsync(string id, string swimlaneId)
+    private async System.Threading.Tasks.Task UpdatePositions(string swimlane, int startingPosition)
     {
-        int position = await GetNextPositionForSwimlane(swimlaneId);
+        const string statement = """
+                                 UPDATE tasks
+                                 SET position = position + 1
+                                 WHERE swimlane_id = @Swimlane
+                                 AND position > @Position
+                                 """;
+
+        using IDbConnection conn = connectionFactory.CreateConnection();
+        await conn.ExecuteAsync(statement, new { Swimlane = swimlane, Position = startingPosition });
+    }
+
+    public async System.Threading.Tasks.Task MoveToSwimlaneAsync(string id, string swimlaneId, int? position = null)
+    {
+        int nextPosition = position ?? await GetNextPositionForSwimlane(swimlaneId);
         const string statement = """
                                  UPDATE tasks
                                  SET swimlane_id=@SwimlaneId, position=@Position
@@ -62,7 +75,9 @@ public class TaskRepository(IDbConnectionFactory connectionFactory)
 
         using IDbConnection conn = connectionFactory.CreateConnection();
 
-        await conn.ExecuteAsync(statement, new { SwimlaneId = swimlaneId, Position = position, Id = id });
+        await UpdatePositions(swimlaneId, nextPosition);
+
+        await conn.ExecuteAsync(statement, new { SwimlaneId = swimlaneId, Position = nextPosition, Id = id });
     }
 
     public async System.Threading.Tasks.Task DeleteAsync(string id)

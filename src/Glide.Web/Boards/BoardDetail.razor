@@ -31,26 +31,75 @@
     <script>
         // Drag and drop functionality
         let draggedTask = null;
+        let dropIndicator = null;
+        let targetTask = null;
+        let insertBefore = false;
 
         function dragTask(event) {
             draggedTask = event.target;
             event.target.classList.add('dragging');
             event.dataTransfer.effectAllowed = 'move';
             event.dataTransfer.setData('text/plain', event.target.dataset.taskId);
+
+            // Create drop indicator if it doesn't exist
+            if (!dropIndicator) {
+                dropIndicator = document.createElement('div');
+                dropIndicator.className = 'drop-indicator';
+            }
         }
 
         function allowDrop(event) {
             event.preventDefault();
             event.dataTransfer.dropEffect = 'move';
 
-            const column = event.target.closest('.swimlane-column');
-            if (column) {
-                column.classList.add('drag-over');
+            if (!draggedTask) return;
+
+            // Check if we're over a task card
+            const taskCard = event.target.closest('.task-card');
+
+            if (taskCard && taskCard !== draggedTask) {
+                // Calculate if mouse is in top or bottom half
+                const rect = taskCard.getBoundingClientRect();
+                const midpoint = rect.top + rect.height / 2;
+                insertBefore = event.clientY < midpoint;
+
+                targetTask = taskCard;
+
+                // Position the drop indicator
+                if (insertBefore) {
+                    taskCard.parentNode.insertBefore(dropIndicator, taskCard);
+                } else {
+                    if (taskCard.nextSibling) {
+                        taskCard.parentNode.insertBefore(dropIndicator, taskCard.nextSibling);
+                    } else {
+                        taskCard.parentNode.appendChild(dropIndicator);
+                    }
+                }
+            } else {
+                // Over empty space in column
+                const column = event.target.closest('.swimlane-column');
+                if (column) {
+                    column.classList.add('drag-over');
+                    const tasksContainer = column.querySelector('.swimlane-tasks');
+
+                    // If no tasks or over empty space, show indicator at bottom
+                    const tasks = tasksContainer.querySelectorAll('.task-card:not(.dragging)');
+                    if (tasks.length === 0) {
+                        tasksContainer.appendChild(dropIndicator);
+                        targetTask = null;
+                        insertBefore = false;
+                    }
+                }
             }
         }
 
         function dropTask(event) {
             event.preventDefault();
+
+            // Remove drop indicator
+            if (dropIndicator && dropIndicator.parentNode) {
+                dropIndicator.parentNode.removeChild(dropIndicator);
+            }
 
             // Remove drag-over class from all columns
             document.querySelectorAll('.swimlane-column').forEach(col => {
@@ -64,39 +113,66 @@
 
             const targetSwimlaneId = column.dataset.swimlaneId;
             const taskId = draggedTask.dataset.taskId;
-            const currentSwimlaneId = draggedTask.dataset.swimlaneId;
 
-            // Only move if dropping on a different swimlane
-            if (targetSwimlaneId !== currentSwimlaneId) {
-                // Move the task card to the new column
-                const tasksContainer = column.querySelector('.swimlane-tasks');
-                tasksContainer.appendChild(draggedTask);
+            // Calculate target position
+            const tasksContainer = column.querySelector('.swimlane-tasks');
+            let targetPosition = 0;
 
-                // Update the task's swimlane_id data attribute
-                draggedTask.dataset.swimlaneId = targetSwimlaneId;
+            if (targetTask && targetTask !== draggedTask) {
+                // Get all tasks in the target swimlane (excluding the dragged one)
+                const allTasks = Array.from(tasksContainer.querySelectorAll('.task-card:not(.dragging)'));
+                const targetIndex = allTasks.indexOf(targetTask);
 
-                // Send the move request to the server
-                const formData = new FormData();
-                formData.append('swimlane_id', targetSwimlaneId);
-
-                fetch('/tasks/' + taskId + '/move', {
-                    method: 'PUT',
-                    body: formData
-                }).then(response => {
-                    if (!response.ok) {
-                        // Revert on error - reload the board
-                        htmx.trigger('#kanban-board', 'load');
-                    } else {
-                        // Update task counts
-                        updateTaskCounts();
-                    }
-                }).catch(() => {
-                    htmx.trigger('#kanban-board', 'load');
-                });
+                if (targetIndex !== -1) {
+                    targetPosition = insertBefore ? targetIndex : targetIndex + 1;
+                }
+            } else {
+                // Dropping at the end
+                const allTasks = tasksContainer.querySelectorAll('.task-card:not(.dragging)');
+                targetPosition = allTasks.length;
             }
+
+            // Update DOM immediately for responsive feel
+            if (targetTask && targetTask !== draggedTask) {
+                if (insertBefore) {
+                    tasksContainer.insertBefore(draggedTask, targetTask);
+                } else {
+                    if (targetTask.nextSibling) {
+                        tasksContainer.insertBefore(draggedTask, targetTask.nextSibling);
+                    } else {
+                        tasksContainer.appendChild(draggedTask);
+                    }
+                }
+            } else {
+                tasksContainer.appendChild(draggedTask);
+            }
+
+            // Update the task's swimlane_id data attribute
+            draggedTask.dataset.swimlaneId = targetSwimlaneId;
+
+            // Send the move request to the server
+            const formData = new FormData();
+            formData.append('swimlane_id', targetSwimlaneId);
+            formData.append('position', targetPosition);
+
+            fetch('/tasks/' + taskId + '/move', {
+                method: 'PUT',
+                body: formData
+            }).then(response => {
+                if (!response.ok) {
+                    // Revert on error - reload the board
+                    htmx.trigger('#kanban-board', 'load');
+                } else {
+                    // Update task counts
+                    updateTaskCounts();
+                }
+            }).catch(() => {
+                htmx.trigger('#kanban-board', 'load');
+            });
 
             draggedTask.classList.remove('dragging');
             draggedTask = null;
+            targetTask = null;
         }
 
         function updateTaskCounts() {
@@ -123,6 +199,10 @@
                 draggedTask.classList.remove('dragging');
                 draggedTask = null;
             }
+            if (dropIndicator && dropIndicator.parentNode) {
+                dropIndicator.parentNode.removeChild(dropIndicator);
+            }
+            targetTask = null;
             document.querySelectorAll('.swimlane-column').forEach(col => {
                 col.classList.remove('drag-over');
             });
@@ -259,7 +339,7 @@
                     .then(html => {
                         previewContent.innerHTML = html;
                     })
-                    .catch(error => {
+                    .catch(() => {
                         previewContent.innerHTML = '<em style="color: red;">Failed to load preview</em>';
                     });
 

@@ -82,7 +82,8 @@ public class TaskController(TaskRepository taskRepository, SwimlaneRepository sw
 
     [HttpPut("{id}/move")]
     [Authorize]
-    public async Task<IResult> MoveAsync([FromRoute] string id, [FromForm(Name = "swimlane_id")] string swimlaneId)
+    public async Task<IResult> MoveAsync([FromRoute] string id, [FromForm(Name = "swimlane_id")] string swimlaneId,
+        [FromForm] int? position)
     {
         // TODO: Make sure the board belongs to the user for this task
         Task? existing = await taskRepository.GetByIdAsync(id);
@@ -97,7 +98,7 @@ public class TaskController(TaskRepository taskRepository, SwimlaneRepository sw
             return Results.NotFound("swimlane not found");
         }
 
-        await taskRepository.MoveToSwimlaneAsync(id, swimlaneId);
+        await taskRepository.MoveToSwimlaneAsync(id, swimlaneId, position);
 
         Task? moved = await taskRepository.GetByIdAsync(id);
         if (moved is null)

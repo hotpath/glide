@@ -35,13 +35,33 @@ public class SwimlaneRepository(IDbConnectionFactory connectionFactory)
                               t.id, t.title, t.description, t.board_id, t.swimlane_id, t.assigned_to, t.position
                        FROM swimlanes AS s
                        LEFT JOIN tasks AS t ON s.id = t.swimlane_id
-                       WHERE s.id = @Id     
+                       WHERE s.id = @Id
+                       ORDER BY s.position, t.position
                        """;
 
         using IDbConnection conn = connectionFactory.CreateConnection();
 
-        return await conn.QuerySingleAsync<Swimlane>(query,
-            new { Id = id });
+        Swimlane? result = null;
+        await conn.QueryAsync<Swimlane, Tasks.Task?, Swimlane>(query,
+            (swimlane, task) =>
+            {
+                if (result is null)
+                {
+                    result = swimlane;
+                    result.Tasks = new List<Tasks.Task>();
+                }
+
+                if (task is not null)
+                {
+                    ((List<Tasks.Task>)result.Tasks).Add(task);
+                }
+
+                return result;
+            },
+            new { Id = id },
+            splitOn: "id");
+
+        return result;
     }
 
     public async Task<IEnumerable<Swimlane>> GetAllByBoardIdAsync(string boardId)
@@ -52,7 +72,7 @@ public class SwimlaneRepository(IDbConnectionFactory connectionFactory)
                        FROM swimlanes AS s
                        LEFT JOIN tasks AS t ON s.id = t.swimlane_id
                        WHERE s.board_id = @BoardId
-                       ORDER BY s.position
+                       ORDER BY s.position, t.position
                        """;
 
         using IDbConnection conn = connectionFactory.CreateConnection();
