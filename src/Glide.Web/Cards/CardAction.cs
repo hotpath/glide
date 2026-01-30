@@ -15,7 +15,7 @@ namespace Glide.Web.Cards;
 public class CardAction(
     ICardRepository cardRepository,
     IBoardRepository boardRepository,
-    ColumnRepository columnRepository)
+    IColumnRepository columnRepository)
 {
     public async Task<Result<CardView>> GetForEditAsync(string cardId, ClaimsPrincipal user)
     {

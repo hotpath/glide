@@ -65,8 +65,8 @@ builder.Services.AddSingleton<IDbConnectionFactory>(new SqliteConnectionFactory(
     .AddSingleton<UserRepository>()
     .AddSingleton<SessionRepository>()
     .AddSingleton<IBoardRepository, BoardRepository>()
-    .AddSingleton<ColumnRepository>()
-    .AddSingleton<CardRepository>();
+    .AddSingleton<IColumnRepository, ColumnRepository>()
+    .AddSingleton<ICardRepository, CardRepository>();
 
 builder.Services.AddSingleton<BoardAction>()
     .AddSingleton<CardAction>()

@@ -4,8 +4,8 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 
 using Glide.Data.Boards;
-using Glide.Data.Columns;
 using Glide.Data.Cards;
+using Glide.Data.Columns;
 
 using Microsoft.AspNetCore.Http;
 
@@ -15,7 +15,7 @@ namespace Glide.Web.Boards;
 
 public class BoardAction(
     IBoardRepository boardRepository,
-    ColumnRepository columnRepository,
+    IColumnRepository columnRepository,
     ICardRepository cardRepository)
 {
     public enum DeleteResult { Success, Unauthenticated, NoOwnership }

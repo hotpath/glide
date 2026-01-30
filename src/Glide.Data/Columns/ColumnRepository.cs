@@ -9,7 +9,7 @@ using Glide.Data.Cards;
 
 namespace Glide.Data.Columns;
 
-public class ColumnRepository(IDbConnectionFactory connectionFactory)
+public class ColumnRepository(IDbConnectionFactory connectionFactory) : IColumnRepository
 {
     public async Task<Column> CreateAsync(string name, string boardId, int position)
     {
