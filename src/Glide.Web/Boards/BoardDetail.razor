@@ -429,6 +429,54 @@
                 hideAddColumnForm();
             }
         }
+
+        // Column menu functions
+        function toggleColumnMenu(event, columnId) {
+            event.stopPropagation();
+            const dropdown = document.getElementById('column-menu-dropdown-' + columnId);
+
+            // Close all other column menus
+            document.querySelectorAll('.column-menu-dropdown').forEach(menu => {
+                if (menu.id !== 'column-menu-dropdown-' + columnId) {
+                    menu.classList.remove('show');
+                }
+            });
+
+            dropdown.classList.toggle('show');
+        }
+
+        function validateColumnDelete(event, button) {
+            const cardCount = parseInt(button.dataset.cardCount);
+
+            if (cardCount > 0) {
+                event.preventDefault();
+                event.stopPropagation();
+                alert('Cannot delete column: it contains ' + cardCount + ' card(s). Please move or delete the cards first.');
+                return false;
+            }
+
+            return true;
+        }
+
+        // Close column menus after successful delete
+        document.body.addEventListener('htmx:afterSwap', function(event) {
+            if (event.detail.requestConfig &&
+                event.detail.requestConfig.verb === 'delete' &&
+                event.detail.requestConfig.path.includes('/columns/')) {
+                document.querySelectorAll('.column-menu-dropdown').forEach(menu => {
+                    menu.classList.remove('show');
+                });
+            }
+        });
+
+        // Close column menus when clicking outside
+        document.addEventListener('click', function (event) {
+            if (!event.target.closest('.column-menu')) {
+                document.querySelectorAll('.column-menu-dropdown').forEach(menu => {
+                    menu.classList.remove('show');
+                });
+            }
+        });
     </script>
 </HtmxLayout>
 

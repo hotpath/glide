@@ -5,6 +5,8 @@ using System.Threading.Tasks;
 
 using Dapper;
 
+using Glide.Data.Cards;
+
 namespace Glide.Data.Columns;
 
 public class ColumnRepository(IDbConnectionFactory connectionFactory)
@@ -60,18 +62,18 @@ public class ColumnRepository(IDbConnectionFactory connectionFactory)
         using IDbConnection conn = connectionFactory.CreateConnection();
 
         Column? result = null;
-        await conn.QueryAsync<Column, Cards.Card?, Column>(query,
+        await conn.QueryAsync<Column, Card?, Column>(query,
             (column, card) =>
             {
                 if (result is null)
                 {
                     result = column;
-                    result.Cards = new List<Cards.Card>();
+                    result.Cards = new List<Card>();
                 }
 
                 if (card is not null)
                 {
-                    ((List<Cards.Card>)result.Cards).Add(card);
+                    ((List<Card>)result.Cards).Add(card);
                 }
 
                 return result;
@@ -96,19 +98,19 @@ public class ColumnRepository(IDbConnectionFactory connectionFactory)
         using IDbConnection conn = connectionFactory.CreateConnection();
 
         Dictionary<string, Column> columnLookup = new();
-        await conn.QueryAsync<Column, Cards.Card?, Column>(query,
+        await conn.QueryAsync<Column, Card?, Column>(query,
             (column, card) =>
             {
                 if (!columnLookup.TryGetValue(column.Id, out Column? existing))
                 {
                     existing = column;
-                    existing.Cards = new List<Cards.Card>();
+                    existing.Cards = new List<Card>();
                     columnLookup.Add(column.Id, existing);
                 }
 
                 if (card is not null)
                 {
-                    ((List<Cards.Card>)existing.Cards).Add(card);
+                    ((List<Card>)existing.Cards).Add(card);
                 }
 
                 return existing;
@@ -117,6 +119,13 @@ public class ColumnRepository(IDbConnectionFactory connectionFactory)
             splitOn: "id");
 
         return columnLookup.Values;
+    }
+
+    public async Task DeleteAsync(string id)
+    {
+        const string statement = "DELETE FROM columns WHERE id=@Id";
+        using IDbConnection conn = connectionFactory.CreateConnection();
+        await conn.ExecuteAsync(statement, new { Id = id });
     }
 
     private record MaxResult(long MaxPosition, long Count);
@@ -128,5 +137,5 @@ public record Column
     public string BoardId { get; set; } = "";
     public string Name { get; set; } = "";
     public int Position { get; set; }
-    public IEnumerable<Cards.Card> Cards { get; set; } = [];
+    public IEnumerable<Card> Cards { get; set; } = [];
 }

@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 
 using Glide.Web.Cards;
+using Glide.Web.Columns;
 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
