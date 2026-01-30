@@ -12,7 +12,7 @@ steps:
         # Run tests for all test projects with coverage
         for test_project in test/**/*.csproj; do
           echo "Running tests for $test_project"
-          dotnet test "$test_project" --no-build --configuration Release --coverage --coverage-output-format cobertura
+          dotnet test --project "$test_project" --no-build --configuration Release --coverage --coverage-output-format cobertura
         done
       - dotnet tool install --global dotnet-reportgenerator-globaltool
       - export PATH="$PATH:/root/.dotnet/tools"
