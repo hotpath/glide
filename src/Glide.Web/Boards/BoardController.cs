@@ -1,11 +1,6 @@
 using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
 using System.Threading.Tasks;
 
-using Glide.Data.Boards;
-using Glide.Data.Swimlanes;
-using Glide.Data.Tasks;
 using Glide.Web.Tasks;
 
 using Microsoft.AspNetCore.Authorization;
@@ -13,164 +8,79 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
-using Task = Glide.Data.Tasks.Task;
-
 namespace Glide.Web.Boards;
 
 [Route("/boards")]
 [ApiController]
-public class BoardController(
-    BoardRepository boardRepository,
-    SwimlaneRepository swimlaneRepository,
-    TaskRepository taskRepository) : ControllerBase
+public class BoardController(BoardAction boardAction) : ControllerBase
 {
     [HttpGet]
     [Authorize]
     public async Task<IResult> GetBoardsAsync()
     {
-        string? userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        if (userId == null)
-        {
-            return Results.Unauthorized();
-        }
-
-        IEnumerable<Board> boards = await boardRepository.GetByUserIdAsync(userId);
-        return new RazorComponentResult<BoardList>(new Dictionary<string, object?> { { "Boards", boards } });
+        BoardAction.Result<IEnumerable<BoardView>> result = await boardAction.GetByUserAsync(User);
+        return result.IsError
+            ? result.StatusResult!
+            : new RazorComponentResult<BoardList>(new { Boards = result.Object });
     }
 
     [HttpPost]
     [Authorize]
     public async Task<IResult> CreateAsync([FromForm] string name)
     {
-        string? userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-        if (string.IsNullOrWhiteSpace(userId))
-        {
-            return Results.Unauthorized();
-        }
-
-        Board board = await boardRepository.CreateAsync(name, userId);
-        await swimlaneRepository.CreateDefaultSwimlanesAsync(board.Id);
-        return new RazorComponentResult<BoardCard>(new { Board = board });
+        BoardAction.Result<BoardView> result = await boardAction.CreateAsync(name, User);
+        return result.IsError
+            ? result.StatusResult!
+            : new RazorComponentResult<BoardCard>(new { Board = result.Object });
     }
 
     [HttpDelete("{id}")]
     [Authorize]
-    public async Task<IActionResult> DeleteAsync([FromRoute] string id)
+    public async Task<IResult> DeleteAsync([FromRoute] string id)
     {
-        string? userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-        if (string.IsNullOrWhiteSpace(userId))
-        {
-            return Unauthorized();
-        }
-
-        Board? existing = await boardRepository.GetByIdAsync(id);
-        if (existing is null || !existing.BoardUsers.Any(x => x.UserId == userId && x.IsOwner))
-        {
-            return NotFound("Board not found");
-        }
-
-
-        await boardRepository.DeleteAsync(id);
-        return Ok("");
+        BoardAction.Result<string> result = await boardAction.DeleteAsync(id, User);
+        return result.IsError ? result.StatusResult! : Results.Ok(result.Object);
     }
 
     [HttpPut("{id}")]
     [Authorize]
     public async Task<IResult> UpdateAsync([FromRoute] string id, [FromForm] string name)
     {
-        string? userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-        if (string.IsNullOrWhiteSpace(userId))
-        {
-            return Results.Unauthorized();
-        }
-
-        Board? existing = await boardRepository.GetByIdAsync(id);
-        if (existing is null)
-        {
-            return new RazorComponentResult<BoardCard>();
-        }
-
-        Board? updated = await boardRepository.UpdateAsync(id, name);
-        if (updated is null)
-        {
-            return new RazorComponentResult<BoardCard>();
-        }
-
-        return new RazorComponentResult<BoardCard>(new { Board = updated });
+        BoardAction.Result<BoardView> result = await boardAction.UpdateAsync(id, name, User);
+        return result.IsError
+            ? result.StatusResult!
+            : new RazorComponentResult<BoardCard>(new { Board = result.Object });
     }
 
     [HttpGet("{id}")]
     [Authorize]
     public async Task<IResult> GetByIdAsync([FromRoute] string id)
     {
-        string? userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-        if (string.IsNullOrWhiteSpace(userId))
-        {
-            return Results.Unauthorized();
-        }
-
-        Board? board = await boardRepository.GetByIdAsync(id);
-        if (board is null || board.BoardUsers.All(x => x.UserId != userId))
-        {
-            return Results.NotFound();
-        }
-
-        return new RazorComponentResult<BoardDetail>(new { Board = board });
+        BoardAction.Result<BoardView> result = await boardAction.GetByIdAsync(id, User);
+        return result.IsError
+            ? result.StatusResult!
+            : new RazorComponentResult<BoardDetail>(new { Board = result.Object });
     }
 
     [HttpGet("{id}/swimlanes")]
     [Authorize]
     public async Task<IResult> GetSwimlanesAsync([FromRoute] string id)
     {
-        string? userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-        if (string.IsNullOrWhiteSpace(userId))
-        {
-            return Results.Unauthorized();
-        }
-
-        Board? board = await boardRepository.GetByIdAsync(id);
-        if (board is null || board.BoardUsers.All(x => x.UserId != userId))
-        {
-            return Results.NotFound();
-        }
-
-        IEnumerable<Swimlane> swimlanes = await swimlaneRepository.GetAllByBoardIdAsync(id);
-        return new RazorComponentResult<SwimlaneLayout>(new { Swimlanes = swimlanes });
+        BoardAction.Result<IEnumerable<SwimlaneView>> result = await boardAction.GetSwimlanesAsync(id, User);
+        return result.IsError
+            ? result.StatusResult!
+            : new RazorComponentResult<SwimlaneLayout>(new { Swimlanes = result.Object });
     }
 
     [HttpPost("{boardId}/swimlanes")]
     [Authorize]
     public async Task<IResult> CreateSwimlane([FromRoute] string boardId, [FromForm] string name)
     {
-        if (string.IsNullOrEmpty(name))
-        {
-            return Results.BadRequest("name is required");
-        }
-
-        // verify that the board exists and belongs to the user
-        string? userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (string.IsNullOrWhiteSpace(userId))
-        {
-            return Results.Unauthorized();
-        }
-
-        Board? board = await boardRepository.GetByIdAsync(boardId);
-        if (board is null || board.BoardUsers.All(x => x.UserId != userId))
-        {
-            return Results.NotFound("board not found");
-        }
-
-        int existingPosition = await swimlaneRepository.GetMaxPositionAsync(boardId);
-
-        await swimlaneRepository.CreateAsync(name, boardId, existingPosition + 1);
-
-        IEnumerable<Swimlane> allBoards = await swimlaneRepository.GetAllByBoardIdAsync(boardId);
-        return new RazorComponentResult<SwimlaneLayout>(new { Swimlanes = allBoards });
+        BoardAction.Result<IEnumerable<SwimlaneView>> result =
+            await boardAction.CreateSwimlaneAsync(boardId, name, User);
+        return result.IsError
+            ? result.StatusResult!
+            : new RazorComponentResult<SwimlaneLayout>(new { Swimlanes = result.Object });
     }
 
     [HttpPost("{boardId}/tasks")]
@@ -180,13 +90,7 @@ public class BoardController(
         [FromForm(Name = "swimlane_id")] string swimlaneId,
         [FromForm] string title)
     {
-        if (string.IsNullOrWhiteSpace(swimlaneId) || string.IsNullOrWhiteSpace(title))
-        {
-            return Results.BadRequest("Missing required parameters");
-        }
-
-        Task task = await taskRepository.CreateAsync(title, boardId, swimlaneId);
-
-        return new RazorComponentResult<TaskCard>(new { Task = task });
+        BoardAction.Result<TaskView> result = await boardAction.CreateTaskAsync(boardId, swimlaneId, title, User);
+        return result.IsError ? result.StatusResult! : new RazorComponentResult<TaskCard>(new { Task = result.Object });
     }
 }

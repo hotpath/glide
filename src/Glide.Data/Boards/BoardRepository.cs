@@ -27,7 +27,10 @@ public class BoardRepository(IDbConnectionFactory connectionFactory)
         await conn.ExecuteAsync(ownerStatement, new { BoardId = id, UserId = userId }, transaction);
         transaction.Commit();
 
-        return new Board { Id = id, Name = name };
+        return new Board
+        {
+            Id = id, Name = name, BoardUsers = [new BoardUser { BoardId = id, UserId = userId, IsOwner = true }]
+        };
     }
 
     public async Task<IEnumerable<Board>> GetByUserIdAsync(string userId)

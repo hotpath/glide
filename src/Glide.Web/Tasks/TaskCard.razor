@@ -1,5 +1,4 @@
 @using Markdig
-@using Task = Glide.Data.Tasks.Task
 <div class="task-card" id="task-@Task.Id" draggable="true" ondragstart="dragTask(event)"
      data-task-id="@Task.Id" data-swimlane-id="@Task.SwimlaneId">
     <div class="task-content" onclick="openTaskModal('@Task.Id')">
@@ -13,5 +12,5 @@
 </div>
 
 @code{
-    [Parameter] public required Task Task { get; set; }
+    [Parameter] public required TaskView Task { get; set; }
 }

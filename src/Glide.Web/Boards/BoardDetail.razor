@@ -1,4 +1,3 @@
-@using Glide.Data.Boards
 @using Glide.Web.Features.Shared
 <HtmxLayout Title="@Board.Name" BodyClass="board-page">
     <main>
@@ -435,5 +434,5 @@
 
 @code
 {
-    [Parameter] public required Board Board { get; init; }
+    [Parameter] public required BoardView Board { get; init; }
 }

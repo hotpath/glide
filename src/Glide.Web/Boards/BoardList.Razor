@@ -1,5 +1,4 @@
-@using Glide.Data.Boards
-@if (!Boards.Any())
+@if (Boards is null || !Boards.Any())
 {
     <div id="boards-grid" class="boards-grid"></div>
     <div id="empty-state" class="empty-state">
@@ -23,5 +22,5 @@ else
 
 @code
 {
-    [Parameter] public IEnumerable<Board> Boards { get; set; } = [];
+    [Parameter] public IEnumerable<BoardView>? Boards { get; set; } = [];
 }

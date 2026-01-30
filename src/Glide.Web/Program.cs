@@ -14,6 +14,7 @@ using Glide.Data.Swimlanes;
 using Glide.Data.Tasks;
 using Glide.Data.Users;
 using Glide.Web.Auth;
+using Glide.Web.Boards;
 using Glide.Web.Features;
 
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -64,6 +65,8 @@ builder.Services.AddSingleton<IDbConnectionFactory>(new SqliteConnectionFactory(
     .AddSingleton<BoardRepository>()
     .AddSingleton<SwimlaneRepository>()
     .AddSingleton<TaskRepository>();
+
+builder.Services.AddSingleton<BoardAction>();
 
 builder.Services
     .AddFluentMigratorCore()

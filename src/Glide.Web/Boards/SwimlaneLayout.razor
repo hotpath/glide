@@ -1,4 +1,3 @@
-@using Glide.Data.Swimlanes
 @using Glide.Web.Tasks
 @foreach (var lane in Swimlanes)
 {
@@ -23,5 +22,5 @@
 
 @code
 {
-    [Parameter] public required IEnumerable<Swimlane> Swimlanes { get; set; }
+    [Parameter] public required IEnumerable<SwimlaneView> Swimlanes { get; set; }
 }
