@@ -64,7 +64,7 @@ string dbPath = Environment.GetEnvironmentVariable("GLIDE_DATABASE_PATH") ?? "/a
 builder.Services.AddSingleton<IDbConnectionFactory>(new SqliteConnectionFactory($"Data Source={dbPath}"))
     .AddSingleton<UserRepository>()
     .AddSingleton<SessionRepository>()
-    .AddSingleton<BoardRepository>()
+    .AddSingleton<IBoardRepository, BoardRepository>()
     .AddSingleton<ColumnRepository>()
     .AddSingleton<CardRepository>();
 

@@ -14,7 +14,7 @@ using Card = Glide.Data.Cards.Card;
 namespace Glide.Web.Boards;
 
 public class BoardAction(
-    BoardRepository boardRepository,
+    IBoardRepository boardRepository,
     ColumnRepository columnRepository,
     CardRepository cardRepository)
 {

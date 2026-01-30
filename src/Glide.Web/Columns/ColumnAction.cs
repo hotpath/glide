@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace Glide.Web.Columns;
 
-public class ColumnAction(ColumnRepository columnRepository, BoardRepository boardRepository)
+public class ColumnAction(ColumnRepository columnRepository, IBoardRepository boardRepository)
 {
     public async Task<Result<IEnumerable<ColumnView>>> DeleteColumnAsync(string columnId, ClaimsPrincipal user)
     {
