@@ -18,7 +18,7 @@ steps:
       - export PATH="$PATH:/root/.dotnet/tools"
       - |
         # Find all coverage files from test projects
-        COVERAGE_FILES=$(find test -name "coverage.cobertura.xml" -path "*/TestResults/*" | tr '\n' ';')
+        COVERAGE_FILES=$(find test -name "*.cobertura.xml" -path "*/TestResults/*" | tr '\n' ';')
         echo "Found coverage files: $COVERAGE_FILES"
 
         # Generate merged coverage report
