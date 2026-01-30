@@ -13,7 +13,7 @@ using Card = Glide.Data.Cards.Card;
 namespace Glide.Web.Cards;
 
 public class CardAction(
-    CardRepository cardRepository,
+    ICardRepository cardRepository,
     IBoardRepository boardRepository,
     ColumnRepository columnRepository)
 {

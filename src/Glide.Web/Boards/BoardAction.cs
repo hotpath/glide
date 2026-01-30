@@ -16,7 +16,7 @@ namespace Glide.Web.Boards;
 public class BoardAction(
     IBoardRepository boardRepository,
     ColumnRepository columnRepository,
-    CardRepository cardRepository)
+    ICardRepository cardRepository)
 {
     public enum DeleteResult { Success, Unauthenticated, NoOwnership }
 
