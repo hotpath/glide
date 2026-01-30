@@ -1,0 +1,72 @@
+name: Test
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: ["**"]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.102'
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build --no-restore --configuration Release
+
+      - name: Run tests with coverage
+        run: |
+          # Run tests for all test projects with coverage
+          for test_project in test/**/*.csproj; do
+            echo "Running tests for $test_project"
+            dotnet test --project "$test_project" --no-build --configuration Release --coverage --coverage-output-format cobertura
+          done
+
+      - name: Install ReportGenerator
+        run: dotnet tool install --global dotnet-reportgenerator-globaltool
+
+      - name: Generate coverage report
+        run: |
+          # Find all coverage files from test projects
+          COVERAGE_FILES=$(find test -name "*.cobertura.xml" -path "*/TestResults/*" | tr '\n' ';')
+          echo "Found coverage files: $COVERAGE_FILES"
+
+          # Generate merged coverage report
+          reportgenerator \
+            -reports:"$COVERAGE_FILES" \
+            -targetdir:"./coverage-report" \
+            -reporttypes:"TextSummary;Html"
+
+      - name: Display coverage summary
+        run: cat ./coverage-report/Summary.txt
+
+      - name: Check coverage threshold
+        run: |
+          # Extract line coverage percentage and check threshold
+          LINE_COVERAGE=$(grep "Line coverage:" ./coverage-report/Summary.txt | awk '{print $3}' | tr -d '%')
+          echo "Line coverage: ${LINE_COVERAGE}%"
+
+          if [ $(echo "$LINE_COVERAGE < 80" | bc) -eq 1 ]; then
+            echo "❌ Error: Code coverage (${LINE_COVERAGE}%) is below the required 80% threshold"
+            exit 1
+          fi
+
+          echo "✅ Code coverage meets threshold (${LINE_COVERAGE}% >= 80%)"
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-report
+          path: coverage-report/
