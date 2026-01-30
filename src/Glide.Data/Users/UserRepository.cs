@@ -7,7 +7,7 @@ using Dapper;
 
 namespace Glide.Data.Users;
 
-public class UserRepository(IDbConnectionFactory connectionFactory)
+public class UserRepository(IDbConnectionFactory connectionFactory) : IUserRepository
 {
     public async Task<User?> GetAsync(string provider, string providerId, CancellationToken cancellationToken = default)
     {

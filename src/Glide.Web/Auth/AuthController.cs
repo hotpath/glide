@@ -17,8 +17,8 @@ public class AuthController(
     AuthContext authContext,
     OAuthClient oAuthClient,
     ILogger<AuthController> logger,
-    UserRepository userRepository,
-    SessionRepository sessionRepository) : ControllerBase
+    IUserRepository userRepository,
+    ISessionRepository sessionRepository) : ControllerBase
 {
     [HttpGet("login")]
     public IActionResult Login()
