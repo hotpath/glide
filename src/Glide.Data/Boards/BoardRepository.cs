@@ -8,7 +8,7 @@ using Dapper;
 
 namespace Glide.Data.Boards;
 
-public class BoardRepository(IDbConnectionFactory connectionFactory)
+public class BoardRepository(IDbConnectionFactory connectionFactory) : IBoardRepository
 {
     public async Task<Board> CreateAsync(string name, string userId)
     {

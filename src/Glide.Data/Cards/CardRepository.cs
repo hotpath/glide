@@ -6,7 +6,7 @@ using Dapper;
 
 namespace Glide.Data.Cards;
 
-public class CardRepository(IDbConnectionFactory connectionFactory)
+public class CardRepository(IDbConnectionFactory connectionFactory) : ICardRepository
 {
     public async Task<Card> CreateAsync(string title, string boardId, string columnId)
     {
