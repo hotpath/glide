@@ -23,7 +23,7 @@ steps:
   build-rc:
     image: gcr.io/kaniko-project/executor:debug
     commands:
-      - export VERSION=$(sed -n 's/.*<Version>\(.*\)<\/Version>.*/\1/p' Directory.Build.props)
+      - export VERSION=$(awk -F'[<>]' '/<Version>/{print $3}' Directory.Build.props)
       - echo "Building version $VERSION-rc"
       - mkdir -p /kaniko/.docker
       - echo "{\"auths\":{\"codeberg.org\":{\"auth\":\"$(echo -n $CODEBERG_USERNAME:$CODEBERG_TOKEN | base64)\"}}}" > /kaniko/.docker/config.json
