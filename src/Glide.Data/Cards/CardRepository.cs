@@ -4,35 +4,35 @@ using System.Threading.Tasks;
 
 using Dapper;
 
-namespace Glide.Data.Tasks;
+namespace Glide.Data.Cards;
 
-public class TaskRepository(IDbConnectionFactory connectionFactory)
+public class CardRepository(IDbConnectionFactory connectionFactory)
 {
-    public async Task<Task> CreateAsync(string title, string boardId, string swimlaneId)
+    public async Task<Card> CreateAsync(string title, string boardId, string swimlaneId)
     {
         string id = Guid.CreateVersion7().ToString();
         const string statement = """
-                                 INSERT INTO tasks(id, title, board_id, swimlane_id)
+                                 INSERT INTO cards(id, title, board_id, swimlane_id)
                                  VALUES (@Id, @Title, @BoardId, @SwimlaneId)
                                  """;
 
         using IDbConnection conn = connectionFactory.CreateConnection();
         await conn.ExecuteAsync(statement, new { Id = id, Title = title, BoardId = boardId, SwimlaneId = swimlaneId });
 
-        return new Task { Id = id, Title = title, BoardId = boardId, SwimlaneId = swimlaneId };
+        return new Card { Id = id, Title = title, BoardId = boardId, SwimlaneId = swimlaneId };
     }
 
-    public async Task<Task?> GetByIdAsync(string id)
+    public async Task<Card?> GetByIdAsync(string id)
     {
-        const string query = "SELECT * FROM tasks WHERE id = @Id";
+        const string query = "SELECT * FROM cards WHERE id = @Id";
         using IDbConnection conn = connectionFactory.CreateConnection();
-        return await conn.QuerySingleOrDefaultAsync<Task>(query, new { Id = id });
+        return await conn.QuerySingleOrDefaultAsync<Card>(query, new { Id = id });
     }
 
     public async System.Threading.Tasks.Task UpdateAsync(string id, string title, string? description)
     {
         const string statement = """
-                                 UPDATE tasks
+                                 UPDATE cards
                                  SET title = @Title,
                                      description = @Description
                                  WHERE id = @Id
@@ -44,7 +44,7 @@ public class TaskRepository(IDbConnectionFactory connectionFactory)
 
     private async Task<int> GetNextPositionForSwimlane(string swimlaneId)
     {
-        const string query = "SELECT MAX(position) as Position FROM tasks WHERE swimlane_id = @SwimlaneId";
+        const string query = "SELECT MAX(position) as Position FROM cards WHERE swimlane_id = @SwimlaneId";
         using IDbConnection conn = connectionFactory.CreateConnection();
 
         int? maxPosition = await conn.QuerySingleOrDefaultAsync<int?>(query, new { SwimlaneId = swimlaneId });
@@ -54,7 +54,7 @@ public class TaskRepository(IDbConnectionFactory connectionFactory)
     private async System.Threading.Tasks.Task UpdatePositions(string swimlane, int startingPosition)
     {
         const string statement = """
-                                 UPDATE tasks
+                                 UPDATE cards
                                  SET position = position + 1
                                  WHERE swimlane_id = @Swimlane
                                  AND position > @Position
@@ -68,7 +68,7 @@ public class TaskRepository(IDbConnectionFactory connectionFactory)
     {
         int nextPosition = position ?? await GetNextPositionForSwimlane(swimlaneId);
         const string statement = """
-                                 UPDATE tasks
+                                 UPDATE cards
                                  SET swimlane_id=@SwimlaneId, position=@Position
                                  WHERE id = @Id
                                  """;
@@ -82,14 +82,14 @@ public class TaskRepository(IDbConnectionFactory connectionFactory)
 
     public async System.Threading.Tasks.Task DeleteAsync(string id)
     {
-        const string statement = "DELETE FROM tasks WHERE id = @Id";
+        const string statement = "DELETE FROM cards WHERE id = @Id";
 
         using IDbConnection conn = connectionFactory.CreateConnection();
         await conn.ExecuteAsync(statement, new { Id = id });
     }
 }
 
-public record Task
+public record Card
 {
     public string Id { get; set; } = "";
     public string Title { get; set; } = "";

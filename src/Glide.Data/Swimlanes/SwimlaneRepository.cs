@@ -50,28 +50,28 @@ public class SwimlaneRepository(IDbConnectionFactory connectionFactory)
     {
         string query = """
                        SELECT s.id, s.name, s.board_id, s.position,
-                              t.id, t.title, t.description, t.board_id, t.swimlane_id, t.assigned_to, t.position
+                              c.id, c.title, c.description, c.board_id, c.swimlane_id, c.assigned_to, c.position
                        FROM swimlanes AS s
-                       LEFT JOIN tasks AS t ON s.id = t.swimlane_id
+                       LEFT JOIN cards AS c ON s.id = c.swimlane_id
                        WHERE s.id = @Id
-                       ORDER BY s.position, t.position
+                       ORDER BY s.position, c.position
                        """;
 
         using IDbConnection conn = connectionFactory.CreateConnection();
 
         Swimlane? result = null;
-        await conn.QueryAsync<Swimlane, Tasks.Task?, Swimlane>(query,
-            (swimlane, task) =>
+        await conn.QueryAsync<Swimlane, Cards.Card?, Swimlane>(query,
+            (swimlane, card) =>
             {
                 if (result is null)
                 {
                     result = swimlane;
-                    result.Tasks = new List<Tasks.Task>();
+                    result.Cards = new List<Cards.Card>();
                 }
 
-                if (task is not null)
+                if (card is not null)
                 {
-                    ((List<Tasks.Task>)result.Tasks).Add(task);
+                    ((List<Cards.Card>)result.Cards).Add(card);
                 }
 
                 return result;
@@ -86,29 +86,29 @@ public class SwimlaneRepository(IDbConnectionFactory connectionFactory)
     {
         string query = """
                        SELECT s.id, s.name, s.board_id, s.position,
-                              t.id, t.title, t.description, t.board_id, t.swimlane_id, t.assigned_to, t.position
+                              c.id, c.title, c.description, c.board_id, c.swimlane_id, c.assigned_to, c.position
                        FROM swimlanes AS s
-                       LEFT JOIN tasks AS t ON s.id = t.swimlane_id
+                       LEFT JOIN cards AS c ON s.id = c.swimlane_id
                        WHERE s.board_id = @BoardId
-                       ORDER BY s.position, t.position
+                       ORDER BY s.position, c.position
                        """;
 
         using IDbConnection conn = connectionFactory.CreateConnection();
 
         Dictionary<string, Swimlane> swimlaneLookup = new();
-        await conn.QueryAsync<Swimlane, Tasks.Task?, Swimlane>(query,
-            (swimlane, task) =>
+        await conn.QueryAsync<Swimlane, Cards.Card?, Swimlane>(query,
+            (swimlane, card) =>
             {
                 if (!swimlaneLookup.TryGetValue(swimlane.Id, out Swimlane? existing))
                 {
                     existing = swimlane;
-                    existing.Tasks = new List<Tasks.Task>();
+                    existing.Cards = new List<Cards.Card>();
                     swimlaneLookup.Add(swimlane.Id, existing);
                 }
 
-                if (task is not null)
+                if (card is not null)
                 {
-                    ((List<Tasks.Task>)existing.Tasks).Add(task);
+                    ((List<Cards.Card>)existing.Cards).Add(card);
                 }
 
                 return existing;
@@ -128,5 +128,5 @@ public record Swimlane
     public string BoardId { get; set; } = "";
     public string Name { get; set; } = "";
     public int Position { get; set; }
-    public IEnumerable<Tasks.Task> Tasks { get; set; } = [];
+    public IEnumerable<Cards.Card> Cards { get; set; } = [];
 }

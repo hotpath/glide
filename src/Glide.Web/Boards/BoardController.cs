@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-using Glide.Web.Tasks;
+using Glide.Web.Cards;
 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -83,14 +83,14 @@ public class BoardController(BoardAction boardAction) : ControllerBase
             : new RazorComponentResult<SwimlaneLayout>(new { Swimlanes = result.Object });
     }
 
-    [HttpPost("{boardId}/tasks")]
+    [HttpPost("{boardId}/cards")]
     [Authorize]
-    public async Task<IResult> CreateTaskAsync(
+    public async Task<IResult> CreateCardAsync(
         [FromRoute] string boardId,
         [FromForm(Name = "swimlane_id")] string swimlaneId,
         [FromForm] string title)
     {
-        BoardAction.Result<TaskView> result = await boardAction.CreateTaskAsync(boardId, swimlaneId, title, User);
-        return result.IsError ? result.StatusResult! : new RazorComponentResult<TaskCard>(new { Task = result.Object });
+        BoardAction.Result<CardView> result = await boardAction.CreateCardAsync(boardId, swimlaneId, title, User);
+        return result.IsError ? result.StatusResult! : new RazorComponentResult<CardCard>(new { Card = result.Object });
     }
 }

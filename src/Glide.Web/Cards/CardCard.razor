@@ -1,0 +1,30 @@
+<div class="card-card"
+     id="card-@Card.Id"
+     draggable="true"
+     ondragstart="dragCard(event)"
+     data-card-id="@Card.Id"
+     data-swimlane-id="@Card.SwimlaneId"
+     onclick="openCardModal('@Card.Id')">
+    <div class="card-content">
+        <div class="card-title">@Card.Title</div>
+        @if (!string.IsNullOrWhiteSpace(Card.Description))
+        {
+            <div class="card-description">@Card.Description</div>
+        }
+    </div>
+    <div class="card-actions">
+        <button class="card-delete"
+                hx-delete="/cards/@Card.Id"
+                hx-target="#card-@Card.Id"
+                hx-swap="outerHTML swap:0s"
+                hx-confirm="Delete this card?"
+                onclick="event.stopPropagation()">
+            ×
+        </button>
+    </div>
+</div>
+
+@code
+{
+    [Parameter] public required CardView Card { get; init; }
+}

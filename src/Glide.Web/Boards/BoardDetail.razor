@@ -35,31 +35,31 @@
         </div>
     </main>
 
-    <!-- Task Edit Modal -->
-    <div id="task-modal" class="modal" onclick="closeModalOnBackdrop(event)">
+    <!-- Card Edit Modal -->
+    <div id="card-modal" class="modal" onclick="closeModalOnBackdrop(event)">
         <div class="modal-content" onclick="event.stopPropagation()">
             <div class="modal-header">
-                <h3>Edit Task</h3>
+                <h3>Edit Card</h3>
                 <button class="modal-close" onclick="closeModal()">&times;</button>
             </div>
             <div id="modal-body" class="modal-body">
-                <!-- Task edit form loaded via HTMX -->
+                <!-- Card edit form loaded via HTMX -->
             </div>
         </div>
     </div>
 
     <script>
         // Drag and drop functionality
-        let draggedTask = null;
+        let draggedCard = null;
         let dropIndicator = null;
-        let targetTask = null;
+        let targetCard = null;
         let insertBefore = false;
 
-        function dragTask(event) {
-            draggedTask = event.target;
+        function dragCard(event) {
+            draggedCard = event.target;
             event.target.classList.add('dragging');
             event.dataTransfer.effectAllowed = 'move';
-            event.dataTransfer.setData('text/plain', event.target.dataset.taskId);
+            event.dataTransfer.setData('text/plain', event.target.dataset.cardId);
 
             // Create drop indicator if it doesn't exist
             if (!dropIndicator) {
@@ -72,27 +72,27 @@
             event.preventDefault();
             event.dataTransfer.dropEffect = 'move';
 
-            if (!draggedTask) return;
+            if (!draggedCard) return;
 
-            // Check if we're over a task card
-            const taskCard = event.target.closest('.task-card');
+            // Check if we're over a card card
+            const cardCard = event.target.closest('.card-card');
 
-            if (taskCard && taskCard !== draggedTask) {
+            if (cardCard && cardCard !== draggedCard) {
                 // Calculate if mouse is in top or bottom half
-                const rect = taskCard.getBoundingClientRect();
+                const rect = cardCard.getBoundingClientRect();
                 const midpoint = rect.top + rect.height / 2;
                 insertBefore = event.clientY < midpoint;
 
-                targetTask = taskCard;
+                targetCard = cardCard;
 
                 // Position the drop indicator
                 if (insertBefore) {
-                    taskCard.parentNode.insertBefore(dropIndicator, taskCard);
+                    cardCard.parentNode.insertBefore(dropIndicator, cardCard);
                 } else {
-                    if (taskCard.nextSibling) {
-                        taskCard.parentNode.insertBefore(dropIndicator, taskCard.nextSibling);
+                    if (cardCard.nextSibling) {
+                        cardCard.parentNode.insertBefore(dropIndicator, cardCard.nextSibling);
                     } else {
-                        taskCard.parentNode.appendChild(dropIndicator);
+                        cardCard.parentNode.appendChild(dropIndicator);
                     }
                 }
             } else {
@@ -100,20 +100,20 @@
                 const column = event.target.closest('.swimlane-column');
                 if (column) {
                     column.classList.add('drag-over');
-                    const tasksContainer = column.querySelector('.swimlane-tasks');
+                    const cardsContainer = column.querySelector('.swimlane-cards');
 
-                    // If no tasks or over empty space, show indicator at bottom
-                    const tasks = tasksContainer.querySelectorAll('.task-card:not(.dragging)');
-                    if (tasks.length === 0) {
-                        tasksContainer.appendChild(dropIndicator);
-                        targetTask = null;
+                    // If no cards or over empty space, show indicator at bottom
+                    const cards = cardsContainer.querySelectorAll('.card-card:not(.dragging)');
+                    if (cards.length === 0) {
+                        cardsContainer.appendChild(dropIndicator);
+                        targetCard = null;
                         insertBefore = false;
                     }
                 }
             }
         }
 
-        function dropTask(event) {
+        function dropCard(event) {
             event.preventDefault();
 
             // Remove drop indicator
@@ -126,56 +126,56 @@
                 col.classList.remove('drag-over');
             });
 
-            if (!draggedTask) return;
+            if (!draggedCard) return;
 
             const column = event.target.closest('.swimlane-column');
             if (!column) return;
 
             const targetSwimlaneId = column.dataset.swimlaneId;
-            const taskId = draggedTask.dataset.taskId;
+            const cardId = draggedCard.dataset.cardId;
 
             // Calculate target position
-            const tasksContainer = column.querySelector('.swimlane-tasks');
+            const cardsContainer = column.querySelector('.swimlane-cards');
             let targetPosition = 0;
 
-            if (targetTask && targetTask !== draggedTask) {
-                // Get all tasks in the target swimlane (excluding the dragged one)
-                const allTasks = Array.from(tasksContainer.querySelectorAll('.task-card:not(.dragging)'));
-                const targetIndex = allTasks.indexOf(targetTask);
+            if (targetCard && targetCard !== draggedCard) {
+                // Get all cards in the target swimlane (excluding the dragged one)
+                const allCards = Array.from(cardsContainer.querySelectorAll('.card-card:not(.dragging)'));
+                const targetIndex = allCards.indexOf(targetCard);
 
                 if (targetIndex !== -1) {
                     targetPosition = insertBefore ? targetIndex : targetIndex + 1;
                 }
             } else {
                 // Dropping at the end
-                const allTasks = tasksContainer.querySelectorAll('.task-card:not(.dragging)');
-                targetPosition = allTasks.length;
+                const allCards = cardsContainer.querySelectorAll('.card-card:not(.dragging)');
+                targetPosition = allCards.length;
             }
 
             // Update DOM immediately for responsive feel
-            if (targetTask && targetTask !== draggedTask) {
+            if (targetCard && targetCard !== draggedCard) {
                 if (insertBefore) {
-                    tasksContainer.insertBefore(draggedTask, targetTask);
+                    cardsContainer.insertBefore(draggedCard, targetCard);
                 } else {
-                    if (targetTask.nextSibling) {
-                        tasksContainer.insertBefore(draggedTask, targetTask.nextSibling);
+                    if (targetCard.nextSibling) {
+                        cardsContainer.insertBefore(draggedCard, targetCard.nextSibling);
                     } else {
-                        tasksContainer.appendChild(draggedTask);
+                        cardsContainer.appendChild(draggedCard);
                     }
                 }
             } else {
-                tasksContainer.appendChild(draggedTask);
+                cardsContainer.appendChild(draggedCard);
             }
 
-            // Update the task's swimlane_id data attribute
-            draggedTask.dataset.swimlaneId = targetSwimlaneId;
+            // Update the card's swimlane_id data attribute
+            draggedCard.dataset.swimlaneId = targetSwimlaneId;
 
             // Send the move request to the server
             const formData = new FormData();
             formData.append('swimlane_id', targetSwimlaneId);
             formData.append('position', targetPosition);
 
-            fetch('/tasks/' + taskId + '/move', {
+            fetch('/cards/' + cardId + '/move', {
                 method: 'PUT',
                 body: formData
             }).then(response => {
@@ -183,24 +183,24 @@
                     // Revert on error - reload the board
                     htmx.trigger('#kanban-board', 'load');
                 } else {
-                    // Update task counts
-                    updateTaskCounts();
+                    // Update card counts
+                    updateCardCounts();
                 }
             }).catch(() => {
                 htmx.trigger('#kanban-board', 'load');
             });
 
-            draggedTask.classList.remove('dragging');
-            draggedTask = null;
-            targetTask = null;
+            draggedCard.classList.remove('dragging');
+            draggedCard = null;
+            targetCard = null;
         }
 
-        function updateTaskCounts() {
+        function updateCardCounts() {
             document.querySelectorAll('.swimlane-column').forEach(column => {
-                const tasks = column.querySelectorAll('.task-card');
-                const countBadge = column.querySelector('.task-count');
+                const cards = column.querySelectorAll('.card-card');
+                const countBadge = column.querySelector('.card-count');
                 if (countBadge) {
-                    countBadge.textContent = tasks.length;
+                    countBadge.textContent = cards.length;
                 }
             });
         }
@@ -215,29 +215,29 @@
 
         // Remove dragging class if drag ends unexpectedly
         document.addEventListener('dragend', function () {
-            if (draggedTask) {
-                draggedTask.classList.remove('dragging');
-                draggedTask = null;
+            if (draggedCard) {
+                draggedCard.classList.remove('dragging');
+                draggedCard = null;
             }
             if (dropIndicator && dropIndicator.parentNode) {
                 dropIndicator.parentNode.removeChild(dropIndicator);
             }
-            targetTask = null;
+            targetCard = null;
             document.querySelectorAll('.swimlane-column').forEach(col => {
                 col.classList.remove('drag-over');
             });
         });
 
-        // Clear input after adding task
+        // Clear input after adding card
         document.body.addEventListener('htmx:afterRequest', function (event) {
             if (event.detail.requestConfig &&
                 event.detail.requestConfig.verb === 'post' &&
-                event.detail.requestConfig.path.includes('/tasks')) {
+                event.detail.requestConfig.path.includes('/cards')) {
                 if (event.detail.successful) {
                     const form = event.detail.elt;
                     if (form && form.tagName === 'FORM') {
                         form.reset();
-                        updateTaskCounts();
+                        updateCardCounts();
                     }
                 }
             }
@@ -247,16 +247,16 @@
         document.body.addEventListener('htmx:afterSwap', function (event) {
             if (event.detail.requestConfig &&
                 event.detail.requestConfig.verb === 'delete') {
-                updateTaskCounts();
+                updateCardCounts();
             }
         });
 
         // Modal functions
-        let currentTaskId = null;
+        let currentCardId = null;
 
-        function openTaskModal(taskId) {
-            currentTaskId = taskId;
-            const modal = document.getElementById('task-modal');
+        function openCardModal(cardId) {
+            currentCardId = cardId;
+            const modal = document.getElementById('card-modal');
             const modalBody = document.getElementById('modal-body');
 
             // Show modal with loading state
@@ -264,8 +264,8 @@
             modalBody.innerHTML = '<div class="loading">Loading...</div>';
             document.body.style.overflow = 'hidden';
 
-            // Fetch task edit form
-            fetch('/tasks/' + taskId + '/edit')
+            // Fetch card edit form
+            fetch('/cards/' + cardId + '/edit')
                 .then(r => r.text())
                 .then(html => {
                     modalBody.innerHTML = html;
@@ -274,17 +274,17 @@
         }
 
         function closeModal() {
-            const modal = document.getElementById('task-modal');
+            const modal = document.getElementById('card-modal');
             modal.classList.remove('modal-open');
             document.body.style.overflow = '';
-            currentTaskId = null;
+            currentCardId = null;
 
             // Refresh the board to show any changes
             htmx.trigger('#kanban-board', 'load');
         }
 
         function closeModalOnBackdrop(event) {
-            if (event.target.id === 'task-modal') {
+            if (event.target.id === 'card-modal') {
                 closeModal();
             }
         }
@@ -292,7 +292,7 @@
         // Close modal on Escape key
         document.addEventListener('keydown', function (event) {
             if (event.key === 'Escape') {
-                const modal = document.getElementById('task-modal');
+                const modal = document.getElementById('card-modal');
                 if (modal.classList.contains('modal-open')) {
                     closeModal();
                 }
@@ -300,9 +300,9 @@
         });
 
         // Create a new label for a board
-        function createLabel(boardId, taskId) {
-            const nameInput = document.getElementById('new-label-name-' + taskId);
-            const colorInput = document.getElementById('new-label-color-' + taskId);
+        function createLabel(boardId, cardId) {
+            const nameInput = document.getElementById('new-label-name-' + cardId);
+            const colorInput = document.getElementById('new-label-color-' + cardId);
 
             const name = nameInput.value.trim();
             if (!name) {
@@ -320,7 +320,7 @@
             }).then(response => {
                 if (response.ok) {
                     // Refresh the modal content to show the new label
-                    fetch('/tasks/' + taskId + '/edit')
+                    fetch('/cards/' + cardId + '/edit')
                         .then(r => r.text())
                         .then(html => {
                             document.getElementById('modal-body').innerHTML = html;
@@ -336,7 +336,7 @@
             clearTimeout(markdownDebounceTimer);
 
             markdownDebounceTimer = setTimeout(() => {
-                const textarea = document.getElementById('task-description');
+                const textarea = document.getElementById('card-description');
                 const previewContent = document.getElementById('preview-content');
                 const markdown = textarea.value.trim();
 
@@ -351,7 +351,7 @@
                 const formData = new FormData();
                 formData.append('markdown', markdown);
 
-                fetch('/tasks/markdown', {
+                fetch('/cards/markdown', {
                     method: 'POST',
                     body: formData
                 })

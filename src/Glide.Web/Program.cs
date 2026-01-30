@@ -11,10 +11,11 @@ using Glide.Data.Boards;
 using Glide.Data.Migrations;
 using Glide.Data.Sessions;
 using Glide.Data.Swimlanes;
-using Glide.Data.Tasks;
+using Glide.Data.Cards;
 using Glide.Data.Users;
 using Glide.Web.Auth;
 using Glide.Web.Boards;
+using Glide.Web.Cards;
 using Glide.Web.Features;
 
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -64,9 +65,10 @@ builder.Services.AddSingleton<IDbConnectionFactory>(new SqliteConnectionFactory(
     .AddSingleton<SessionRepository>()
     .AddSingleton<BoardRepository>()
     .AddSingleton<SwimlaneRepository>()
-    .AddSingleton<TaskRepository>();
+    .AddSingleton<CardRepository>();
 
 builder.Services.AddSingleton<BoardAction>();
+builder.Services.AddSingleton<CardAction>();
 
 builder.Services
     .AddFluentMigratorCore()

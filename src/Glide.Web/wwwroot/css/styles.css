@@ -574,7 +574,7 @@ body.board-page main {
     letter-spacing: 0.5px;
 }
 
-.task-count {
+.card-count {
     background: var(--bg-elevated);
     color: var(--text-muted);
     font-size: 0.75rem;
@@ -583,7 +583,7 @@ body.board-page main {
     border-radius: 10px;
 }
 
-.swimlane-tasks {
+.swimlane-cards {
     flex: 1;
     overflow-y: auto;
     padding: 0.5rem;
@@ -592,8 +592,8 @@ body.board-page main {
     gap: 0.5rem;
 }
 
-/* Task cards */
-.task-card {
+/* Card cards */
+.card-card {
     background: var(--bg-surface);
     border-radius: 4px;
     padding: 0.75rem;
@@ -607,36 +607,36 @@ body.board-page main {
     border: 1px solid var(--border-color);
 }
 
-.task-card:hover {
+.card-card:hover {
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
     border-color: var(--border-light);
 }
 
-.task-card:active {
+.card-card:active {
     cursor: grabbing;
 }
 
-.task-card.dragging {
+.card-card.dragging {
     opacity: 0.5;
     transform: rotate(2deg);
 }
 
-.task-content {
+.card-content {
     flex: 1;
     min-width: 0;
 }
 
-.task-title {
+.card-title {
     color: var(--text-primary);
     font-weight: bolder;
     word-break: break-word;
 }
 
-.task-actions {
+.card-actions {
     flex-shrink: 0;
 }
 
-.btn-delete-task {
+.card-delete {
     background: transparent;
     border: none;
     color: var(--text-muted);
@@ -647,18 +647,18 @@ body.board-page main {
     line-height: 1;
 }
 
-.btn-delete-task:hover {
+.card-delete:hover {
     background: rgba(224, 108, 117, 0.15);
     color: var(--accent-red);
 }
 
-/* Add task form */
-.add-task-form {
+/* Add card form */
+.add-card-form {
     padding: 0.5rem;
     border-top: 1px solid var(--border-color);
 }
 
-.add-task-input {
+.add-card-input {
     width: 100%;
     padding: 0.5rem;
     border: none;
@@ -668,13 +668,13 @@ body.board-page main {
     color: var(--text-primary);
 }
 
-.add-task-input:focus {
+.add-card-input:focus {
     outline: none;
     background: var(--bg-surface);
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
-.add-task-input::placeholder {
+.add-card-input::placeholder {
     color: var(--text-muted);
 }
 
@@ -684,7 +684,7 @@ body.board-page main {
     border-color: var(--accent-blue);
 }
 
-.swimlane-tasks.drag-over {
+.swimlane-cards.drag-over {
     background: rgba(97, 175, 239, 0.05);
     border-radius: 4px;
 }
@@ -698,7 +698,7 @@ body.board-page main {
 }
 
 /* Label pills */
-.task-labels {
+.card-labels {
     display: flex;
     flex-wrap: wrap;
     gap: 0.25rem;
@@ -717,8 +717,8 @@ body.board-page main {
     white-space: nowrap;
 }
 
-/* Task description on card */
-.task-description {
+/* Card description on card */
+.card-description {
     display: block;
     font-size: 0.75rem;
     color: var(--text-muted);
@@ -730,7 +730,7 @@ body.board-page main {
     position: relative;
 }
 
-.task-card .task-description::after {
+.card-card .card-description::after {
     content: '';
     position: absolute;
     bottom: 0;
@@ -742,47 +742,47 @@ body.board-page main {
 }
 
 /* Hide code blocks and other complex elements on cards - show in modal only */
-/*.task-card .task-description pre {
+/*.card-card .card-description pre {
     display: none;
 }*/
 
-.task-card .task-description > *:first-child {
+.card-card .card-description > *:first-child {
     margin-top: 0;
 }
 
-.task-card .task-description > *:last-child {
+.card-card .card-description > *:last-child {
     margin-bottom: 0;
 }
 
-.task-description p, .markdown-preview p {
+.card-description p, .markdown-preview p {
     margin: 1em 0;
 }
 
-.task-description p:first-child, .markdown-preview p:first-child {
+.card-description p:first-child, .markdown-preview p:first-child {
     margin-top: 0;
 }
 
-.task-description p:last-child, .markdown-preview p:last-child {
+.card-description p:last-child, .markdown-preview p:last-child {
     margin-bottom: 0;
 }
 
-textarea#task-description {
+textarea#card-description {
     font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace;
 }
 
-/* Expanded task card */
-.task-card-expanded {
+/* Expanded card card */
+.card-card-expanded {
     cursor: default;
     padding: 1rem;
 }
 
-.task-card-expanded .task-edit-form {
+.card-card-expanded .card-edit-form {
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
 }
 
-.task-title-input {
+.card-title-input {
     width: 100%;
     padding: 0.5rem;
     border: 1px solid var(--border-color);
@@ -793,13 +793,13 @@ textarea#task-description {
     color: var(--text-primary);
 }
 
-.task-title-input:focus {
+.card-title-input:focus {
     outline: none;
     border-color: var(--accent-blue);
     box-shadow: 0 0 0 2px rgba(97, 175, 239, 0.2);
 }
 
-.task-description-input {
+.card-description-input {
     width: 100%;
     min-height: 80px;
     padding: 0.5rem;
@@ -812,14 +812,14 @@ textarea#task-description {
     color: var(--text-primary);
 }
 
-.task-description-input:focus {
+.card-description-input:focus {
     outline: none;
     border-color: var(--accent-blue);
     box-shadow: 0 0 0 2px rgba(97, 175, 239, 0.2);
 }
 
 /* Labels section in expanded card */
-.task-labels-section {
+.card-labels-section {
     border-top: 1px solid var(--border-color);
     padding-top: 0.75rem;
 }
@@ -909,8 +909,8 @@ textarea#task-description {
     background: var(--border-light);
 }
 
-/* Task edit actions */
-.task-edit-actions {
+/* Card edit actions */
+.card-edit-actions {
     display: flex;
     gap: 0.5rem;
     justify-content: flex-end;
@@ -928,8 +928,8 @@ textarea#task-description {
     background: var(--border-light);
 }
 
-/* Make task content clickable for expansion */
-.task-card .task-content {
+/* Make card content clickable for expansion */
+.card-card .card-content {
     cursor: pointer;
 }
 
@@ -1020,20 +1020,20 @@ textarea#task-description {
     flex: 1;
 }
 
-/* Modal task edit form */
-.modal-task-form {
+/* Modal card edit form */
+.modal-card-form {
     display: flex;
     flex-direction: column;
     gap: 1rem;
 }
 
-.modal-task-form .form-group {
+.modal-card-form .form-group {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
 }
 
-.modal-task-form label {
+.modal-card-form label {
     font-size: 0.875rem;
     font-weight: 600;
     color: var(--text-muted);
@@ -1041,8 +1041,8 @@ textarea#task-description {
     letter-spacing: 0.5px;
 }
 
-.modal-task-form input[type="text"],
-.modal-task-form textarea {
+.modal-card-form input[type="text"],
+.modal-card-form textarea {
     width: 100%;
     padding: 0.75rem;
     border: 1px solid var(--border-color);
@@ -1052,26 +1052,136 @@ textarea#task-description {
     color: var(--text-primary);
 }
 
-.modal-task-form input[type="text"]:focus,
-.modal-task-form textarea:focus {
+.modal-card-form input[type="text"]:focus,
+.modal-card-form textarea:focus {
     outline: none;
     border-color: var(--accent-blue);
     box-shadow: 0 0 0 3px rgba(97, 175, 239, 0.2);
 }
 
-.modal-task-form textarea {
+.modal-card-form textarea {
     min-height: 120px;
     resize: vertical;
     font-family: inherit;
 }
 
-.modal-task-form .form-actions {
+.modal-card-form .form-actions {
     display: flex;
     gap: 0.75rem;
     justify-content: flex-end;
     padding-top: 1rem;
     border-top: 1px solid var(--border-color);
     margin-top: 0.5rem;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: flex-end;
+    padding-top: 1rem;
+}
+
+.btn-primary {
+    background: var(--accent-blue);
+    color: var(--bg-dark);
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 4px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.btn-primary:hover {
+    background: var(--accent-blue-hover);
+}
+
+.btn-secondary {
+    background: var(--bg-elevated);
+    color: var(--text-primary);
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 4px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.btn-secondary:hover {
+    background: var(--border-light);
+}
+
+.tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.tab-button {
+    background: transparent;
+    border: none;
+    padding: 0.5rem 1rem;
+    color: var(--text-muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    font-weight: 500;
+}
+
+.tab-button:hover {
+    color: var(--text-primary);
+}
+
+.tab-button.active {
+    color: var(--accent-blue);
+    border-bottom-color: var(--accent-blue);
+}
+
+.tab-content {
+    display: block;
+}
+
+.form-input {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    background: var(--bg-dark);
+    color: var(--text-primary);
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: var(--accent-blue);
+    box-shadow: 0 0 0 2px rgba(97, 175, 239, 0.2);
+}
+
+.form-textarea {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    background: var(--bg-dark);
+    color: var(--text-primary);
+    resize: vertical;
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace;
+}
+
+.form-textarea:focus {
+    outline: none;
+    border-color: var(--accent-blue);
+    box-shadow: 0 0 0 2px rgba(97, 175, 239, 0.2);
+}
+
+.help-text {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-top: 0.25rem;
+}
+
+.markdown-preview {
+    padding: 0.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    background: var(--bg-dark);
+    min-height: 120px;
 }
 
 /* Modal labels section */

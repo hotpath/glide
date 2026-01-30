@@ -5,18 +5,18 @@ using System.Threading.Tasks;
 
 using Glide.Data.Boards;
 using Glide.Data.Swimlanes;
-using Glide.Data.Tasks;
+using Glide.Data.Cards;
 
 using Microsoft.AspNetCore.Http;
 
-using Task = Glide.Data.Tasks.Task;
+using Card = Glide.Data.Cards.Card;
 
 namespace Glide.Web.Boards;
 
 public class BoardAction(
     BoardRepository boardRepository,
     SwimlaneRepository swimlaneRepository,
-    TaskRepository taskRepository)
+    CardRepository cardRepository)
 {
     public enum DeleteResult { Success, Unauthenticated, NoOwnership }
 
@@ -148,7 +148,7 @@ public class BoardAction(
         return new Result<IEnumerable<SwimlaneView>>(allSwimlanes.Select(SwimlaneView.FromSwimlane));
     }
 
-    public async Task<Result<TaskView>> CreateTaskAsync(
+    public async Task<Result<CardView>> CreateCardAsync(
         string boardId,
         string swimlaneId,
         string title,
@@ -157,22 +157,22 @@ public class BoardAction(
         string? userId = user.FindFirstValue(ClaimTypes.NameIdentifier);
         if (string.IsNullOrWhiteSpace(userId))
         {
-            return new Result<TaskView>(Results.Unauthorized());
+            return new Result<CardView>(Results.Unauthorized());
         }
 
         if (string.IsNullOrWhiteSpace(swimlaneId) || string.IsNullOrWhiteSpace(title))
         {
-            return new Result<TaskView>(Results.BadRequest("missing required parameters"));
+            return new Result<CardView>(Results.BadRequest("missing required parameters"));
         }
 
         Board? board = await boardRepository.GetByIdAsync(boardId);
         if (board is null || board.BoardUsers.All(x => x.UserId != userId))
         {
-            return new Result<TaskView>(Results.NotFound("board not found"));
+            return new Result<CardView>(Results.NotFound("board not found"));
         }
 
-        Task task = await taskRepository.CreateAsync(title, boardId, swimlaneId);
-        return new Result<TaskView>(TaskView.FromTask(task));
+        Card card = await cardRepository.CreateAsync(title, boardId, swimlaneId);
+        return new Result<CardView>(CardView.FromCard(card));
     }
 
     public record Result<T>(T? Object, IResult? StatusResult = null)

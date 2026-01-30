@@ -3,7 +3,7 @@ using System.Linq;
 
 using Glide.Data.Boards;
 using Glide.Data.Swimlanes;
-using Glide.Data.Tasks;
+using Glide.Data.Cards;
 
 namespace Glide.Web;
 
@@ -24,16 +24,16 @@ public record BoardUserView(string Username, bool IsOwner)
     }
 }
 
-public record SwimlaneView(string Id, string Name, string BoardId, int Position, IEnumerable<TaskView> Tasks)
+public record SwimlaneView(string Id, string Name, string BoardId, int Position, IEnumerable<CardView> Cards)
 {
     public static SwimlaneView FromSwimlane(Swimlane swimlane)
     {
         return new SwimlaneView(swimlane.Id, swimlane.Name, swimlane.BoardId, swimlane.Position,
-            swimlane.Tasks.Select(TaskView.FromTask));
+            swimlane.Cards.Select(CardView.FromCard));
     }
 }
 
-public record TaskView(
+public record CardView(
     string Id,
     string Title,
     string? Description,
@@ -42,9 +42,9 @@ public record TaskView(
     string? AssignedTo,
     int Position)
 {
-    public static TaskView FromTask(Task task)
+    public static CardView FromCard(Card card)
     {
-        return new TaskView(task.Id, task.Title, task.Description, task.BoardId, task.SwimlaneId, task.AssignedTo,
-            task.Position);
+        return new CardView(card.Id, card.Title, card.Description, card.BoardId, card.SwimlaneId, card.AssignedTo,
+            card.Position);
     }
 }
