@@ -1,0 +1,85 @@
+@using Glide.Web.Features.Shared
+<HtmxLayout Title="Dashboard" BodyClass="dashboard-page">
+    <main>
+        <div id="welcome-banner" class="welcome-message">
+            <h3>Welcome to Glide!</h3>
+            <p>Your simple kanban board management system. Get started by creating your first board.</p>
+        </div>
+
+        <section class="boards-section">
+            <div class="section-header">
+                <h2>Boards</h2>
+                <form id="create-board-form" class="create-board-form" hx-post="/boards"
+                      hx-target="#boards-grid" hx-swap="beforeend">
+                    <input type="text" name="name" placeholder="New board name" aria-label="board name" required>
+                    <button type="submit">Create Board</button>
+                </form>
+            </div>
+            <div id="boards-list" hx-get="/boards" hx-trigger="load" hx-swap="innerHTML">
+                <div class="loading">Loading Boards...</div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            document.getElementById('user-name').textContent = 'User';
+        });
+
+        function hideEmptyState() {
+            const emptyState = document.getElementById('empty-state');
+            if (emptyState) {
+                emptyState.style.display = 'none';
+            }
+        }
+
+        function showEmptyStateIfNeeded() {
+            const grid = document.getElementById('boards-grid');
+            const emptyState = document.getElementById('empty-state');
+
+            if (grid && grid.children.length === 0 && emptyState) {
+                emptyState.style.display = 'block';
+            }
+        }
+
+        // Handle successful board creation
+        document.getElementById('create-board-form').addEventListener('htmx:afterRequest', function (event) {
+            if (event.detail.successful) {
+                this.reset();
+                hideEmptyState();
+            }
+        });
+
+        // Listen for htmx after-swap to handle empty state after delete
+        document.body.addEventListener('htmx:afterSwap', function (event) {
+            // After a delete, check if we need to show empty state
+            if (event.detail.requestConfig &&
+                event.detail.requestConfig.verb === 'delete') {
+                showEmptyStateIfNeeded();
+            }
+        });
+
+        // Event delegation for edit/cancel buttons
+        document.getElementById('boards-list').addEventListener('click', function (event) {
+            const editBtn = event.target.closest('.btn-edit');
+            const cancelBtn = event.target.closest('.btn-cancel');
+
+            if (editBtn) {
+                const boardId = editBtn.dataset.boardId;
+                const card = document.getElementById('board-' + boardId);
+                if (card) {
+                    card.querySelector('.board-view').style.display = 'none';
+                    card.querySelector('.board-edit-form').style.display = 'flex';
+                    card.querySelector('.board-edit-form input').focus();
+                }
+            } else if (cancelBtn) {
+                const boardId = cancelBtn.dataset.boardId;
+                const card = document.getElementById('board-' + boardId);
+                if (card) {
+                    card.querySelector('.board-view').style.display = 'flex';
+                    card.querySelector('.board-edit-form').style.display = 'none';
+                }
+            }
+        });
+    </script>
+</HtmxLayout>

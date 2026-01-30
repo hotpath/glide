@@ -1,0 +1,52 @@
+variables:
+  - &image '${CI_REPO_OWNER}/${CI_REPO_NAME}'
+
+steps:
+  build-main:
+    image: woodpeckerci/plugin-kaniko
+    settings:
+      registry: codeberg.org
+      username:
+        from_secret: codeberg_username
+      password:
+        from_secret: codeberg_token
+      repo: *image
+      dockerfile: Containerfile
+      tags:
+        - latest
+        - ${CI_COMMIT_SHA:0:8}
+    when:
+      - event: push
+        branch: [ main, develop ]
+      - event: manual
+
+  build-rc:
+    image: gcr.io/kaniko-project/executor:debug
+    commands:
+      - export VERSION=$(awk -F'[<>]' '/<Version>/{print $3}' Directory.Build.props)
+      - echo "Building version $VERSION-rc"
+      - mkdir -p /kaniko/.docker
+      - echo "{\"auths\":{\"codeberg.org\":{\"auth\":\"$(echo -n $CODEBERG_USERNAME:$CODEBERG_TOKEN | base64)\"}}}" > /kaniko/.docker/config.json
+      - /kaniko/executor --context=$(pwd) --dockerfile=Containerfile --destination=codeberg.org/${CI_REPO_OWNER}/${CI_REPO_NAME}:$VERSION-rc --destination=codeberg.org/${CI_REPO_OWNER}/${CI_REPO_NAME}:rc
+    environment:
+      CODEBERG_USERNAME:
+        from_secret: codeberg_username
+      CODEBERG_TOKEN:
+        from_secret: codeberg_token
+    when:
+      - event: push
+        branch: release/*
+
+  build-release:
+    image: woodpeckerci/plugin-kaniko
+    settings:
+      registry: codeberg.org
+      username:
+        from_secret: codeberg_username
+      password:
+        from_secret: codeberg_token
+      repo: *image
+      dockerfile: Containerfile
+      auto_tag: true
+    when:
+      - event: tag

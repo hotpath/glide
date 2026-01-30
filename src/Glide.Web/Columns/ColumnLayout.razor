@@ -1,0 +1,40 @@
+@using Glide.Web.Cards
+@foreach (var column in Columns)
+{
+    <div class="column" data-column-id="@column.Id" ondrop="dropCard(event)" ondragover="allowDrop(event)">
+        <div class="column-header">
+            <h3>@column.Name</h3>
+            <div class="column-menu">
+                <button class="column-menu-button" onclick="toggleColumnMenu(event, '@column.Id')">⋮</button>
+                <div class="column-menu-dropdown" id="column-menu-dropdown-@column.Id">
+                    <button class="column-menu-item"
+                            hx-delete="/columns/@column.Id"
+                            hx-target="#kanban-board"
+                            hx-swap="innerHTML"
+                            hx-confirm="Are you sure you want to delete this column?"
+                            data-card-count="@column.Cards.Count()"
+                            onclick="return validateColumnDelete(event, this)">
+                        Delete Column
+                    </button>
+                </div>
+            </div>
+            <span class="card-count">@column.Cards.Count()</span>
+        </div>
+        <div class="column-cards" id="column-cards-@column.Id">
+            @foreach (var c in column.Cards)
+            {
+                <CardCard Card="@c"/>
+            }
+        </div>
+        <form class="add-card-form" hx-post="/boards/@column.BoardId/cards" hx-target="#column-cards-@column.Id"
+              hx-swap="beforeend">
+            <input type="hidden" name="column_id" value="@column.Id">
+            <input type="text" name="title" placeholder="+ Add card" class="add-card-input" required>
+        </form>
+    </div>
+}
+
+@code
+{
+    [Parameter] public required IEnumerable<ColumnView> Columns { get; set; }
+}

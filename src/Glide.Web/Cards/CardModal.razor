@@ -1,0 +1,40 @@
+<form class="modal-card-form"
+      hx-put="/cards/@Card.Id"
+      hx-target="#card-@Card.Id"
+      hx-swap="outerHTML"
+      hx-on::after-request="if(event.detail.successful) closeModal()">
+    <div class="form-group">
+        <label for="card-title">Title</label>
+        <input type="text"
+               id="card-title"
+               name="title"
+               value="@Card.Title"
+               required
+               class="form-input">
+    </div>
+
+    <div class="form-group">
+        <label for="card-description">Description</label>
+        <textarea id="card-description"
+                  name="description"
+                  rows="10"
+                  class="form-textarea"
+                  oninput="updateMarkdownPreview()">@Card.Description</textarea>
+        <div class="help-text">Markdown supported</div>
+    </div>
+
+    <div class="form-group">
+        <label>Preview</label>
+        <div id="preview-content" class="markdown-preview"></div>
+    </div>
+
+    <div class="modal-actions">
+        <button type="submit" class="btn-primary">Save</button>
+        <button type="button" class="btn-secondary" onclick="closeModal()">Cancel</button>
+    </div>
+</form>
+
+@code
+{
+    [Parameter] public required CardView Card { get; init; }
+}
