@@ -4,7 +4,7 @@ when:
 
 steps:
   test:
-    image: mcr.microsoft.com/dotnet/sdk:10.0.2
+    image: mcr.microsoft.com/dotnet/sdk:10.0.102-alpine3.23
     commands:
       - dotnet restore
       - dotnet build --no-restore --configuration Release
