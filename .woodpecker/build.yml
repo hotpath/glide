@@ -27,7 +27,7 @@ steps:
       - echo "Building version $VERSION-rc"
       - mkdir -p /kaniko/.docker
       - echo "{\"auths\":{\"codeberg.org\":{\"auth\":\"$(echo -n $CODEBERG_USERNAME:$CODEBERG_TOKEN | base64)\"}}}" > /kaniko/.docker/config.json
-      - /kaniko/executor --context=/woodpecker/src --dockerfile=Containerfile --destination=codeberg.org/${CI_REPO_OWNER}/${CI_REPO_NAME}:$VERSION-rc --destination=codeberg.org/${CI_REPO_OWNER}/${CI_REPO_NAME}:rc
+      - /kaniko/executor --context=$(pwd) --dockerfile=Containerfile --destination=codeberg.org/${CI_REPO_OWNER}/${CI_REPO_NAME}:$VERSION-rc --destination=codeberg.org/${CI_REPO_OWNER}/${CI_REPO_NAME}:rc
     environment:
       CODEBERG_USERNAME:
         from_secret: codeberg_username
