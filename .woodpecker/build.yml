@@ -1,7 +1,8 @@
 when:
-  - event: [push, tag]
-    branch: [main, develop]
+  - event: [ push, tag ]
+    branch: [ main, develop ]
   - event: tag
+  - event: manual
 
 variables:
   - &image 'codeberg.org/${CI_REPO}'
