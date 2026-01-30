@@ -55,10 +55,10 @@ public class CardController(CardAction cardAction) : ControllerBase
     [Authorize]
     public async Task<IResult> MoveAsync(
         [FromRoute] string id,
-        [FromForm(Name = "swimlane_id")] string swimlaneId,
+        [FromForm(Name = "column_id")] string columnId,
         [FromForm] int? position)
     {
-        CardAction.Result<CardView> result = await cardAction.MoveAsync(id, swimlaneId, position, User);
+        CardAction.Result<CardView> result = await cardAction.MoveAsync(id, columnId, position, User);
         return result.IsError
             ? result.StatusResult!
             : new RazorComponentResult<CardCard>(new { Card = result.Object });

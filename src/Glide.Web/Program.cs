@@ -10,7 +10,7 @@ using Glide.Data;
 using Glide.Data.Boards;
 using Glide.Data.Migrations;
 using Glide.Data.Sessions;
-using Glide.Data.Swimlanes;
+using Glide.Data.Columns;
 using Glide.Data.Cards;
 using Glide.Data.Users;
 using Glide.Web.Auth;
@@ -64,7 +64,7 @@ builder.Services.AddSingleton<IDbConnectionFactory>(new SqliteConnectionFactory(
     .AddSingleton<UserRepository>()
     .AddSingleton<SessionRepository>()
     .AddSingleton<BoardRepository>()
-    .AddSingleton<SwimlaneRepository>()
+    .AddSingleton<ColumnRepository>()
     .AddSingleton<CardRepository>();
 
 builder.Services.AddSingleton<BoardAction>();

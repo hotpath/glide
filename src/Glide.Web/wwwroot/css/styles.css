@@ -541,12 +541,12 @@ body.board-page main {
     margin: auto;
 }
 
-.kanban-board > .swimlane-column {
+.kanban-board > .column {
     flex-shrink: 0;
 }
 
-/* Swimlane columns */
-.swimlane-column {
+/* Columns */
+.column {
     background: var(--bg-dark);
     border-radius: 8px;
     min-width: 280px;
@@ -557,7 +557,7 @@ body.board-page main {
     border: 1px solid var(--border-color);
 }
 
-.swimlane-header {
+.column-header {
     padding: 0.75rem 1rem;
     display: flex;
     justify-content: space-between;
@@ -565,7 +565,7 @@ body.board-page main {
     border-bottom: 1px solid var(--border-color);
 }
 
-.swimlane-header h3 {
+.column-header h3 {
     font-size: 0.875rem;
     font-weight: 600;
     color: var(--text-muted);
@@ -583,7 +583,7 @@ body.board-page main {
     border-radius: 10px;
 }
 
-.swimlane-cards {
+.column-cards {
     flex: 1;
     overflow-y: auto;
     padding: 0.5rem;
@@ -679,12 +679,12 @@ body.board-page main {
 }
 
 /* Drag and drop visual feedback */
-.swimlane-column.drag-over {
+.column.drag-over {
     background: rgba(97, 175, 239, 0.1);
     border-color: var(--accent-blue);
 }
 
-.swimlane-cards.drag-over {
+.column-cards.drag-over {
     background: rgba(97, 175, 239, 0.05);
     border-radius: 4px;
 }

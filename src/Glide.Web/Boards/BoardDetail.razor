@@ -12,7 +12,7 @@
                     </div>
                     <form id="add-column-form" class="add-column-form" style="display: none;"
                           novalidate
-                          hx-post="/boards/@Board.Id/swimlanes"
+                          hx-post="/boards/@Board.Id/columns"
                           hx-target="#kanban-board"
                           hx-swap="innerHTML"
                           hx-on::after-request="handleAddColumnResponse(event)">
@@ -28,7 +28,7 @@
         </div>
 
         <div class="kanban-board" id="kanban-board"
-             hx-get="/boards/@Board.Id/swimlanes"
+             hx-get="/boards/@Board.Id/columns"
              hx-trigger="load"
              hx-swap="innerHTML">
             <div class="loading">Loading board...</div>
@@ -97,10 +97,10 @@
                 }
             } else {
                 // Over empty space in column
-                const column = event.target.closest('.swimlane-column');
+                const column = event.target.closest('.column');
                 if (column) {
                     column.classList.add('drag-over');
-                    const cardsContainer = column.querySelector('.swimlane-cards');
+                    const cardsContainer = column.querySelector('.column-cards');
 
                     // If no cards or over empty space, show indicator at bottom
                     const cards = cardsContainer.querySelectorAll('.card-card:not(.dragging)');
@@ -122,24 +122,24 @@
             }
 
             // Remove drag-over class from all columns
-            document.querySelectorAll('.swimlane-column').forEach(col => {
+            document.querySelectorAll('.column').forEach(col => {
                 col.classList.remove('drag-over');
             });
 
             if (!draggedCard) return;
 
-            const column = event.target.closest('.swimlane-column');
+            const column = event.target.closest('.column');
             if (!column) return;
 
-            const targetSwimlaneId = column.dataset.swimlaneId;
+            const targetColumnId = column.dataset.columnId;
             const cardId = draggedCard.dataset.cardId;
 
             // Calculate target position
-            const cardsContainer = column.querySelector('.swimlane-cards');
+            const cardsContainer = column.querySelector('.column-cards');
             let targetPosition = 0;
 
             if (targetCard && targetCard !== draggedCard) {
-                // Get all cards in the target swimlane (excluding the dragged one)
+                // Get all cards in the target column (excluding the dragged one)
                 const allCards = Array.from(cardsContainer.querySelectorAll('.card-card:not(.dragging)'));
                 const targetIndex = allCards.indexOf(targetCard);
 
@@ -167,12 +167,12 @@
                 cardsContainer.appendChild(draggedCard);
             }
 
-            // Update the card's swimlane_id data attribute
-            draggedCard.dataset.swimlaneId = targetSwimlaneId;
+            // Update the card's column_id data attribute
+            draggedCard.dataset.columnId = targetColumnId;
 
             // Send the move request to the server
             const formData = new FormData();
-            formData.append('swimlane_id', targetSwimlaneId);
+            formData.append('column_id', targetColumnId);
             formData.append('position', targetPosition);
 
             fetch('/cards/' + cardId + '/move', {
@@ -196,7 +196,7 @@
         }
 
         function updateCardCounts() {
-            document.querySelectorAll('.swimlane-column').forEach(column => {
+            document.querySelectorAll('.column').forEach(column => {
                 const cards = column.querySelectorAll('.card-card');
                 const countBadge = column.querySelector('.card-count');
                 if (countBadge) {
@@ -207,7 +207,7 @@
 
         // Remove drag-over class when leaving a column
         document.addEventListener('dragleave', function (event) {
-            const column = event.target.closest('.swimlane-column');
+            const column = event.target.closest('.column');
             if (column && !column.contains(event.relatedTarget)) {
                 column.classList.remove('drag-over');
             }
@@ -223,7 +223,7 @@
                 dropIndicator.parentNode.removeChild(dropIndicator);
             }
             targetCard = null;
-            document.querySelectorAll('.swimlane-column').forEach(col => {
+            document.querySelectorAll('.column').forEach(col => {
                 col.classList.remove('drag-over');
             });
         });

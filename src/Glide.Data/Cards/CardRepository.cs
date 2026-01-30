@@ -8,18 +8,18 @@ namespace Glide.Data.Cards;
 
 public class CardRepository(IDbConnectionFactory connectionFactory)
 {
-    public async Task<Card> CreateAsync(string title, string boardId, string swimlaneId)
+    public async Task<Card> CreateAsync(string title, string boardId, string columnId)
     {
         string id = Guid.CreateVersion7().ToString();
         const string statement = """
-                                 INSERT INTO cards(id, title, board_id, swimlane_id)
-                                 VALUES (@Id, @Title, @BoardId, @SwimlaneId)
+                                 INSERT INTO cards(id, title, board_id, column_id)
+                                 VALUES (@Id, @Title, @BoardId, @ColumnId)
                                  """;
 
         using IDbConnection conn = connectionFactory.CreateConnection();
-        await conn.ExecuteAsync(statement, new { Id = id, Title = title, BoardId = boardId, SwimlaneId = swimlaneId });
+        await conn.ExecuteAsync(statement, new { Id = id, Title = title, BoardId = boardId, ColumnId = columnId });
 
-        return new Card { Id = id, Title = title, BoardId = boardId, SwimlaneId = swimlaneId };
+        return new Card { Id = id, Title = title, BoardId = boardId, ColumnId = columnId };
     }
 
     public async Task<Card?> GetByIdAsync(string id)
@@ -42,42 +42,42 @@ public class CardRepository(IDbConnectionFactory connectionFactory)
         await conn.ExecuteAsync(statement, new { Id = id, Title = title, Description = description });
     }
 
-    private async Task<int> GetNextPositionForSwimlane(string swimlaneId)
+    private async Task<int> GetNextPositionForColumn(string columnId)
     {
-        const string query = "SELECT MAX(position) as Position FROM cards WHERE swimlane_id = @SwimlaneId";
+        const string query = "SELECT MAX(position) as Position FROM cards WHERE column_id = @ColumnId";
         using IDbConnection conn = connectionFactory.CreateConnection();
 
-        int? maxPosition = await conn.QuerySingleOrDefaultAsync<int?>(query, new { SwimlaneId = swimlaneId });
+        int? maxPosition = await conn.QuerySingleOrDefaultAsync<int?>(query, new { ColumnId = columnId });
         return maxPosition.HasValue ? maxPosition.Value + 1 : 0;
     }
 
-    private async System.Threading.Tasks.Task UpdatePositions(string swimlane, int startingPosition)
+    private async System.Threading.Tasks.Task UpdatePositions(string column, int startingPosition)
     {
         const string statement = """
                                  UPDATE cards
                                  SET position = position + 1
-                                 WHERE swimlane_id = @Swimlane
+                                 WHERE column_id = @Column
                                  AND position > @Position
                                  """;
 
         using IDbConnection conn = connectionFactory.CreateConnection();
-        await conn.ExecuteAsync(statement, new { Swimlane = swimlane, Position = startingPosition });
+        await conn.ExecuteAsync(statement, new { Column = column, Position = startingPosition });
     }
 
-    public async System.Threading.Tasks.Task MoveToSwimlaneAsync(string id, string swimlaneId, int? position = null)
+    public async System.Threading.Tasks.Task MoveToColumnAsync(string id, string columnId, int? position = null)
     {
-        int nextPosition = position ?? await GetNextPositionForSwimlane(swimlaneId);
+        int nextPosition = position ?? await GetNextPositionForColumn(columnId);
         const string statement = """
                                  UPDATE cards
-                                 SET swimlane_id=@SwimlaneId, position=@Position
+                                 SET column_id=@ColumnId, position=@Position
                                  WHERE id = @Id
                                  """;
 
         using IDbConnection conn = connectionFactory.CreateConnection();
 
-        await UpdatePositions(swimlaneId, nextPosition);
+        await UpdatePositions(columnId, nextPosition);
 
-        await conn.ExecuteAsync(statement, new { SwimlaneId = swimlaneId, Position = nextPosition, Id = id });
+        await conn.ExecuteAsync(statement, new { ColumnId = columnId, Position = nextPosition, Id = id });
     }
 
     public async System.Threading.Tasks.Task DeleteAsync(string id)
@@ -95,7 +95,7 @@ public record Card
     public string Title { get; set; } = "";
     public string? Description { get; set; }
     public string BoardId { get; set; } = "";
-    public string? SwimlaneId { get; set; }
+    public string? ColumnId { get; set; }
     public string? AssignedTo { get; set; }
     public int Position { get; set; }
 }

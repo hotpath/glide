@@ -4,7 +4,7 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 
 using Glide.Data.Boards;
-using Glide.Data.Swimlanes;
+using Glide.Data.Columns;
 using Glide.Data.Cards;
 
 using Microsoft.AspNetCore.Http;
@@ -15,7 +15,7 @@ namespace Glide.Web.Boards;
 
 public class BoardAction(
     BoardRepository boardRepository,
-    SwimlaneRepository swimlaneRepository,
+    ColumnRepository columnRepository,
     CardRepository cardRepository)
 {
     public enum DeleteResult { Success, Unauthenticated, NoOwnership }
@@ -42,7 +42,7 @@ public class BoardAction(
         }
 
         Board board = await boardRepository.CreateAsync(name, userId);
-        await swimlaneRepository.CreateDefaultSwimlanesAsync(board.Id);
+        await columnRepository.CreateDefaultColumnsAsync(board.Id);
         return new Result<BoardView>(BoardView.FromBoard(board, userId));
     }
 
@@ -101,56 +101,56 @@ public class BoardAction(
         return new Result<BoardView>(BoardView.FromBoard(board, userId));
     }
 
-    public async Task<Result<IEnumerable<SwimlaneView>>> GetSwimlanesAsync(string boardId, ClaimsPrincipal user)
+    public async Task<Result<IEnumerable<ColumnView>>> GetColumnsAsync(string boardId, ClaimsPrincipal user)
     {
         string? userId = user.FindFirstValue(ClaimTypes.NameIdentifier);
 
         if (string.IsNullOrWhiteSpace(userId))
         {
-            return new Result<IEnumerable<SwimlaneView>>(Results.Unauthorized());
+            return new Result<IEnumerable<ColumnView>>(Results.Unauthorized());
         }
 
         Board? board = await boardRepository.GetByIdAsync(boardId);
         if (board is null || board.BoardUsers.All(x => x.UserId != userId))
         {
-            return new Result<IEnumerable<SwimlaneView>>(Results.NotFound("board not found"));
+            return new Result<IEnumerable<ColumnView>>(Results.NotFound("board not found"));
         }
 
-        IEnumerable<Swimlane> swimlanes = await swimlaneRepository.GetAllByBoardIdAsync(boardId);
-        return new Result<IEnumerable<SwimlaneView>>(swimlanes.Select(SwimlaneView.FromSwimlane));
+        IEnumerable<Column> columns = await columnRepository.GetAllByBoardIdAsync(boardId);
+        return new Result<IEnumerable<ColumnView>>(columns.Select(ColumnView.FromColumn));
     }
 
-    public async Task<Result<IEnumerable<SwimlaneView>>> CreateSwimlaneAsync(string boardId, string name,
+    public async Task<Result<IEnumerable<ColumnView>>> CreateColumnAsync(string boardId, string name,
         ClaimsPrincipal user)
     {
         if (string.IsNullOrWhiteSpace(name))
         {
-            return new Result<IEnumerable<SwimlaneView>>(Results.BadRequest("name is required"));
+            return new Result<IEnumerable<ColumnView>>(Results.BadRequest("name is required"));
         }
 
         // verify the board exists and belongs to the user
         string? userId = user.FindFirstValue(ClaimTypes.NameIdentifier);
         if (string.IsNullOrWhiteSpace(userId))
         {
-            return new Result<IEnumerable<SwimlaneView>>(Results.Unauthorized());
+            return new Result<IEnumerable<ColumnView>>(Results.Unauthorized());
         }
 
         Board? board = await boardRepository.GetByIdAsync(boardId);
         if (board is null || !board.BoardUsers.Any(x => x.UserId == userId && x.IsOwner))
         {
-            return new Result<IEnumerable<SwimlaneView>>(Results.NotFound("board not found"));
+            return new Result<IEnumerable<ColumnView>>(Results.NotFound("board not found"));
         }
 
-        int existingPosition = await swimlaneRepository.GetMaxPositionAsync(boardId);
-        await swimlaneRepository.CreateAsync(name, boardId, existingPosition + 1);
+        int existingPosition = await columnRepository.GetMaxPositionAsync(boardId);
+        await columnRepository.CreateAsync(name, boardId, existingPosition + 1);
 
-        IEnumerable<Swimlane> allSwimlanes = await swimlaneRepository.GetAllByBoardIdAsync(boardId);
-        return new Result<IEnumerable<SwimlaneView>>(allSwimlanes.Select(SwimlaneView.FromSwimlane));
+        IEnumerable<Column> allColumns = await columnRepository.GetAllByBoardIdAsync(boardId);
+        return new Result<IEnumerable<ColumnView>>(allColumns.Select(ColumnView.FromColumn));
     }
 
     public async Task<Result<CardView>> CreateCardAsync(
         string boardId,
-        string swimlaneId,
+        string columnId,
         string title,
         ClaimsPrincipal user)
     {
@@ -160,7 +160,7 @@ public class BoardAction(
             return new Result<CardView>(Results.Unauthorized());
         }
 
-        if (string.IsNullOrWhiteSpace(swimlaneId) || string.IsNullOrWhiteSpace(title))
+        if (string.IsNullOrWhiteSpace(columnId) || string.IsNullOrWhiteSpace(title))
         {
             return new Result<CardView>(Results.BadRequest("missing required parameters"));
         }
@@ -171,7 +171,7 @@ public class BoardAction(
             return new Result<CardView>(Results.NotFound("board not found"));
         }
 
-        Card card = await cardRepository.CreateAsync(title, boardId, swimlaneId);
+        Card card = await cardRepository.CreateAsync(title, boardId, columnId);
         return new Result<CardView>(CardView.FromCard(card));
     }
 

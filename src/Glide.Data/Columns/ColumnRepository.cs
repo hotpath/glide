@@ -5,23 +5,23 @@ using System.Threading.Tasks;
 
 using Dapper;
 
-namespace Glide.Data.Swimlanes;
+namespace Glide.Data.Columns;
 
-public class SwimlaneRepository(IDbConnectionFactory connectionFactory)
+public class ColumnRepository(IDbConnectionFactory connectionFactory)
 {
-    public async Task<Swimlane> CreateAsync(string name, string boardId, int position)
+    public async Task<Column> CreateAsync(string name, string boardId, int position)
     {
         string id = Guid.CreateVersion7().ToString();
 
         const string statement =
-            "INSERT INTO swimlanes(id, name, board_id, position) VALUES(@Id,@Name,@BoardId,@Position)";
+            "INSERT INTO columns(id, name, board_id, position) VALUES(@Id,@Name,@BoardId,@Position)";
 
         using IDbConnection conn = connectionFactory.CreateConnection();
         await conn.ExecuteAsync(statement, new { Id = id, Name = name, BoardId = boardId, Position = position });
-        return new Swimlane { Id = id, Name = name, BoardId = boardId, Position = position };
+        return new Column { Id = id, Name = name, BoardId = boardId, Position = position };
     }
 
-    public async Task CreateDefaultSwimlanesAsync(string boardId)
+    public async Task CreateDefaultColumnsAsync(string boardId)
     {
         await CreateAsync("Todo", boardId, 0);
         await CreateAsync("In Progress", boardId, 1);
@@ -32,7 +32,7 @@ public class SwimlaneRepository(IDbConnectionFactory connectionFactory)
     {
         const string query = """
                              SELECT MAX(position) as maxPosition, COUNT(id) as count
-                             FROM swimlanes
+                             FROM columns
                              WHERE board_id = @BoardId
                              """;
         using IDbConnection conn = connectionFactory.CreateConnection();
@@ -46,26 +46,26 @@ public class SwimlaneRepository(IDbConnectionFactory connectionFactory)
         return (int)result.MaxPosition; // we know that this is a 32-bit val
     }
 
-    public async Task<Swimlane?> GetByIdAsync(string id)
+    public async Task<Column?> GetByIdAsync(string id)
     {
         string query = """
-                       SELECT s.id, s.name, s.board_id, s.position,
-                              c.id, c.title, c.description, c.board_id, c.swimlane_id, c.assigned_to, c.position
-                       FROM swimlanes AS s
-                       LEFT JOIN cards AS c ON s.id = c.swimlane_id
-                       WHERE s.id = @Id
-                       ORDER BY s.position, c.position
+                       SELECT c.id, c.name, c.board_id, c.position,
+                              ca.id, ca.title, ca.description, ca.board_id, ca.column_id, ca.assigned_to, ca.position
+                       FROM columns AS c
+                       LEFT JOIN cards AS ca ON c.id = ca.column_id
+                       WHERE c.id = @Id
+                       ORDER BY c.position, ca.position
                        """;
 
         using IDbConnection conn = connectionFactory.CreateConnection();
 
-        Swimlane? result = null;
-        await conn.QueryAsync<Swimlane, Cards.Card?, Swimlane>(query,
-            (swimlane, card) =>
+        Column? result = null;
+        await conn.QueryAsync<Column, Cards.Card?, Column>(query,
+            (column, card) =>
             {
                 if (result is null)
                 {
-                    result = swimlane;
+                    result = column;
                     result.Cards = new List<Cards.Card>();
                 }
 
@@ -82,28 +82,28 @@ public class SwimlaneRepository(IDbConnectionFactory connectionFactory)
         return result;
     }
 
-    public async Task<IEnumerable<Swimlane>> GetAllByBoardIdAsync(string boardId)
+    public async Task<IEnumerable<Column>> GetAllByBoardIdAsync(string boardId)
     {
         string query = """
-                       SELECT s.id, s.name, s.board_id, s.position,
-                              c.id, c.title, c.description, c.board_id, c.swimlane_id, c.assigned_to, c.position
-                       FROM swimlanes AS s
-                       LEFT JOIN cards AS c ON s.id = c.swimlane_id
-                       WHERE s.board_id = @BoardId
-                       ORDER BY s.position, c.position
+                       SELECT c.id, c.name, c.board_id, c.position,
+                              ca.id, ca.title, ca.description, ca.board_id, ca.column_id, ca.assigned_to, ca.position
+                       FROM columns AS c
+                       LEFT JOIN cards AS ca ON c.id = ca.column_id
+                       WHERE c.board_id = @BoardId
+                       ORDER BY c.position, ca.position
                        """;
 
         using IDbConnection conn = connectionFactory.CreateConnection();
 
-        Dictionary<string, Swimlane> swimlaneLookup = new();
-        await conn.QueryAsync<Swimlane, Cards.Card?, Swimlane>(query,
-            (swimlane, card) =>
+        Dictionary<string, Column> columnLookup = new();
+        await conn.QueryAsync<Column, Cards.Card?, Column>(query,
+            (column, card) =>
             {
-                if (!swimlaneLookup.TryGetValue(swimlane.Id, out Swimlane? existing))
+                if (!columnLookup.TryGetValue(column.Id, out Column? existing))
                 {
-                    existing = swimlane;
+                    existing = column;
                     existing.Cards = new List<Cards.Card>();
-                    swimlaneLookup.Add(swimlane.Id, existing);
+                    columnLookup.Add(column.Id, existing);
                 }
 
                 if (card is not null)
@@ -116,13 +116,13 @@ public class SwimlaneRepository(IDbConnectionFactory connectionFactory)
             new { BoardId = boardId },
             splitOn: "id");
 
-        return swimlaneLookup.Values;
+        return columnLookup.Values;
     }
 
     private record MaxResult(long MaxPosition, long Count);
 }
 
-public record Swimlane
+public record Column
 {
     public string Id { get; set; } = "";
     public string BoardId { get; set; } = "";

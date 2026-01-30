@@ -62,35 +62,35 @@ public class BoardController(BoardAction boardAction) : ControllerBase
             : new RazorComponentResult<BoardDetail>(new { Board = result.Object });
     }
 
-    [HttpGet("{id}/swimlanes")]
+    [HttpGet("{id}/columns")]
     [Authorize]
-    public async Task<IResult> GetSwimlanesAsync([FromRoute] string id)
+    public async Task<IResult> GetColumnsAsync([FromRoute] string id)
     {
-        BoardAction.Result<IEnumerable<SwimlaneView>> result = await boardAction.GetSwimlanesAsync(id, User);
+        BoardAction.Result<IEnumerable<ColumnView>> result = await boardAction.GetColumnsAsync(id, User);
         return result.IsError
             ? result.StatusResult!
-            : new RazorComponentResult<SwimlaneLayout>(new { Swimlanes = result.Object });
+            : new RazorComponentResult<ColumnLayout>(new { Columns = result.Object });
     }
 
-    [HttpPost("{boardId}/swimlanes")]
+    [HttpPost("{boardId}/columns")]
     [Authorize]
-    public async Task<IResult> CreateSwimlane([FromRoute] string boardId, [FromForm] string name)
+    public async Task<IResult> CreateColumn([FromRoute] string boardId, [FromForm] string name)
     {
-        BoardAction.Result<IEnumerable<SwimlaneView>> result =
-            await boardAction.CreateSwimlaneAsync(boardId, name, User);
+        BoardAction.Result<IEnumerable<ColumnView>> result =
+            await boardAction.CreateColumnAsync(boardId, name, User);
         return result.IsError
             ? result.StatusResult!
-            : new RazorComponentResult<SwimlaneLayout>(new { Swimlanes = result.Object });
+            : new RazorComponentResult<ColumnLayout>(new { Columns = result.Object });
     }
 
     [HttpPost("{boardId}/cards")]
     [Authorize]
     public async Task<IResult> CreateCardAsync(
         [FromRoute] string boardId,
-        [FromForm(Name = "swimlane_id")] string swimlaneId,
+        [FromForm(Name = "column_id")] string columnId,
         [FromForm] string title)
     {
-        BoardAction.Result<CardView> result = await boardAction.CreateCardAsync(boardId, swimlaneId, title, User);
+        BoardAction.Result<CardView> result = await boardAction.CreateCardAsync(boardId, columnId, title, User);
         return result.IsError ? result.StatusResult! : new RazorComponentResult<CardCard>(new { Card = result.Object });
     }
 }

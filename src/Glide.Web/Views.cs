@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 using Glide.Data.Boards;
-using Glide.Data.Swimlanes;
+using Glide.Data.Columns;
 using Glide.Data.Cards;
 
 namespace Glide.Web;
@@ -24,12 +24,12 @@ public record BoardUserView(string Username, bool IsOwner)
     }
 }
 
-public record SwimlaneView(string Id, string Name, string BoardId, int Position, IEnumerable<CardView> Cards)
+public record ColumnView(string Id, string Name, string BoardId, int Position, IEnumerable<CardView> Cards)
 {
-    public static SwimlaneView FromSwimlane(Swimlane swimlane)
+    public static ColumnView FromColumn(Column column)
     {
-        return new SwimlaneView(swimlane.Id, swimlane.Name, swimlane.BoardId, swimlane.Position,
-            swimlane.Cards.Select(CardView.FromCard));
+        return new ColumnView(column.Id, column.Name, column.BoardId, column.Position,
+            column.Cards.Select(CardView.FromCard));
     }
 }
 
@@ -38,13 +38,13 @@ public record CardView(
     string Title,
     string? Description,
     string BoardId,
-    string? SwimlaneId,
+    string? ColumnId,
     string? AssignedTo,
     int Position)
 {
     public static CardView FromCard(Card card)
     {
-        return new CardView(card.Id, card.Title, card.Description, card.BoardId, card.SwimlaneId, card.AssignedTo,
+        return new CardView(card.Id, card.Title, card.Description, card.BoardId, card.ColumnId, card.AssignedTo,
             card.Position);
     }
 }

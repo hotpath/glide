@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 using Glide.Data.Boards;
 using Glide.Data.Cards;
-using Glide.Data.Swimlanes;
+using Glide.Data.Columns;
 
 using Microsoft.AspNetCore.Http;
 
@@ -15,7 +15,7 @@ namespace Glide.Web.Cards;
 public class CardAction(
     CardRepository cardRepository,
     BoardRepository boardRepository,
-    SwimlaneRepository swimlaneRepository)
+    ColumnRepository columnRepository)
 {
     public async Task<Result<CardView>> GetForEditAsync(string cardId, ClaimsPrincipal user)
     {
@@ -104,7 +104,7 @@ public class CardAction(
 
     public async Task<Result<CardView>> MoveAsync(
         string cardId,
-        string swimlaneId,
+        string columnId,
         int? position,
         ClaimsPrincipal user)
     {
@@ -127,19 +127,19 @@ public class CardAction(
             return new Result<CardView>(Results.NotFound("Card not found"));
         }
 
-        Swimlane? swimlane = await swimlaneRepository.GetByIdAsync(swimlaneId);
-        if (swimlane is null)
+        Column? column = await columnRepository.GetByIdAsync(columnId);
+        if (column is null)
         {
-            return new Result<CardView>(Results.NotFound("Swimlane not found"));
+            return new Result<CardView>(Results.NotFound("Column not found"));
         }
 
-        // Verify swimlane belongs to the same board
-        if (swimlane.BoardId != existing.BoardId)
+        // Verify column belongs to the same board
+        if (column.BoardId != existing.BoardId)
         {
-            return new Result<CardView>(Results.BadRequest("Swimlane does not belong to the same board"));
+            return new Result<CardView>(Results.BadRequest("Column does not belong to the same board"));
         }
 
-        await cardRepository.MoveToSwimlaneAsync(cardId, swimlaneId, position);
+        await cardRepository.MoveToColumnAsync(cardId, columnId, position);
 
         Card? moved = await cardRepository.GetByIdAsync(cardId);
         if (moved is null)
