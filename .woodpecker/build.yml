@@ -5,7 +5,7 @@ when:
   - event: manual
 
 variables:
-  - &image 'codeberg/${CI_REPO_OWNER}/${CI_REPO_NAME}'
+  - &image '${CI_REPO_OWNER}/${CI_REPO_NAME}'
 
 steps:
   build:
