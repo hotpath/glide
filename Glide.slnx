@@ -3,6 +3,7 @@
     <File Path=".editorconfig" />
     <File Path=".gitignore" />
     <File Path=".woodpecker\build.yml" />
+    <File Path=".woodpecker\test.yml" />
     <File Path="compose.yml" />
     <File Path="Containerfile" />
     <File Path="global.json" />

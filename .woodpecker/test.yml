@@ -1,16 +1,12 @@
 ---
 when:
-  - event: [push, pull_request]
+  - event: [ push, pull_request ]
 
 steps:
   restore:
     image: mcr.microsoft.com/dotnet/sdk:10.0
     commands:
       - dotnet restore
-
-  build:
-    image: mcr.microsoft.com/dotnet/sdk:10.0
-    commands:
       - dotnet build --no-restore --configuration Release
 
   test:
@@ -22,10 +18,6 @@ steps:
           echo "Running tests for $test_project"
           dotnet test "$test_project" --no-build --configuration Release --coverage --coverage-output-format cobertura
         done
-
-  coverage-report:
-    image: mcr.microsoft.com/dotnet/sdk:10.0
-    commands:
       - dotnet tool install --global dotnet-reportgenerator-globaltool
       - export PATH="$PATH:/root/.dotnet/tools"
       - |
