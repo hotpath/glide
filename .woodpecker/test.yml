@@ -3,15 +3,11 @@ when:
   - event: [ push, pull_request ]
 
 steps:
-  restore:
-    image: mcr.microsoft.com/dotnet/sdk:10.0
+  test:
+    image: mcr.microsoft.com/dotnet/sdk:10.0.2
     commands:
       - dotnet restore
       - dotnet build --no-restore --configuration Release
-
-  test:
-    image: mcr.microsoft.com/dotnet/sdk:10.0
-    commands:
       - |
         # Run tests for all test projects with coverage
         for test_project in test/**/*.csproj; do
