@@ -21,18 +21,14 @@ steps:
       - event: manual
 
   build-rc:
-    image: woodpeckerci/plugin-kaniko
-    settings:
-      registry: codeberg.org
-      username:
-        from_secret: codeberg_username
-      password:
-        from_secret: codeberg_token
-      repo: *image
-      dockerfile: Containerfile
-      tags:
-        - rc
-        - ${CI_COMMIT_SHA:0:8}-rc
+    image: gcr.io/kaniko-project/executor:debug
+    commands:
+      - export VERSION=$(grep -oP '<Version>\K[^<]+' Directory.Build.props)
+      - echo "Building version $VERSION-rc"
+      - mkdir -p /kaniko/.docker
+      - echo "{\"auths\":{\"codeberg.org\":{\"auth\":\"$(echo -n $CODEBERG_USERNAME:$CODEBERG_TOKEN | base64)\"}}}" > /kaniko/.docker/config.json
+      - /kaniko/executor --context=/woodpecker/src --dockerfile=Containerfile --destination=codeberg.org/${CI_REPO_OWNER}/${CI_REPO_NAME}:$VERSION-rc --destination=codeberg.org/${CI_REPO_OWNER}/${CI_REPO_NAME}:rc
+    secrets: [ codeberg_username, codeberg_token ]
     when:
       - event: push
         branch: release/*
