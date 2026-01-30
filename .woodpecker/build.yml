@@ -1,14 +1,43 @@
-when:
-  - event: [ push, tag ]
-    branch: [ main, develop ]
-  - event: tag
-  - event: manual
-
 variables:
   - &image '${CI_REPO_OWNER}/${CI_REPO_NAME}'
 
 steps:
-  build:
+  build-main:
+    image: woodpeckerci/plugin-kaniko
+    settings:
+      registry: codeberg.org
+      username:
+        from_secret: codeberg_username
+      password:
+        from_secret: codeberg_token
+      repo: *image
+      dockerfile: Containerfile
+      tags:
+        - latest
+        - ${CI_COMMIT_SHA:0:8}
+    when:
+      - event: push
+        branch: [ main, develop ]
+      - event: manual
+
+  build-rc:
+    image: woodpeckerci/plugin-kaniko
+    settings:
+      registry: codeberg.org
+      username:
+        from_secret: codeberg_username
+      password:
+        from_secret: codeberg_token
+      repo: *image
+      dockerfile: Containerfile
+      tags:
+        - rc
+        - ${CI_COMMIT_SHA:0:8}-rc
+    when:
+      - event: push
+        branch: release/*
+
+  build-release:
     image: woodpeckerci/plugin-kaniko
     settings:
       registry: codeberg.org
@@ -19,6 +48,5 @@ steps:
       repo: *image
       dockerfile: Containerfile
       auto_tag: true
-      tags:
-        - latest
-        - ${CI_COMMIT_SHA:0:8}
+    when:
+      - event: tag
