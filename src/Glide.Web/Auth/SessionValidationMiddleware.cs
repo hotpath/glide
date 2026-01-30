@@ -10,7 +10,7 @@ namespace Glide.Web.Auth;
 
 public class SessionValidationMiddleware(RequestDelegate next)
 {
-    public async Task InvokeAsync(HttpContext context, SessionRepository sessionRepository)
+    public async Task InvokeAsync(HttpContext context, ISessionRepository sessionRepository)
     {
         string? sessionId = context.Request.Cookies["glide_session"];
 

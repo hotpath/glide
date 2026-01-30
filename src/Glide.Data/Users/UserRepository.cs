@@ -7,10 +7,15 @@ using Dapper;
 
 namespace Glide.Data.Users;
 
-public class UserRepository(IDbConnectionFactory connectionFactory)
+public class UserRepository(IDbConnectionFactory connectionFactory) : IUserRepository
 {
     public async Task<User?> GetAsync(string provider, string providerId, CancellationToken cancellationToken = default)
     {
+        if (cancellationToken.IsCancellationRequested)
+        {
+            throw new TaskCanceledException();
+        }
+
         const string query = """
                              SELECT * FROM users
                              WHERE oauth_provider = @Provider

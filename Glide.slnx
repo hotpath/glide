@@ -3,13 +3,18 @@
     <File Path=".editorconfig" />
     <File Path=".gitignore" />
     <File Path=".woodpecker\build.yml" />
+    <File Path=".woodpecker\test.yml" />
     <File Path="compose.yml" />
     <File Path="Containerfile" />
+    <File Path="global.json" />
     <File Path="LICENSE" />
     <File Path="README.md" />
   </Folder>
   <Folder Name="/src/">
     <Project Path="src/Glide.Data/Glide.Data.csproj" />
     <Project Path="src/Glide.Web/Glide.Web.csproj" />
+  </Folder>
+  <Folder Name="/test/">
+    <Project Path="test/Glide.Data.Unit/Glide.Data.Unit.csproj" />
   </Folder>
 </Solution>

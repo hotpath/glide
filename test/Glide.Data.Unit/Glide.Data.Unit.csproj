@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <EnableMicrosoftTestingExtensions>true</EnableMicrosoftTestingExtensions>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="TUnit" Version="1.12.90"/>
+    <PackageReference Include="FluentMigrator.Runner.SQLite" Version="8.0.1"/>
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.2"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Glide.Data\Glide.Data.csproj"/>
+  </ItemGroup>
+
+</Project>

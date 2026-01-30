@@ -6,7 +6,7 @@ using Dapper;
 
 namespace Glide.Data.Sessions;
 
-public class SessionRepository(IDbConnectionFactory connectionFactory)
+public class SessionRepository(IDbConnectionFactory connectionFactory) : ISessionRepository
 {
     public async Task<Session> CreateAsync(string userId, long durationSeconds)
     {

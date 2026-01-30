@@ -9,7 +9,7 @@ using Glide.Data.Cards;
 
 namespace Glide.Data.Columns;
 
-public class ColumnRepository(IDbConnectionFactory connectionFactory)
+public class ColumnRepository(IDbConnectionFactory connectionFactory) : IColumnRepository
 {
     public async Task<Column> CreateAsync(string name, string boardId, int position)
     {
@@ -25,7 +25,7 @@ public class ColumnRepository(IDbConnectionFactory connectionFactory)
 
     public async Task CreateDefaultColumnsAsync(string boardId)
     {
-        await CreateAsync("Todo", boardId, 0);
+        await CreateAsync("To Do", boardId, 0);
         await CreateAsync("In Progress", boardId, 1);
         await CreateAsync("Done", boardId, 2);
     }
@@ -40,12 +40,12 @@ public class ColumnRepository(IDbConnectionFactory connectionFactory)
         using IDbConnection conn = connectionFactory.CreateConnection();
 
         MaxResult result = await conn.QuerySingleAsync<MaxResult>(query, new { BoardId = boardId });
-        if (result.Count == 0)
+        if (result.Count == 0 || result.MaxPosition is null)
         {
             return -1;
         }
 
-        return (int)result.MaxPosition; // we know that this is a 32-bit val
+        return (int)result.MaxPosition.Value; // we know that this is a 32-bit val
     }
 
     public async Task<Column?> GetByIdAsync(string id)
@@ -128,7 +128,11 @@ public class ColumnRepository(IDbConnectionFactory connectionFactory)
         await conn.ExecuteAsync(statement, new { Id = id });
     }
 
-    private record MaxResult(long MaxPosition, long Count);
+    private record MaxResult
+    {
+        public long? MaxPosition { get; init; }
+        public long Count { get; init; }
+    }
 }
 
 public record Column

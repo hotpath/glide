@@ -6,7 +6,7 @@ using Dapper;
 
 namespace Glide.Data.Cards;
 
-public class CardRepository(IDbConnectionFactory connectionFactory)
+public class CardRepository(IDbConnectionFactory connectionFactory) : ICardRepository
 {
     public async Task<Card> CreateAsync(string title, string boardId, string columnId)
     {
@@ -29,7 +29,7 @@ public class CardRepository(IDbConnectionFactory connectionFactory)
         return await conn.QuerySingleOrDefaultAsync<Card>(query, new { Id = id });
     }
 
-    public async System.Threading.Tasks.Task UpdateAsync(string id, string title, string? description)
+    public async Task UpdateAsync(string id, string title, string? description)
     {
         const string statement = """
                                  UPDATE cards
@@ -42,29 +42,7 @@ public class CardRepository(IDbConnectionFactory connectionFactory)
         await conn.ExecuteAsync(statement, new { Id = id, Title = title, Description = description });
     }
 
-    private async Task<int> GetNextPositionForColumn(string columnId)
-    {
-        const string query = "SELECT MAX(position) as Position FROM cards WHERE column_id = @ColumnId";
-        using IDbConnection conn = connectionFactory.CreateConnection();
-
-        int? maxPosition = await conn.QuerySingleOrDefaultAsync<int?>(query, new { ColumnId = columnId });
-        return maxPosition.HasValue ? maxPosition.Value + 1 : 0;
-    }
-
-    private async System.Threading.Tasks.Task UpdatePositions(string column, int startingPosition)
-    {
-        const string statement = """
-                                 UPDATE cards
-                                 SET position = position + 1
-                                 WHERE column_id = @Column
-                                 AND position > @Position
-                                 """;
-
-        using IDbConnection conn = connectionFactory.CreateConnection();
-        await conn.ExecuteAsync(statement, new { Column = column, Position = startingPosition });
-    }
-
-    public async System.Threading.Tasks.Task MoveToColumnAsync(string id, string columnId, int? position = null)
+    public async Task MoveToColumnAsync(string id, string columnId, int? position = null)
     {
         int nextPosition = position ?? await GetNextPositionForColumn(columnId);
         const string statement = """
@@ -80,12 +58,34 @@ public class CardRepository(IDbConnectionFactory connectionFactory)
         await conn.ExecuteAsync(statement, new { ColumnId = columnId, Position = nextPosition, Id = id });
     }
 
-    public async System.Threading.Tasks.Task DeleteAsync(string id)
+    public async Task DeleteAsync(string id)
     {
         const string statement = "DELETE FROM cards WHERE id = @Id";
 
         using IDbConnection conn = connectionFactory.CreateConnection();
         await conn.ExecuteAsync(statement, new { Id = id });
+    }
+
+    private async Task<int> GetNextPositionForColumn(string columnId)
+    {
+        const string query = "SELECT MAX(position) as Position FROM cards WHERE column_id = @ColumnId";
+        using IDbConnection conn = connectionFactory.CreateConnection();
+
+        int? maxPosition = await conn.QuerySingleOrDefaultAsync<int?>(query, new { ColumnId = columnId });
+        return maxPosition.HasValue ? maxPosition.Value + 1 : 0;
+    }
+
+    private async Task UpdatePositions(string column, int startingPosition)
+    {
+        const string statement = """
+                                 UPDATE cards
+                                 SET position = position + 1
+                                 WHERE column_id = @Column
+                                 AND position > @Position
+                                 """;
+
+        using IDbConnection conn = connectionFactory.CreateConnection();
+        await conn.ExecuteAsync(statement, new { Column = column, Position = startingPosition });
     }
 }
 

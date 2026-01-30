@@ -62,11 +62,11 @@ builder.Services.AddHttpClient("ForgejoOAuth", (sp, client) =>
 string dbPath = Environment.GetEnvironmentVariable("GLIDE_DATABASE_PATH") ?? "/app/glide.db";
 
 builder.Services.AddSingleton<IDbConnectionFactory>(new SqliteConnectionFactory($"Data Source={dbPath}"))
-    .AddSingleton<UserRepository>()
-    .AddSingleton<SessionRepository>()
-    .AddSingleton<BoardRepository>()
-    .AddSingleton<ColumnRepository>()
-    .AddSingleton<CardRepository>();
+    .AddSingleton<IUserRepository, UserRepository>()
+    .AddSingleton<ISessionRepository, SessionRepository>()
+    .AddSingleton<IBoardRepository, BoardRepository>()
+    .AddSingleton<IColumnRepository, ColumnRepository>()
+    .AddSingleton<ICardRepository, CardRepository>();
 
 builder.Services.AddSingleton<BoardAction>()
     .AddSingleton<CardAction>()
