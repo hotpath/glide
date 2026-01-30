@@ -9,7 +9,7 @@ variables:
 
 steps:
   build:
-    image: woodpeckerci/plugin-docker-buildx
+    image: woodpeckerci/plugin-kaniko
     settings:
       registry: codeberg.org
       username:
@@ -18,7 +18,6 @@ steps:
         from_secret: codeberg_token
       repo: *image
       dockerfile: Containerfile
-      platforms: linux/amd64,linux/arm64
       auto_tag: true
       tags:
         - latest
