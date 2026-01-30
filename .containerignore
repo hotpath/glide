@@ -1,0 +1,14 @@
+**/.git
+**/.gitignore
+**/.vscode
+**/.idea
+**/bin
+**/obj
+**/*.db
+**/*.db-shm
+**/*.db-wal
+.env
+README.md
+CLAUDE.md
+Containerfile
+.containerignore

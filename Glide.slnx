@@ -1,7 +1,10 @@
 <Solution>
-  <Folder Name="/assets/">
+  <Folder Name="/build/">
     <File Path=".editorconfig" />
     <File Path=".gitignore" />
+    <File Path=".woodpecker\build.yml" />
+    <File Path="compose.yml" />
+    <File Path="Containerfile" />
     <File Path="LICENSE" />
     <File Path="README.md" />
   </Folder>

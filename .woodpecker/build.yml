@@ -1,0 +1,24 @@
+when:
+  - event: [push, tag]
+    branch: [main, develop]
+  - event: tag
+
+variables:
+  - &image 'codeberg.org/${CI_REPO}'
+
+steps:
+  build:
+    image: woodpeckerci/plugin-docker-buildx
+    settings:
+      registry: codeberg.org
+      username:
+        from_secret: codeberg_username
+      password:
+        from_secret: codeberg_token
+      repo: *image
+      dockerfile: Containerfile
+      platforms: linux/amd64,linux/arm64
+      auto_tag: true
+      tags:
+        - latest
+        - ${CI_COMMIT_SHA:0:8}
