@@ -1,0 +1,21 @@
+@using Glide.Web
+
+@foreach (var label in Labels)
+{
+    <button type="button"
+            class="filter-label-option"
+            onclick="filterByLabel('@label.Id')">
+        <span class="label-badge" style="background-color: @label.Color">
+            @if (!string.IsNullOrWhiteSpace(label.Icon))
+            {
+                <span class="label-icon">@label.Icon</span>
+            }
+            <span class="label-name">@label.Name</span>
+        </span>
+    </button>
+}
+
+@code {
+    [Parameter]
+    public required IEnumerable<LabelView> Labels { get; set; }
+}

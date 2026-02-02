@@ -1,4 +1,8 @@
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
+
+using Glide.Web.Labels;
 
 using Markdig;
 
@@ -11,7 +15,7 @@ namespace Glide.Web.Cards;
 
 [Route("/cards")]
 [ApiController]
-public class CardController(CardAction cardAction) : ControllerBase
+public class CardController(CardAction cardAction, LabelAction labelAction) : ControllerBase
 {
     public static readonly MarkdownPipeline Pipeline =
         new MarkdownPipelineBuilder()
@@ -25,9 +29,22 @@ public class CardController(CardAction cardAction) : ControllerBase
     public async Task<IResult> EditAsync([FromRoute] string id)
     {
         CardAction.Result<CardView> result = await cardAction.GetForEditAsync(id, User);
-        return result.IsError
-            ? result.StatusResult!
-            : new RazorComponentResult<CardModal>(new { Card = result.Object });
+        if (result.IsError)
+        {
+            return result.StatusResult!;
+        }
+
+        // Get all labels for the board
+        LabelAction.Result<IEnumerable<LabelView>> labelsResult =
+            await labelAction.GetByBoardIdAsync(result.Object!.BoardId, User);
+
+        var allLabels = labelsResult.IsError ? Enumerable.Empty<LabelView>() : labelsResult.Object!;
+
+        return new RazorComponentResult<CardModal>(new
+        {
+            Card = result.Object,
+            AllBoardLabels = allLabels
+        });
     }
 
     [HttpPut("{id}")]
@@ -69,5 +86,27 @@ public class CardController(CardAction cardAction) : ControllerBase
     public IResult ConvertToHtml([FromForm] string markdown)
     {
         return Results.Text(Markdown.ToHtml(markdown, Pipeline), "text/html");
+    }
+
+    [HttpPost("{cardId}/labels")]
+    [Authorize]
+    public async Task<IResult> AddLabelAsync(
+        [FromRoute] string cardId,
+        [FromForm(Name = "label_id")] string labelId)
+    {
+        LabelAction.Result<IEnumerable<LabelView>> result = await labelAction.AddLabelToCardAsync(cardId, labelId, User);
+        return result.IsError
+            ? result.StatusResult!
+            : new RazorComponentResult<LabelList>(new { Labels = result.Object });
+    }
+
+    [HttpDelete("{cardId}/labels/{labelId}")]
+    [Authorize]
+    public async Task<IResult> RemoveLabelAsync([FromRoute] string cardId, [FromRoute] string labelId)
+    {
+        LabelAction.Result<IEnumerable<LabelView>> result = await labelAction.RemoveLabelFromCardAsync(cardId, labelId, User);
+        return result.IsError
+            ? result.StatusResult!
+            : new RazorComponentResult<LabelList>(new { Labels = result.Object });
     }
 }

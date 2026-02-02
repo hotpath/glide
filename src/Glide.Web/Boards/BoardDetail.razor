@@ -4,12 +4,23 @@
         <div class="board-header">
             <a href="/dashboard" class="back-link" title="Back to Dashboard">←</a>
             <h2 class="board-title">@Board.Name</h2>
+            <div class="label-filter">
+                <button class="filter-button" onclick="toggleLabelFilter(event)">Filter</button>
+                <div class="label-filter-dropdown" id="label-filter-dropdown" style="display: none;">
+                    <button type="button" onclick="filterByLabel(null)">Show All</button>
+                    <div id="filter-labels" hx-get="/boards/@Board.Id/labels?view=filter" hx-trigger="load" hx-swap="innerHTML">
+                        Loading labels...
+                    </div>
+                </div>
+            </div>
+
             <div class="board-menu">
                 <button class="board-menu-button" onclick="toggleBoardMenu(event)">⋮</button>
                 <div class="board-menu-dropdown" id="board-menu-dropdown">
                     <div id="add-column-menu-item">
                         <button class="board-menu-item" onclick="showAddColumnForm(event)">Add column</button>
                     </div>
+                    <button class="board-menu-item" onclick="openLabelManagement('@Board.Id')">Manage labels</button>
                     <form id="add-column-form" class="add-column-form" style="display: none;"
                           novalidate
                           hx-post="/boards/@Board.Id/columns"
@@ -299,36 +310,122 @@
             }
         });
 
-        // Create a new label for a board
-        function createLabel(boardId, cardId) {
+        // Create a new label for a card (inline creation from card modal)
+        function createLabelForCard(cardId, boardId) {
             const nameInput = document.getElementById('new-label-name-' + cardId);
             const colorInput = document.getElementById('new-label-color-' + cardId);
+            const iconInput = document.getElementById('new-label-icon-' + cardId);
 
             const name = nameInput.value.trim();
             if (!name) {
+                alert('Please enter a label name');
                 return;
             }
 
             const color = colorInput.value;
+            const icon = iconInput.value.trim();
 
-            fetch('/boards/' + boardId + '/labels', {
+            const formData = new FormData();
+            formData.append('board_id', boardId);
+            formData.append('name', name);
+            formData.append('color', color);
+            if (icon) {
+                formData.append('icon', icon);
+            }
+
+            fetch('/labels', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: 'name=' + encodeURIComponent(name) + '&color=' + encodeURIComponent(color)
+                body: formData
             }).then(response => {
                 if (response.ok) {
-                    // Refresh the modal content to show the new label
-                    fetch('/cards/' + cardId + '/edit')
-                        .then(r => r.text())
-                        .then(html => {
-                            document.getElementById('modal-body').innerHTML = html;
-                            htmx.process(document.getElementById('modal-body'));
-                        });
+                    return response.json();
+                }
+            }).then(label => {
+                if (label) {
+                    // Add the label to the card
+                    const addFormData = new FormData();
+                    addFormData.append('label_id', label.id);
+
+                    fetch('/cards/' + cardId + '/labels', {
+                        method: 'POST',
+                        body: addFormData
+                    }).then(() => {
+                        // Refresh modal to show the new label
+                        fetch('/cards/' + cardId + '/edit')
+                            .then(r => r.text())
+                            .then(html => {
+                                document.getElementById('modal-body').innerHTML = html;
+                                htmx.process(document.getElementById('modal-body'));
+                            });
+                    });
                 }
             });
         }
+
+        // Toggle label picker dropdown
+        function toggleLabelPicker(cardId) {
+            const menu = document.getElementById('label-picker-menu-' + cardId);
+            if (menu.style.display === 'none') {
+                menu.style.display = 'block';
+            } else {
+                menu.style.display = 'none';
+            }
+        }
+
+        // Open label management modal
+        function openLabelManagement(boardId) {
+            fetch('/boards/' + boardId + '/labels')
+                .then(r => r.text())
+                .then(html => {
+                    const modalContainer = document.createElement('div');
+                    modalContainer.id = 'label-modal-container';
+                    modalContainer.innerHTML = html;
+                    document.body.appendChild(modalContainer);
+                    htmx.process(modalContainer);
+                    document.body.style.overflow = 'hidden';
+                });
+        }
+
+        // Label filtering
+        let currentLabelFilter = null;
+
+        function toggleLabelFilter(event) {
+            event.stopPropagation();
+            const dropdown = document.getElementById('label-filter-dropdown');
+            dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function filterByLabel(labelId) {
+            currentLabelFilter = labelId;
+            const cards = document.querySelectorAll('.card-card');
+
+            cards.forEach(card => {
+                if (labelId === null) {
+                    // Show all cards
+                    card.style.display = '';
+                } else {
+                    // Check if card has the label
+                    const hasLabel = card.querySelector(`[data-label-id="${labelId}"]`);
+                    card.style.display = hasLabel ? '' : 'none';
+                }
+            });
+
+            // Update card counts
+            updateCardCounts();
+
+            // Close the filter dropdown
+            document.getElementById('label-filter-dropdown').style.display = 'none';
+        }
+
+        // Close filter dropdown when clicking outside
+        document.addEventListener('click', function (event) {
+            if (!event.target.closest('.label-filter')) {
+                const dropdown = document.getElementById('label-filter-dropdown');
+                if (dropdown) {
+                    dropdown.style.display = 'none';
+                }
+            }
+        });
 
         let markdownDebounceTimer = null;
 

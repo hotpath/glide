@@ -1,0 +1,71 @@
+@using Glide.Web
+
+<div class="modal-overlay" onclick="closeModal(event)">
+    <div class="modal-content label-management" onclick="event.stopPropagation()">
+        <div class="modal-header">
+            <h2>Manage Labels</h2>
+            <button type="button" class="close-button" onclick="closeModal()">&times;</button>
+        </div>
+
+        <div class="modal-body">
+            <div class="create-label-form">
+                <h3>Create New Label</h3>
+                <form hx-post="/labels" hx-swap="beforebegin" hx-target="#label-list">
+                    <input type="hidden" name="board_id" value="@BoardId" />
+                    <div class="form-row">
+                        <input type="text" name="name" placeholder="Label name" required maxlength="50" />
+                        <input type="color" name="color" value="#808080" class="color-picker" />
+                        <input type="text" name="icon" placeholder="Icon" maxlength="2" />
+                        <button type="submit">Create</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="label-list-editable" id="label-list">
+                @foreach (var label in Labels)
+                {
+                    <div class="label-row" id="label-row-@label.Id">
+                        <form class="label-edit-form"
+                              hx-put="/labels/@label.Id"
+                              hx-target="#label-badge-@label.Id"
+                              hx-swap="outerHTML">
+                            <input type="text" name="name" value="@label.Name" required maxlength="50" />
+                            <input type="color" name="color" value="@label.Color" class="color-picker" />
+                            <input type="text" name="icon" value="@label.Icon" placeholder="Icon" maxlength="2" />
+                            <button type="submit" class="save-button">Save</button>
+                        </form>
+
+                        <div id="label-badge-@label.Id">
+                            <LabelBadge Label="@label" />
+                        </div>
+
+                        <button type="button"
+                                class="delete-button"
+                                hx-delete="/labels/@label.Id"
+                                hx-target="#label-row-@label.Id"
+                                hx-swap="outerHTML swap:0s"
+                                hx-confirm="Delete this label? It will be removed from all cards.">
+                            Delete
+                        </button>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function closeModal(event) {
+        if (!event || event.target.classList.contains('modal-overlay') || event.target.classList.contains('close-button')) {
+            document.querySelector('.modal-overlay').remove();
+        }
+    }
+</script>
+
+@code {
+    [Parameter]
+    public required IEnumerable<LabelView> Labels { get; set; }
+
+    [Parameter]
+    public required string BoardId { get; set; }
+}

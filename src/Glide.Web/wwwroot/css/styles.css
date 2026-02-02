@@ -1599,3 +1599,324 @@ textarea#card-description {
     padding: 0.375rem 0.75rem;
     font-size: 0.875rem;
 }
+
+/* Label Badge */
+.label-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: white;
+    white-space: nowrap;
+}
+
+.label-icon {
+    font-size: 0.875rem;
+    line-height: 1;
+}
+
+.label-name {
+    line-height: 1;
+}
+
+/* Label List */
+.label-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.375rem;
+}
+
+.card-labels-compact {
+    margin-top: 0.75rem;
+    display: block;
+}
+
+/* Label Picker */
+.label-picker {
+    margin-bottom: 1rem;
+}
+
+.label-picker label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: var(--text-bright);
+}
+
+.current-labels {
+    margin-bottom: 0.5rem;
+    min-height: 2rem;
+}
+
+.label-picker-toggle {
+    background: var(--bg-elevated);
+    color: var(--text-primary);
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    border: 1px solid var(--border-color);
+    cursor: pointer;
+    font-size: 0.875rem;
+}
+
+.label-picker-toggle:hover {
+    background: var(--bg-surface);
+    border-color: var(--border-light);
+}
+
+.label-picker-menu {
+    margin-top: 0.5rem;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    padding: 0.75rem;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.available-labels {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.label-option,
+.label-remove {
+    background: transparent;
+    border: none;
+    padding: 0.5rem;
+    text-align: left;
+    cursor: pointer;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.label-option:hover,
+.label-remove:hover {
+    background: var(--bg-elevated);
+}
+
+.label-remove .remove-icon {
+    color: var(--accent-red);
+    font-size: 1.25rem;
+    font-weight: bold;
+    margin-left: 0.5rem;
+}
+
+.create-label-inline {
+    border-top: 1px solid var(--border-color);
+    padding-top: 1rem;
+    margin-bottom: 1rem;
+}
+
+.create-label-inline h4 {
+    margin-bottom: 0.5rem;
+    font-size: 0.875rem;
+    color: var(--text-bright);
+}
+
+.create-label-inline input[type="text"] {
+    width: 100%;
+    padding: 0.5rem;
+    margin-bottom: 0.5rem;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    color: var(--text-primary);
+    font-size: 0.875rem;
+}
+
+.create-label-inline input[type="color"] {
+    width: 100%;
+    height: 40px;
+    margin-bottom: 0.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.create-label-inline button {
+    width: 100%;
+}
+
+/* Label Management Modal */
+.label-management {
+    max-width: 600px;
+    width: 90%;
+}
+
+.create-label-form {
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.create-label-form h3 {
+    margin-bottom: 1rem;
+    color: var(--text-bright);
+    font-size: 1.125rem;
+}
+
+.form-row {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.form-row input[type="text"] {
+    flex: 1;
+    padding: 0.5rem;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    color: var(--text-primary);
+}
+
+.color-picker {
+    width: 60px;
+    height: 40px;
+    padding: 0.25rem;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    cursor: pointer;
+    background: var(--bg-elevated);
+}
+
+.label-list-editable {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.label-row {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    padding: 1rem;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+}
+
+.label-edit-form {
+    flex: 1;
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.label-edit-form input[type="text"] {
+    flex: 1;
+    padding: 0.5rem;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    color: var(--text-primary);
+    font-size: 0.875rem;
+}
+
+.label-edit-form input[type="color"] {
+    width: 50px;
+    height: 32px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.save-button {
+    background: var(--accent-green);
+    color: white;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+}
+
+.save-button:hover {
+    opacity: 0.9;
+}
+
+.delete-button {
+    background: var(--accent-red);
+    color: white;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+}
+
+.delete-button:hover {
+    background: var(--accent-red-hover);
+}
+
+/* Label Filter */
+.label-filter {
+    position: relative;
+    margin-right: 1rem;
+}
+
+.filter-button {
+    background: var(--bg-elevated);
+    color: var(--text-primary);
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    border: 1px solid var(--border-color);
+    cursor: pointer;
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.filter-button:hover {
+    background: var(--bg-surface);
+    border-color: var(--border-light);
+}
+
+.label-filter-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 0.5rem;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    padding: 0.75rem;
+    min-width: 200px;
+    max-height: 400px;
+    overflow-y: auto;
+    box-shadow: var(--shadow-md);
+    z-index: 100;
+}
+
+.label-filter-dropdown button {
+    width: 100%;
+    text-align: left;
+    margin-bottom: 0.5rem;
+    background: transparent;
+    border: none;
+    padding: 0.5rem;
+    border-radius: 4px;
+    cursor: pointer;
+    color: var(--text-primary);
+}
+
+.label-filter-dropdown button:hover {
+    background: var(--bg-elevated);
+}
+
+.filter-label-option {
+    background: transparent;
+    border: none;
+    padding: 0.5rem;
+    text-align: left;
+    cursor: pointer;
+    border-radius: 4px;
+    display: block;
+    width: 100%;
+    margin-bottom: 0.375rem;
+}
+
+.filter-label-option:hover {
+    background: var(--bg-elevated);
+}

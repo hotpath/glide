@@ -72,15 +72,15 @@ public class CreateInitialSchema : Migration
             .OnDelete(Rule.Cascade).Indexed("idx_labels_board_id")
             .WithColumn("name").AsString().NotNullable()
             .WithColumn("color").AsString().NotNullable().WithDefaultValue("#808080")
-            .WithColumn("icon").AsString();
+            .WithColumn("icon").AsString().Nullable();
 
         Execute.Sql("""
                                 CREATE TABLE card_labels (
                                     card_id TEXT NOT NULL,
                                     label_id TEXT NOT NULL,
                                     PRIMARY KEY (card_id, label_id),
-                                    FOREIGN KEY (card_id) REFERENCES cards(id),
-                                    FOREIGN KEY (label_id) REFERENCES labels(id)
+                                    FOREIGN KEY (card_id) REFERENCES cards(id) ON DELETE CASCADE,
+                                    FOREIGN KEY (label_id) REFERENCES labels(id) ON DELETE CASCADE
                                 )
                     """);
 

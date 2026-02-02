@@ -1,3 +1,5 @@
+@using Glide.Web.Labels
+
 <div class="card-card"
      id="card-@Card.Id"
      draggable="true"
@@ -10,6 +12,12 @@
         @if (!string.IsNullOrWhiteSpace(Card.Description))
         {
             <div class="card-description">@Card.Description</div>
+        }
+        @if (Card.Labels.Any())
+        {
+            <div class="card-labels-compact">
+                <LabelList Labels="@Card.Labels" />
+            </div>
         }
     </div>
     <div class="card-actions">

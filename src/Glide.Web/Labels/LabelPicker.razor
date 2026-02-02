@@ -1,0 +1,77 @@
+@using Glide.Web
+
+<div class="label-picker">
+    <label for="label-picker-@CardId">Labels</label>
+
+    <div class="current-labels" id="card-labels-@CardId">
+        <LabelList Labels="@CurrentLabels" />
+    </div>
+
+    <div class="label-picker-dropdown">
+        <button type="button" class="label-picker-toggle" onclick="toggleLabelPicker('@CardId')">
+            + Add Label
+        </button>
+
+        <div class="label-picker-menu" id="label-picker-menu-@CardId" style="display: none;">
+            <div class="available-labels">
+                @foreach (var label in AvailableLabels.Where(l => !CurrentLabels.Any(c => c.Id == l.Id)))
+                {
+                    <button type="button"
+                            class="label-option"
+                            hx-post="/cards/@CardId/labels"
+                            hx-vals='{"label_id": "@label.Id"}'
+                            hx-target="#card-labels-@CardId"
+                            hx-swap="innerHTML">
+                        <span class="label-badge" style="background-color: @label.Color">
+                            @if (!string.IsNullOrWhiteSpace(label.Icon))
+                            {
+                                <span class="label-icon">@label.Icon</span>
+                            }
+                            <span class="label-name">@label.Name</span>
+                        </span>
+                    </button>
+                }
+            </div>
+
+            <div class="create-label-inline">
+                <h4>Create New Label</h4>
+                <input type="text" id="new-label-name-@CardId" placeholder="Label name" maxlength="50" />
+                <input type="color" id="new-label-color-@CardId" value="#808080" />
+                <input type="text" id="new-label-icon-@CardId" placeholder="Icon (emoji)" maxlength="2" />
+                <button type="button" onclick="createLabelForCard('@CardId', '@BoardId')">Create & Add</button>
+            </div>
+
+            @foreach (var label in CurrentLabels)
+            {
+                <button type="button"
+                        class="label-remove"
+                        hx-delete="/cards/@CardId/labels/@label.Id"
+                        hx-target="#card-labels-@CardId"
+                        hx-swap="innerHTML">
+                    <span class="label-badge" style="background-color: @label.Color">
+                        @if (!string.IsNullOrWhiteSpace(label.Icon))
+                        {
+                            <span class="label-icon">@label.Icon</span>
+                        }
+                        <span class="label-name">@label.Name</span>
+                    </span>
+                    <span class="remove-icon">×</span>
+                </button>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public required string CardId { get; set; }
+
+    [Parameter]
+    public required string BoardId { get; set; }
+
+    [Parameter]
+    public required IEnumerable<LabelView> CurrentLabels { get; set; }
+
+    [Parameter]
+    public required IEnumerable<LabelView> AvailableLabels { get; set; }
+}

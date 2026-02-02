@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 
 using Glide.Web.Cards;
 using Glide.Web.Columns;
+using Glide.Web.Labels;
 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -13,7 +14,7 @@ namespace Glide.Web.Boards;
 
 [Route("/boards")]
 [ApiController]
-public class BoardController(BoardAction boardAction) : ControllerBase
+public class BoardController(BoardAction boardAction, LabelAction labelAction) : ControllerBase
 {
     [HttpGet]
     [Authorize]
@@ -93,5 +94,24 @@ public class BoardController(BoardAction boardAction) : ControllerBase
     {
         BoardAction.Result<CardView> result = await boardAction.CreateCardAsync(boardId, columnId, title, User);
         return result.IsError ? result.StatusResult! : new RazorComponentResult<CardCard>(new { Card = result.Object });
+    }
+
+    [HttpGet("{boardId}/labels")]
+    [Authorize]
+    public async Task<IResult> GetLabelsAsync([FromRoute] string boardId, [FromQuery] string? view = null)
+    {
+        LabelAction.Result<IEnumerable<LabelView>> result = await labelAction.GetByBoardIdAsync(boardId, User);
+        if (result.IsError)
+        {
+            return result.StatusResult!;
+        }
+
+        // Return different views based on query parameter
+        if (view == "filter")
+        {
+            return new RazorComponentResult<LabelFilterList>(new { Labels = result.Object });
+        }
+
+        return new RazorComponentResult<LabelManagementModal>(new { Labels = result.Object, BoardId = boardId });
     }
 }
