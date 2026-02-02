@@ -171,6 +171,138 @@ nav h1 {
     background: var(--accent-red-hover);
 }
 
+/* Navigation Bar */
+.app-nav {
+    background: var(--bg-dark);
+    padding: 1rem 2rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border-color);
+    position: sticky;
+    top: 0;
+    z-index: 900;
+}
+
+.nav-brand {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text-bright);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.nav-brand:hover {
+    color: var(--accent-blue);
+}
+
+.nav-end {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    position: relative;
+}
+
+.user-menu-button {
+    background: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.user-menu-button:hover {
+    background: var(--bg-surface);
+    border-color: var(--accent-blue);
+}
+
+.user-menu-dropdown {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: calc(100% + 0.5rem);
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    padding: 0.5rem 0;
+    min-width: 220px;
+    z-index: 950;
+}
+
+.user-menu-dropdown.show {
+    display: block;
+}
+
+.user-menu-header {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-bright);
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.user-menu-item {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 0.75rem 1rem;
+    background: transparent;
+    border: none;
+    color: var(--text-primary);
+    cursor: pointer;
+    text-decoration: none;
+    font-size: 0.9rem;
+}
+
+.user-menu-item:hover {
+    background: var(--bg-elevated);
+    color: var(--text-bright);
+}
+
+.user-menu-item.logout {
+    border-top: 1px solid var(--border-color);
+    color: var(--accent-red);
+    margin-top: 0.25rem;
+}
+
+.user-menu-item.logout:hover {
+    background: rgba(239, 83, 80, 0.1);
+}
+
+/* Adjust main content when navbar is present */
+body.has-navbar main {
+    margin-top: 1rem;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+    .app-nav {
+        padding: 0.75rem 1rem;
+    }
+
+    .nav-brand {
+        font-size: 1.25rem;
+    }
+
+    .user-menu-button {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.85rem;
+    }
+
+    .user-menu-dropdown {
+        min-width: 200px;
+    }
+}
+
 main {
     max-width: 1200px;
     margin: 2rem auto;

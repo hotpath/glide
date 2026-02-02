@@ -37,6 +37,7 @@ WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 builder.Configuration.AddEnvironmentVariables();
 builder.Services.AddRazorComponents();
 builder.Services.AddControllers();
+builder.Services.AddHttpContextAccessor();
 builder.Logging.AddConsole();
 builder.Logging.SetMinimumLevel(LogLevel.Trace);
 

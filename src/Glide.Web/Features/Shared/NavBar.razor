@@ -1,0 +1,75 @@
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+
+@{
+    string displayName = "User";
+
+    if (HttpContextAccessor.HttpContext?.User.Identity?.IsAuthenticated == true)
+    {
+        var user = HttpContextAccessor.HttpContext.User;
+        displayName = user.FindFirst("DisplayName")?.Value ?? user.FindFirst(ClaimTypes.Email)?.Value ?? "User";
+    }
+}
+
+<nav class="app-nav">
+    <a href="/dashboard" class="nav-brand">Glide</a>
+
+    <div class="nav-end">
+        <button class="user-menu-button" onclick="toggleUserMenu(event)" aria-label="User menu" aria-haspopup="true"
+                aria-expanded="false" id="user-menu-button">
+            <span>@displayName</span>
+            <span>▾</span>
+        </button>
+
+        <div class="user-menu-dropdown" id="user-menu">
+            <div class="user-menu-header">@displayName</div>
+            <a href="/profile" class="user-menu-item">Profile / Account</a>
+            <a href="/settings" class="user-menu-item">App Settings</a>
+            <a href="/about" class="user-menu-item">Help / About</a>
+            <button class="user-menu-item logout" hx-post="/auth/logout" hx-swap="none"
+                    hx-on::after-request="window.location.href='/'">
+                Logout
+            </button>
+        </div>
+    </div>
+</nav>
+
+<script>
+    function toggleUserMenu(event) {
+        event.stopPropagation();
+        const menu = document.getElementById('user-menu');
+        const button = document.getElementById('user-menu-button');
+        const isExpanded = menu.classList.contains('show');
+
+        menu.classList.toggle('show');
+        button.setAttribute('aria-expanded', !isExpanded);
+    }
+
+    // Close menu when clicking outside
+    document.addEventListener('click', function (event) {
+        const menu = document.getElementById('user-menu');
+        const button = document.getElementById('user-menu-button');
+
+        if (menu && menu.classList.contains('show')) {
+            if (!menu.contains(event.target) && !button.contains(event.target)) {
+                menu.classList.remove('show');
+                button.setAttribute('aria-expanded', 'false');
+            }
+        }
+    });
+
+    // Close menu on Escape key
+    document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape') {
+            const menu = document.getElementById('user-menu');
+            const button = document.getElementById('user-menu-button');
+
+            if (menu && menu.classList.contains('show')) {
+                menu.classList.remove('show');
+                button.setAttribute('aria-expanded', 'false');
+                button.focus(); // Return focus to button
+            }
+        }
+    });
+</script>
