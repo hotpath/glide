@@ -67,12 +67,22 @@ builder.Services.AddSingleton<AuthContext>(sp =>
     return new AuthContext(configs);
 });
 
+// Register session configuration (applies to all auth methods)
+builder.Services.AddSingleton(sp =>
+{
+    var config = sp.GetRequiredService<IConfiguration>();
+    return SessionConfig.FromConfiguration(config);
+});
+
 // Register provider implementations
 builder.Services.AddSingleton<IOAuthProvider, ForgejoOAuthProvider>();
 builder.Services.AddSingleton<IOAuthProvider, GitHubOAuthProvider>();
 
 // Register factory
 builder.Services.AddSingleton<OAuthProviderFactory>();
+
+// Register password authentication service
+builder.Services.AddSingleton<PasswordAuthService>();
 
 // HTTP clients for each provider
 builder.Services.AddHttpClient("forgejoOAuth", (sp, client) =>

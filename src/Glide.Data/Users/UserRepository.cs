@@ -30,8 +30,8 @@ public class UserRepository(IDbConnectionFactory connectionFactory) : IUserRepos
         using IDbConnection conn = connectionFactory.CreateConnection();
 
         const string insertStatement = """
-                                       INSERT INTO users (id, display_name, email, created_at, updated_at)
-                                       VALUES (@Id, @DisplayName, @Email, @CreatedAt, @UpdatedAt)
+                                       INSERT INTO users (id, display_name, email, password_hash, created_at, updated_at)
+                                       VALUES (@Id, @DisplayName, @Email, @PasswordHash, @CreatedAt, @UpdatedAt)
                                        """;
 
         await conn.ExecuteAsync(insertStatement, user);
@@ -46,6 +46,7 @@ public class UserRepository(IDbConnectionFactory connectionFactory) : IUserRepos
                                        UPDATE users
                                        SET display_name = @DisplayName,
                                            email = @Email,
+                                           password_hash = @PasswordHash,
                                            updated_at = @UpdatedAt
                                        WHERE id = @Id
                                        """;

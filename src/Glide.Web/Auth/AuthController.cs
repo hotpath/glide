@@ -21,6 +21,8 @@ public class AuthController(
     AuthContext authContext,
     OAuthProviderFactory providerFactory,
     IHttpClientFactory clientFactory,
+    PasswordAuthService passwordAuthService,
+    SessionConfig sessionConfig,
     ILogger<AuthController> logger,
     IUserRepository userRepository,
     IUserOAuthProviderRepository oauthProviderRepository,
@@ -206,5 +208,124 @@ public class AuthController(
 
         HttpContext.Response.Cookies.Delete("glide_session");
         return Redirect("/");
+    }
+
+    [HttpPost("register")]
+    public async Task<IActionResult> Register(
+        [FromForm] string email,
+        [FromForm] string password,
+        [FromForm] string? displayName = null)
+    {
+        logger.LogTrace("Registration attempt for email: {email}", email);
+
+        // Validate email
+        if (string.IsNullOrWhiteSpace(email))
+        {
+            return BadRequest("Email is required");
+        }
+
+        // Validate password strength
+        string? passwordError = passwordAuthService.ValidatePasswordStrength(password);
+        if (passwordError is not null)
+        {
+            return BadRequest(passwordError);
+        }
+
+        // Check if user already exists
+        User? existingUser = await userRepository.GetByEmailAsync(email);
+        if (existingUser is not null)
+        {
+            return BadRequest("An account with this email already exists");
+        }
+
+        // Hash the password
+        string passwordHash = passwordAuthService.HashPassword(password);
+
+        // Create new user
+        long now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+        User newUser = new()
+        {
+            Id = Guid.CreateVersion7().ToString(),
+            Email = email,
+            DisplayName = displayName ?? email.Split('@')[0], // Use email prefix as default display name
+            PasswordHash = passwordHash,
+            CreatedAt = now,
+            UpdatedAt = now
+        };
+
+        await userRepository.CreateAsync(newUser);
+        logger.LogTrace("Created new user: {userId}", newUser.Id);
+
+        // Create session
+        Session session = await sessionRepository.CreateAsync(newUser.Id, sessionConfig.DurationSeconds);
+        logger.LogTrace("Session created: {sessionId}", session.Id);
+
+        // Set cookie
+        HttpContext.Response.Cookies.Append("glide_session", session.Id,
+            new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = HttpContext.Request.IsHttps,
+                SameSite = SameSiteMode.Lax,
+                MaxAge = TimeSpan.FromSeconds(sessionConfig.DurationSeconds),
+                Path = "/"
+            });
+
+        return Redirect("/dashboard");
+    }
+
+    [HttpPost("login-password")]
+    public async Task<IActionResult> LoginWithPassword(
+        [FromForm] string email,
+        [FromForm] string password)
+    {
+        logger.LogTrace("Password login attempt for email: {email}", email);
+
+        // Validate inputs
+        if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
+        {
+            return BadRequest("Email and password are required");
+        }
+
+        // Find user by email
+        User? user = await userRepository.GetByEmailAsync(email);
+        if (user is null)
+        {
+            // Don't reveal whether user exists
+            return BadRequest("Invalid email or password");
+        }
+
+        // Check if user has a password set
+        if (string.IsNullOrWhiteSpace(user.PasswordHash))
+        {
+            return BadRequest("This account uses OAuth login. Please use the OAuth buttons to log in.");
+        }
+
+        // Verify password
+        bool passwordValid = passwordAuthService.VerifyPassword(password, user.PasswordHash);
+        if (!passwordValid)
+        {
+            logger.LogDebug("Invalid password for user: {userId}", user.Id);
+            return BadRequest("Invalid email or password");
+        }
+
+        logger.LogTrace("Password verified for user: {userId}", user.Id);
+
+        // Create session
+        Session session = await sessionRepository.CreateAsync(user.Id, sessionConfig.DurationSeconds);
+        logger.LogTrace("Session created: {sessionId}", session.Id);
+
+        // Set cookie
+        HttpContext.Response.Cookies.Append("glide_session", session.Id,
+            new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = HttpContext.Request.IsHttps,
+                SameSite = SameSiteMode.Lax,
+                MaxAge = TimeSpan.FromSeconds(sessionConfig.DurationSeconds),
+                Path = "/"
+            });
+
+        return Redirect("/dashboard");
     }
 }
