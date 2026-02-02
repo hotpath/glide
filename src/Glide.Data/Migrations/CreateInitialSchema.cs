@@ -37,15 +37,15 @@ public class CreateInitialSchema : Migration
 
         Create.UniqueConstraint("uniq_boards_users").OnTable("boards_users").Columns("board_id", "user_id");
 
-        Create.Table("swimlanes")
+        Create.Table("columns")
             .WithColumn("id").AsString().NotNullable().PrimaryKey()
             .WithColumn("name").AsString().NotNullable()
             .WithColumn("board_id").AsString().NotNullable().ForeignKey("fk_board_id_boards", "boards", "id")
             .OnDelete(Rule.Cascade)
-            .Indexed("idx_swimlanes_board_id")
+            .Indexed("idx_columns_board_id")
             .WithColumn("position").AsInt32().NotNullable().WithDefaultValue(0);
 
-        Create.Table("tasks")
+        Create.Table("cards")
             .WithColumn("id").AsString().NotNullable().PrimaryKey()
             .WithColumn("title").AsString().NotNullable()
             .WithColumn("description").AsString().Nullable()
@@ -53,8 +53,8 @@ public class CreateInitialSchema : Migration
             .OnDelete(Rule.Cascade)
             .Indexed("idx_boards_board_id")
             .WithColumn("assigned_to").AsString().ForeignKey("fk_assigned_to_users", "users", "id").Nullable()
-            .WithColumn("swimlane_id").AsString().ForeignKey("fk_swimlane_id_swimlanes", "swimlanes", "id")
-            .Indexed("idx_tasks_swimlane_id")
+            .WithColumn("column_id").AsString().ForeignKey("fk_column_id_columns", "columns", "id")
+            .Indexed("idx_cards_column_id")
             .WithColumn("position").AsInt32().NotNullable().WithDefaultValue(0)
             .Indexed("idx_boards_assigned_to");
 
@@ -75,28 +75,28 @@ public class CreateInitialSchema : Migration
             .WithColumn("icon").AsString();
 
         Execute.Sql("""
-                                CREATE TABLE task_labels (
-                                    task_id TEXT NOT NULL,
+                                CREATE TABLE card_labels (
+                                    card_id TEXT NOT NULL,
                                     label_id TEXT NOT NULL,
-                                    PRIMARY KEY (task_id, label_id),
-                                    FOREIGN KEY (task_id) REFERENCES tasks(id),
+                                    PRIMARY KEY (card_id, label_id),
+                                    FOREIGN KEY (card_id) REFERENCES cards(id),
                                     FOREIGN KEY (label_id) REFERENCES labels(id)
                                 )
                     """);
 
-        Create.Index("idx_task_labels_task_id").OnTable("task_labels").OnColumn("task_id");
-        Create.Index("idx_task_labels_label_id").OnTable("task_labels").OnColumn("label_id");
+        Create.Index("idx_card_labels_card_id").OnTable("card_labels").OnColumn("card_id");
+        Create.Index("idx_card_labels_label_id").OnTable("card_labels").OnColumn("label_id");
     }
 
     public override void Down()
     {
-        Delete.Index("idx_task_labels_label_id").OnTable("task_labels");
-        Delete.Index("idx_task_labels_task_id").OnTable("task_labels");
-        Delete.Table("task_labels");
+        Delete.Index("idx_card_labels_label_id").OnTable("card_labels");
+        Delete.Index("idx_card_labels_card_id").OnTable("card_labels");
+        Delete.Table("card_labels");
         Delete.Table("labels");
         Delete.Table("sessions");
-        Delete.Table("tasks");
-        Delete.Table("swimlanes");
+        Delete.Table("cards");
+        Delete.Table("columns");
         Delete.Table("boards");
         Delete.UniqueConstraint("uniq_boards_users").FromTable("boards_users");
         Delete.Table("boards_users");
