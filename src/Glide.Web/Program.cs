@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 using Dapper;
 
@@ -13,6 +14,7 @@ using Glide.Data.Columns;
 using Glide.Data.Migrations;
 using Glide.Data.Sessions;
 using Glide.Data.Users;
+using Glide.Data.UserOAuthProviders;
 using Glide.Web.Auth;
 using Glide.Web.Boards;
 using Glide.Web.Cards;
@@ -47,16 +49,42 @@ builder.WebHost.ConfigureKestrel(options =>
     options.ListenAnyIP(int.Parse(port));
 });
 
-builder.Services.AddSingleton<ForgejoOAuthConfig>(sp =>
-    ForgejoOAuthConfig.FromConfig(sp.GetRequiredService<IConfiguration>()));
-
-builder.Services.AddSingleton<AuthContext>()
-    .AddSingleton<OAuthClient>();
-
-builder.Services.AddHttpClient("ForgejoOAuth", (sp, client) =>
+// Provider configurations
+builder.Services.AddSingleton(sp =>
 {
-    ForgejoOAuthConfig config = sp.GetRequiredService<ForgejoOAuthConfig>();
-    client.BaseAddress = config.BaseUri;
+    var config = sp.GetRequiredService<IConfiguration>();
+    return new Dictionary<string, OAuthProviderConfig>
+    {
+        ["forgejo"] = OAuthProviderConfig.FromConfig(config, "FORGEJO"),
+        ["github"] = OAuthProviderConfig.FromConfig(config, "GITHUB")
+    };
+});
+
+// Update AuthContext to use new config dictionary
+builder.Services.AddSingleton<AuthContext>(sp =>
+{
+    var configs = sp.GetRequiredService<Dictionary<string, OAuthProviderConfig>>();
+    return new AuthContext(configs);
+});
+
+// Register provider implementations
+builder.Services.AddSingleton<IOAuthProvider, ForgejoOAuthProvider>();
+builder.Services.AddSingleton<IOAuthProvider, GitHubOAuthProvider>();
+
+// Register factory
+builder.Services.AddSingleton<OAuthProviderFactory>();
+
+// HTTP clients for each provider
+builder.Services.AddHttpClient("forgejoOAuth", (sp, client) =>
+{
+    var configs = sp.GetRequiredService<Dictionary<string, OAuthProviderConfig>>();
+    client.BaseAddress = configs["forgejo"].BaseUri;
+});
+
+builder.Services.AddHttpClient("githubOAuth", (sp, client) =>
+{
+    var configs = sp.GetRequiredService<Dictionary<string, OAuthProviderConfig>>();
+    client.BaseAddress = configs["github"].BaseUri;
 });
 
 // DB Migrations
@@ -64,6 +92,7 @@ string dbPath = Environment.GetEnvironmentVariable("GLIDE_DATABASE_PATH") ?? "/a
 
 builder.Services.AddSingleton<IDbConnectionFactory>(new SqliteConnectionFactory($"Data Source={dbPath}"))
     .AddSingleton<IUserRepository, UserRepository>()
+    .AddSingleton<IUserOAuthProviderRepository, UserOAuthProviderRepository>()
     .AddSingleton<ISessionRepository, SessionRepository>()
     .AddSingleton<IBoardRepository, BoardRepository>()
     .AddSingleton<IColumnRepository, ColumnRepository>()

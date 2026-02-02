@@ -199,15 +199,16 @@ public class SessionRepositoryTests : RepositoryTestBase
     private async Task<User> CreateTestUser(string providerId, string displayName = "Test User",
         string? email = null)
     {
+        long now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
         User user = new()
         {
-            Id = Guid.NewGuid().ToString(),
-            OAuthProvider = "forgejo",
-            OAuthProviderId = providerId,
+            Id = Guid.CreateVersion7().ToString(),
             DisplayName = displayName,
-            Email = email ?? $"{providerId}@example.com"
+            Email = email ?? $"{providerId}@example.com",
+            CreatedAt = now,
+            UpdatedAt = now
         };
-        await _userRepository.Create(user);
+        await _userRepository.CreateAsync(user);
         return user;
     }
 }

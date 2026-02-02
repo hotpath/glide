@@ -125,7 +125,7 @@ body.login-page {
 .oauth-button {
     display: inline-block;
     background: var(--accent-blue);
-    color: var(--bg-dark);
+    color: white;
     text-decoration: none;
     padding: 1rem 2rem;
     border-radius: 6px;
@@ -133,14 +133,37 @@ body.login-page {
     font-size: 1rem;
     transition: background 0.2s ease;
     margin-top: 1rem;
+    margin-bottom: 1rem;
+    width: 100%;
 }
 
 .oauth-button:hover {
     background: var(--accent-blue-hover);
 }
 
-.oauth-button:before {
+.forgejo-button {
+    background: #2185d0;
+}
+
+.forgejo-button:hover {
+    background: #1e77ba;
+}
+
+.forgejo-button:before {
     content: "🌲";
+    margin-right: 0.5rem;
+}
+
+.github-button {
+    background: #24292e;
+}
+
+.github-button:hover {
+    background: #1b1f23;
+}
+
+.github-button:before {
+    content: "🐙";
     margin-right: 0.5rem;
 }
 

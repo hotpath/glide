@@ -5,10 +5,8 @@ namespace Glide.Data.Users;
 
 public interface IUserRepository
 {
-    Task<User?> GetAsync(string provider, string providerId, CancellationToken cancellationToken = default);
-    Task Create(User user);
+    Task<User?> GetByIdAsync(string id);
+    Task<User?> GetByEmailAsync(string email);
+    Task<User> CreateAsync(User user);
     Task UpdateAsync(User user);
-
-    Task<User> CreateOrUpdateFromOAuthAsync(string provider, string providerId, string displayName,
-        string email);
 }
