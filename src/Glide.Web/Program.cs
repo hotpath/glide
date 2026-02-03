@@ -39,6 +39,10 @@ DefaultTypeMap.MatchNamesWithUnderscores = true;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 builder.Configuration.AddEnvironmentVariables();
+
+// Validate required configuration early
+ConfigurationValidator.ValidateRequired(builder.Configuration);
+
 builder.Services.AddRazorComponents();
 builder.Services.AddControllers();
 builder.Services.AddHttpContextAccessor();
