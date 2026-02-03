@@ -6,6 +6,7 @@
     <File Path=".gitignore" />
     <File Path="compose.yml" />
     <File Path="Containerfile" />
+    <File Path="Directory.Build.props" />
     <File Path="global.json" />
     <File Path="LICENSE" />
     <File Path="README.md" />
