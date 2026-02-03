@@ -1,4 +1,6 @@
 @using Glide.Web.Features.Shared
+@using Glide.Web.Auth
+@inject Dictionary<string, OAuthProviderConfig> OAuthConfigs
 
 <HtmxLayout Title="Login" BodyClass="login-page">
     <div class="login-container">
@@ -26,19 +28,22 @@
                 <button type="submit" class="auth-submit-button">Login</button>
             </form>
 
-            <div class="auth-divider">
-                <span>or continue with</span>
-            </div>
+            @if (IsGitHubConfigured)
+            {
+                <div class="auth-divider">
+                    <span>or continue with</span>
+                </div>
 
-            <div class="oauth-buttons">
-                <a href="/auth/login?provider=github" class="oauth-button github-button">
-                    <span class="oauth-icon">
-                        <img src="/images/GitHub_Invertocat_Black_Clearspace.svg" alt="" class="github-logo-light" />
-                        <img src="/images/GitHub_Invertocat_White_Clearspace.svg" alt="" class="github-logo-dark" />
-                    </span>
-                    Login with GitHub
-                </a>
-            </div>
+                <div class="oauth-buttons">
+                    <a href="/auth/login?provider=github" class="oauth-button github-button">
+                        <span class="oauth-icon">
+                            <img src="/images/GitHub_Invertocat_Black_Clearspace.svg" alt="" class="github-logo-light" />
+                            <img src="/images/GitHub_Invertocat_White_Clearspace.svg" alt="" class="github-logo-dark" />
+                        </span>
+                        Login with GitHub
+                    </a>
+                </div>
+            }
         </div>
 
         <!-- Register tab -->
@@ -60,19 +65,22 @@
                 <button type="submit" class="auth-submit-button">Create Account</button>
             </form>
 
-            <div class="auth-divider">
-                <span>or sign up with</span>
-            </div>
+            @if (IsGitHubConfigured)
+            {
+                <div class="auth-divider">
+                    <span>or sign up with</span>
+                </div>
 
-            <div class="oauth-buttons">
-                <a href="/auth/login?provider=github" class="oauth-button github-button">
-                    <span class="oauth-icon">
-                        <img src="/images/GitHub_Invertocat_Black_Clearspace.svg" alt="" class="github-logo-light" />
-                        <img src="/images/GitHub_Invertocat_White_Clearspace.svg" alt="" class="github-logo-dark" />
-                    </span>
-                    Sign up with GitHub
-                </a>
-            </div>
+                <div class="oauth-buttons">
+                    <a href="/auth/login?provider=github" class="oauth-button github-button">
+                        <span class="oauth-icon">
+                            <img src="/images/GitHub_Invertocat_Black_Clearspace.svg" alt="" class="github-logo-light" />
+                            <img src="/images/GitHub_Invertocat_White_Clearspace.svg" alt="" class="github-logo-dark" />
+                        </span>
+                        Sign up with GitHub
+                    </a>
+                </div>
+            }
         </div>
 
         <div id="error-message"></div>
@@ -94,3 +102,7 @@
         }
     </script>
 </HtmxLayout>
+
+@code {
+    private bool IsGitHubConfigured => OAuthConfigs.TryGetValue("github", out var config) && !string.IsNullOrEmpty(config.ClientId);
+}
