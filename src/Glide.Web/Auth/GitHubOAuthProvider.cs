@@ -86,12 +86,54 @@ public class GitHubOAuthProvider : IOAuthProvider
             return null;
         }
 
+        // If email is not provided in /user, fetch from /user/emails
+        string email = user.Email ?? "";
+        if (string.IsNullOrEmpty(email))
+        {
+            email = await GetPrimaryEmailAsync(client, accessToken, cancellationToken) ?? "";
+        }
+
         return new OAuthUserInfo(
             ProviderId: user.Id.ToString(),
             Username: user.Login,
-            Email: user.Email ?? "",
+            Email: email,
             DisplayName: user.Name ?? user.Login
         );
+    }
+
+    private async Task<string?> GetPrimaryEmailAsync(
+        HttpClient client,
+        string accessToken,
+        CancellationToken cancellationToken = default)
+    {
+        HttpRequestMessage request = new(HttpMethod.Get, "https://api.github.com/user/emails");
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+        request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.github+json"));
+        request.Headers.UserAgent.Add(new ProductInfoHeaderValue("Glide", "1.0"));
+
+        HttpResponseMessage response = await client.SendAsync(request, cancellationToken);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            return null;
+        }
+
+        List<GitHubEmail>? emails = await response.Content.ReadFromJsonAsync<List<GitHubEmail>>(_jsonOpts, cancellationToken);
+
+        if (emails is null || emails.Count == 0)
+        {
+            return null;
+        }
+
+        // Find the primary email, or fall back to the first verified email
+        GitHubEmail? primaryEmail = emails.Find(e => e.Primary && e.Verified);
+        if (primaryEmail != null)
+        {
+            return primaryEmail.Email;
+        }
+
+        GitHubEmail? verifiedEmail = emails.Find(e => e.Verified);
+        return verifiedEmail?.Email;
     }
 
     private record GitHubUser
@@ -100,6 +142,13 @@ public class GitHubOAuthProvider : IOAuthProvider
         public required string Login { get; init; }
         public string? Email { get; init; }
         public string? Name { get; init; }
+    }
+
+    private record GitHubEmail
+    {
+        public required string Email { get; init; }
+        public bool Primary { get; init; }
+        public bool Verified { get; init; }
     }
 
     private record TokenResult

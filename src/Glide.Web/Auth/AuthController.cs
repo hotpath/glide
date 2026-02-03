@@ -103,14 +103,82 @@ public class AuthController(
         {
             // User has logged in with this provider before
             logger.LogTrace("Found existing OAuth provider record for user {userId}", oauthProviderRecord.UserId);
-            user = await userRepository.GetByIdAsync(oauthProviderRecord.UserId)
-                   ?? throw new InvalidOperationException("User not found for OAuth provider");
-
-            // Update user info if display name changed
-            if (user.DisplayName != oauthUser.DisplayName)
+            User? existingUser = await userRepository.GetByIdAsync(oauthProviderRecord.UserId);
+            
+            if (existingUser is not null)
             {
-                await userRepository.UpdateAsync(user with { DisplayName = oauthUser.DisplayName });
-                user = user with { DisplayName = oauthUser.DisplayName };
+                user = existingUser;
+
+                // Update user info if display name changed
+                if (user.DisplayName != oauthUser.DisplayName)
+                {
+                    await userRepository.UpdateAsync(user with { DisplayName = oauthUser.DisplayName });
+                    user = user with { DisplayName = oauthUser.DisplayName };
+                }
+            }
+            else
+            {
+                // Orphaned OAuth provider record (user was deleted). Clean it up and link to existing user if available.
+                logger.LogDebug("OAuth provider record found but user missing. Deleting orphaned record.");
+                await oauthProviderRepository.DeleteAsync(oauthProviderRecord.Id);
+
+                // Check if user exists by email and link provider to them
+                User? userByEmail = await userRepository.GetByEmailAsync(oauthUser.Email);
+
+                long now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                if (userByEmail is not null)
+                {
+                    logger.LogTrace("Linking OAuth provider to existing user {userId}", userByEmail.Id);
+                    user = userByEmail;
+
+                    UserOAuthProvider newProviderLink = new()
+                    {
+                        Id = Guid.CreateVersion7().ToString(),
+                        UserId = user.Id,
+                        Provider = provider,
+                        ProviderUserId = oauthUser.ProviderId,
+                        ProviderEmail = oauthUser.Email,
+                        CreatedAt = now,
+                        UpdatedAt = now
+                    };
+
+                    await oauthProviderRepository.CreateAsync(newProviderLink);
+
+                    // Update display name if different
+                    if (user.DisplayName != oauthUser.DisplayName)
+                    {
+                        await userRepository.UpdateAsync(user with { DisplayName = oauthUser.DisplayName });
+                        user = user with { DisplayName = oauthUser.DisplayName };
+                    }
+                }
+                else
+                {
+                    // Create new user
+                    logger.LogTrace("Creating new user for OAuth provider {provider}", provider);
+                    user = new User
+                    {
+                        Id = Guid.CreateVersion7().ToString(),
+                        DisplayName = oauthUser.DisplayName,
+                        Email = oauthUser.Email,
+                        CreatedAt = now,
+                        UpdatedAt = now
+                    };
+
+                    await userRepository.CreateAsync(user);
+
+                    UserOAuthProvider newProviderLink = new()
+                    {
+                        Id = Guid.CreateVersion7().ToString(),
+                        UserId = user.Id,
+                        Provider = provider,
+                        ProviderUserId = oauthUser.ProviderId,
+                        ProviderEmail = oauthUser.Email,
+                        CreatedAt = now,
+                        UpdatedAt = now
+                    };
+
+                    await oauthProviderRepository.CreateAsync(newProviderLink);
+                }
             }
         }
         else
