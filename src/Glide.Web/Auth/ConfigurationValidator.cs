@@ -1,35 +1,30 @@
-namespace Glide.Web.Auth;
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
 using Microsoft.Extensions.Configuration;
 
+namespace Glide.Web.Auth;
+
 /// <summary>
-/// Validates required configuration on application startup.
-/// Ensures all required environment variables are set before the app runs.
+///     Validates required configuration on application startup.
+///     Ensures all required environment variables are set before the app runs.
 /// </summary>
 public static class ConfigurationValidator
 {
     public static void ValidateRequired(IConfiguration configuration)
     {
-        var requiredVariables = new[]
-        {
-            "GLIDE_DATABASE_PATH",
-            "OAUTH_CLIENT_ID",
-            "OAUTH_CLIENT_SECRET",
-            "OAUTH_AUTHORIZE_URL",
-            "OAUTH_TOKEN_URL",
-            "OAUTH_USER_INFO_URL",
-            "OAUTH_REDIRECT_URI"
-        };
+        string[] requiredVariables =
+        [
+            "GLIDE_DATABASE_PATH", "GITHUB_CLIENT_ID", "GITHUB_CLIENT_SECRET", "GITHUB_BASE_URI",
+            "GITHUB_REDIRECT_URI"
+        ];
 
-        var missingVariables = new List<string>();
+        List<string> missingVariables = new();
 
-        foreach (var variable in requiredVariables)
+        foreach (string variable in requiredVariables)
         {
-            var value = configuration[variable];
+            string? value = configuration[variable];
             if (string.IsNullOrWhiteSpace(value))
             {
                 missingVariables.Add(variable);
