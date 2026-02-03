@@ -29,7 +29,9 @@ public class BoardRepository(IDbConnectionFactory connectionFactory) : IBoardRep
 
         return new Board
         {
-            Id = id, Name = name, BoardUsers = [new BoardUser { BoardId = id, UserId = userId, IsOwner = true }]
+            Id = id,
+            Name = name,
+            BoardUsers = [new BoardUser { BoardId = id, UserId = userId, IsOwner = true }]
         };
     }
 

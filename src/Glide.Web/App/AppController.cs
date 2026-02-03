@@ -23,7 +23,7 @@ public class AppController : ControllerBase
     {
         return Task.FromResult<IResult>(new RazorComponentResult<About>());
     }
-    
+
     [HttpGet("/profile")]
     [Authorize]
     public Task<IResult> GetProfile()

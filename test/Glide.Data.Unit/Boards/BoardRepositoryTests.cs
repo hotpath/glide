@@ -257,7 +257,7 @@ public class BoardRepositoryTests : RepositoryTestBase
         User owner = await CreateTestUser("board-owner");
         User user1 = await CreateTestUser("board-user-12");
         User user2 = await CreateTestUser("board-user-13");
-        
+
         Board board = await _repository.CreateAsync("Multi-User Board", owner.Id);
         await _repository.AddUserToBoardAsync(board.Id, user1.Id, false);
         await _repository.AddUserToBoardAsync(board.Id, user2.Id, true);

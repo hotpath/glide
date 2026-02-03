@@ -6,8 +6,8 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using Glide.Data.Sessions;
-using Glide.Data.Users;
 using Glide.Data.UserOAuthProviders;
+using Glide.Data.Users;
 
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -104,7 +104,7 @@ public class AuthController(
             // User has logged in with this provider before
             logger.LogTrace("Found existing OAuth provider record for user {userId}", oauthProviderRecord.UserId);
             User? existingUser = await userRepository.GetByIdAsync(oauthProviderRecord.UserId);
-            
+
             if (existingUser is not null)
             {
                 user = existingUser;
