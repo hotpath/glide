@@ -22,7 +22,7 @@
                             hx-vals='{"label_id": "@label.Id"}'
                             hx-target="#card-labels-@CardId"
                             hx-swap="innerHTML">
-                        <span class="label-badge" style="background-color: @label.Color">
+                        <span class="label-badge">
                             @if (!string.IsNullOrWhiteSpace(label.Icon))
                             {
                                 <span class="label-icon">@label.Icon</span>
@@ -36,7 +36,6 @@
             <div class="create-label-inline">
                 <h4>Create New Label</h4>
                 <input type="text" id="new-label-name-@CardId" placeholder="Label name" maxlength="50" />
-                <input type="color" id="new-label-color-@CardId" value="#808080" />
                 <input type="text" id="new-label-icon-@CardId" placeholder="Icon (emoji)" maxlength="2" />
                 <button type="button" onclick="createLabelForCard('@CardId', '@BoardId')">Create & Add</button>
             </div>
@@ -48,7 +47,7 @@
                         hx-delete="/cards/@CardId/labels/@label.Id"
                         hx-target="#card-labels-@CardId"
                         hx-swap="innerHTML">
-                    <span class="label-badge" style="background-color: @label.Color">
+                    <span class="label-badge">
                         @if (!string.IsNullOrWhiteSpace(label.Icon))
                         {
                             <span class="label-icon">@label.Icon</span>

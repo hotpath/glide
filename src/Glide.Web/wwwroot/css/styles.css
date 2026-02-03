@@ -1607,9 +1607,11 @@ textarea#card-description {
     gap: 0.25rem;
     padding: 0.25rem 0.5rem;
     border-radius: 4px;
+    border: 1px solid #4b5563;
     font-size: 0.75rem;
     font-weight: 600;
     color: white;
+    background-color: #6b7280;
     white-space: nowrap;
 }
 

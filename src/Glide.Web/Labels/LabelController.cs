@@ -17,10 +17,9 @@ public class LabelController(LabelAction labelAction) : ControllerBase
     public async Task<IResult> CreateAsync(
         [FromForm(Name = "board_id")] string boardId,
         [FromForm] string name,
-        [FromForm] string color,
         [FromForm] string? icon)
     {
-        LabelAction.Result<LabelView> result = await labelAction.CreateAsync(boardId, name, color, icon, User);
+        LabelAction.Result<LabelView> result = await labelAction.CreateAsync(boardId, name, icon, User);
         if (result.IsError)
         {
             return result.StatusResult!;
@@ -35,10 +34,9 @@ public class LabelController(LabelAction labelAction) : ControllerBase
     public async Task<IResult> UpdateAsync(
         [FromRoute] string id,
         [FromForm] string name,
-        [FromForm] string color,
         [FromForm] string? icon)
     {
-        LabelAction.Result<LabelView> result = await labelAction.UpdateAsync(id, name, color, icon, User);
+        LabelAction.Result<LabelView> result = await labelAction.UpdateAsync(id, name, icon, User);
         return result.IsError
             ? result.StatusResult!
             : new RazorComponentResult<LabelBadge>(new { Label = result.Object });

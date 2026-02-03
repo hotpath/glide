@@ -30,14 +30,13 @@ public class LabelRepositoryTests : RepositoryTestBase
         Board board = await CreateTestBoard();
 
         // Act
-        Label label = await _repository.CreateAsync(board.Id, "Bug", "#ff0000", "🐛");
+        Label label = await _repository.CreateAsync(board.Id, "Bug", "🐛");
 
         // Assert
         await Assert.That(label).IsNotNull();
         await Assert.That(label.Id).IsNotEmpty();
         await Assert.That(label.BoardId).IsEqualTo(board.Id);
         await Assert.That(label.Name).IsEqualTo("Bug");
-        await Assert.That(label.Color).IsEqualTo("#ff0000");
         await Assert.That(label.Icon).IsEqualTo("🐛");
     }
 
@@ -48,7 +47,7 @@ public class LabelRepositoryTests : RepositoryTestBase
         Board board = await CreateTestBoard();
 
         // Act
-        Label label = await _repository.CreateAsync(board.Id, "Feature", "#00ff00", null);
+        Label label = await _repository.CreateAsync(board.Id, "Feature", null);
 
         // Assert
         await Assert.That(label).IsNotNull();
@@ -61,7 +60,7 @@ public class LabelRepositoryTests : RepositoryTestBase
     {
         // Arrange
         Board board = await CreateTestBoard();
-        Label created = await _repository.CreateAsync(board.Id, "Enhancement", "#0000ff", "✨");
+        Label created = await _repository.CreateAsync(board.Id, "Enhancement", "✨");
 
         // Act
         Label? result = await _repository.GetByIdAsync(created.Id);
@@ -70,7 +69,6 @@ public class LabelRepositoryTests : RepositoryTestBase
         await Assert.That(result).IsNotNull();
         await Assert.That(result!.Id).IsEqualTo(created.Id);
         await Assert.That(result.Name).IsEqualTo("Enhancement");
-        await Assert.That(result.Color).IsEqualTo("#0000ff");
         await Assert.That(result.Icon).IsEqualTo("✨");
     }
 
@@ -91,9 +89,9 @@ public class LabelRepositoryTests : RepositoryTestBase
         Board board1 = await CreateTestBoard();
         Board board2 = await CreateTestBoard();
 
-        await _repository.CreateAsync(board1.Id, "Bug", "#ff0000", "🐛");
-        await _repository.CreateAsync(board1.Id, "Feature", "#00ff00", "✨");
-        await _repository.CreateAsync(board2.Id, "Task", "#0000ff", "📋");
+        await _repository.CreateAsync(board1.Id, "Bug", "🐛");
+        await _repository.CreateAsync(board1.Id, "Feature", "✨");
+        await _repository.CreateAsync(board2.Id, "Task", "📋");
 
         // Act
         IEnumerable<Label> labels = await _repository.GetByBoardIdAsync(board1.Id);
@@ -123,9 +121,9 @@ public class LabelRepositoryTests : RepositoryTestBase
     {
         // Arrange
         Board board = await CreateTestBoard();
-        await _repository.CreateAsync(board.Id, "Zebra", "#ff0000", null);
-        await _repository.CreateAsync(board.Id, "Apple", "#00ff00", null);
-        await _repository.CreateAsync(board.Id, "Mango", "#0000ff", null);
+        await _repository.CreateAsync(board.Id, "Zebra", null);
+        await _repository.CreateAsync(board.Id, "Apple", null);
+        await _repository.CreateAsync(board.Id, "Mango", null);
 
         // Act
         IEnumerable<Label> labels = await _repository.GetByBoardIdAsync(board.Id);
@@ -142,15 +140,14 @@ public class LabelRepositoryTests : RepositoryTestBase
     {
         // Arrange
         Board board = await CreateTestBoard();
-        Label label = await _repository.CreateAsync(board.Id, "Old Name", "#111111", "🔧");
+        Label label = await _repository.CreateAsync(board.Id, "Old Name", "🔧");
 
         // Act
-        await _repository.UpdateAsync(label.Id, "New Name", "#222222", "🎨");
+        await _repository.UpdateAsync(label.Id, "New Name", "🎨");
 
         // Assert
         Label? updated = await _repository.GetByIdAsync(label.Id);
         await Assert.That(updated!.Name).IsEqualTo("New Name");
-        await Assert.That(updated.Color).IsEqualTo("#222222");
         await Assert.That(updated.Icon).IsEqualTo("🎨");
     }
 
@@ -159,10 +156,10 @@ public class LabelRepositoryTests : RepositoryTestBase
     {
         // Arrange
         Board board = await CreateTestBoard();
-        Label label = await _repository.CreateAsync(board.Id, "Label", "#ffffff", "⭐");
+        Label label = await _repository.CreateAsync(board.Id, "Label", "⭐");
 
         // Act
-        await _repository.UpdateAsync(label.Id, "Label", "#ffffff", null);
+        await _repository.UpdateAsync(label.Id, "Label", null);
 
         // Assert
         Label? updated = await _repository.GetByIdAsync(label.Id);
@@ -174,7 +171,7 @@ public class LabelRepositoryTests : RepositoryTestBase
     {
         // Arrange
         Board board = await CreateTestBoard();
-        Label label = await _repository.CreateAsync(board.Id, "To Delete", "#000000", null);
+        Label label = await _repository.CreateAsync(board.Id, "To Delete", null);
 
         Label? beforeDelete = await _repository.GetByIdAsync(label.Id);
         await Assert.That(beforeDelete).IsNotNull();
@@ -200,7 +197,7 @@ public class LabelRepositoryTests : RepositoryTestBase
         // Arrange
         (Board board, Column column) = await CreateTestBoardAndColumn();
         Card card = await _cardRepository.CreateAsync("Card", board.Id, column.Id);
-        Label label = await _repository.CreateAsync(board.Id, "Label", "#ff0000", null);
+        Label label = await _repository.CreateAsync(board.Id, "Label", null);
 
         // Act
         await _repository.AddLabelToCardAsync(card.Id, label.Id);
@@ -216,7 +213,7 @@ public class LabelRepositoryTests : RepositoryTestBase
         // Arrange
         (Board board, Column column) = await CreateTestBoardAndColumn();
         Card card = await _cardRepository.CreateAsync("Card", board.Id, column.Id);
-        Label label = await _repository.CreateAsync(board.Id, "Label", "#ff0000", null);
+        Label label = await _repository.CreateAsync(board.Id, "Label", null);
 
         // Act
         await _repository.AddLabelToCardAsync(card.Id, label.Id);
@@ -233,7 +230,7 @@ public class LabelRepositoryTests : RepositoryTestBase
         // Arrange
         (Board board, Column column) = await CreateTestBoardAndColumn();
         Card card = await _cardRepository.CreateAsync("Card", board.Id, column.Id);
-        Label label = await _repository.CreateAsync(board.Id, "Label", "#ff0000", null);
+        Label label = await _repository.CreateAsync(board.Id, "Label", null);
         await _repository.AddLabelToCardAsync(card.Id, label.Id);
 
         // Act
@@ -250,7 +247,7 @@ public class LabelRepositoryTests : RepositoryTestBase
         // Arrange
         (Board board, Column column) = await CreateTestBoardAndColumn();
         Card card = await _cardRepository.CreateAsync("Card", board.Id, column.Id);
-        Label label = await _repository.CreateAsync(board.Id, "Label", "#ff0000", null);
+        Label label = await _repository.CreateAsync(board.Id, "Label", null);
 
         // Act & Assert
         await _repository.RemoveLabelFromCardAsync(card.Id, label.Id);
@@ -262,9 +259,9 @@ public class LabelRepositoryTests : RepositoryTestBase
         // Arrange
         (Board board, Column column) = await CreateTestBoardAndColumn();
         Card card = await _cardRepository.CreateAsync("Card", board.Id, column.Id);
-        Label label1 = await _repository.CreateAsync(board.Id, "Bug", "#ff0000", "🐛");
-        Label label2 = await _repository.CreateAsync(board.Id, "Feature", "#00ff00", "✨");
-        Label label3 = await _repository.CreateAsync(board.Id, "Task", "#0000ff", "📋");
+        Label label1 = await _repository.CreateAsync(board.Id, "Bug", "🐛");
+        Label label2 = await _repository.CreateAsync(board.Id, "Feature", "✨");
+        Label label3 = await _repository.CreateAsync(board.Id, "Task", "📋");
 
         await _repository.AddLabelToCardAsync(card.Id, label1.Id);
         await _repository.AddLabelToCardAsync(card.Id, label3.Id);
@@ -300,8 +297,8 @@ public class LabelRepositoryTests : RepositoryTestBase
         // Arrange
         (Board board, Column column) = await CreateTestBoardAndColumn();
         Card card = await _cardRepository.CreateAsync("Card", board.Id, column.Id);
-        Label label1 = await _repository.CreateAsync(board.Id, "Zebra", "#ff0000", null);
-        Label label2 = await _repository.CreateAsync(board.Id, "Apple", "#00ff00", null);
+        Label label1 = await _repository.CreateAsync(board.Id, "Zebra", null);
+        Label label2 = await _repository.CreateAsync(board.Id, "Apple", null);
 
         await _repository.AddLabelToCardAsync(card.Id, label1.Id);
         await _repository.AddLabelToCardAsync(card.Id, label2.Id);
@@ -323,7 +320,7 @@ public class LabelRepositoryTests : RepositoryTestBase
         Card card1 = await _cardRepository.CreateAsync("Card 1", board.Id, column.Id);
         Card card2 = await _cardRepository.CreateAsync("Card 2", board.Id, column.Id);
         Card card3 = await _cardRepository.CreateAsync("Card 3", board.Id, column.Id);
-        Label label = await _repository.CreateAsync(board.Id, "Bug", "#ff0000", "🐛");
+        Label label = await _repository.CreateAsync(board.Id, "Bug", "🐛");
 
         await _repository.AddLabelToCardAsync(card1.Id, label.Id);
         await _repository.AddLabelToCardAsync(card3.Id, label.Id);
@@ -344,7 +341,7 @@ public class LabelRepositoryTests : RepositoryTestBase
     {
         // Arrange
         Board board = await CreateTestBoard();
-        Label label = await _repository.CreateAsync(board.Id, "Label", "#ff0000", null);
+        Label label = await _repository.CreateAsync(board.Id, "Label", null);
 
         // Act
         IEnumerable<string> cardIds = await _repository.GetCardIdsByLabelIdAsync(label.Id);
@@ -359,7 +356,7 @@ public class LabelRepositoryTests : RepositoryTestBase
         // Arrange
         (Board board, Column column) = await CreateTestBoardAndColumn();
         Card card = await _cardRepository.CreateAsync("Card", board.Id, column.Id);
-        Label label = await _repository.CreateAsync(board.Id, "Label", "#ff0000", null);
+        Label label = await _repository.CreateAsync(board.Id, "Label", null);
         await _repository.AddLabelToCardAsync(card.Id, label.Id);
 
         // Act
@@ -375,7 +372,7 @@ public class LabelRepositoryTests : RepositoryTestBase
     {
         // Arrange
         Board board = await CreateTestBoard();
-        Label label = await _repository.CreateAsync(board.Id, "Label", "#ff0000", null);
+        Label label = await _repository.CreateAsync(board.Id, "Label", null);
 
         // Verify label exists
         Label? beforeDelete = await _repository.GetByIdAsync(label.Id);
@@ -396,9 +393,9 @@ public class LabelRepositoryTests : RepositoryTestBase
         Board board = await CreateTestBoard();
 
         // Act
-        Label label1 = await _repository.CreateAsync(board.Id, "Label 1", "#ff0000", null);
-        Label label2 = await _repository.CreateAsync(board.Id, "Label 2", "#00ff00", null);
-        Label label3 = await _repository.CreateAsync(board.Id, "Label 3", "#0000ff", null);
+        Label label1 = await _repository.CreateAsync(board.Id, "Label 1", null);
+        Label label2 = await _repository.CreateAsync(board.Id, "Label 2", null);
+        Label label3 = await _repository.CreateAsync(board.Id, "Label 3", null);
 
         // Assert
         await Assert.That(label1.Id).IsNotEqualTo(label2.Id);

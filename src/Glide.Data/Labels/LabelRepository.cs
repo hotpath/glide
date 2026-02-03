@@ -9,18 +9,18 @@ namespace Glide.Data.Labels;
 
 public class LabelRepository(IDbConnectionFactory connectionFactory) : ILabelRepository
 {
-    public async Task<Label> CreateAsync(string boardId, string name, string color, string? icon)
+    public async Task<Label> CreateAsync(string boardId, string name, string? icon)
     {
         string id = Guid.CreateVersion7().ToString();
         const string statement = """
-                                 INSERT INTO labels(id, board_id, name, color, icon)
-                                 VALUES (@Id, @BoardId, @Name, @Color, @Icon)
+                                 INSERT INTO labels(id, board_id, name, icon)
+                                 VALUES (@Id, @BoardId, @Name, @Icon)
                                  """;
 
         using IDbConnection conn = connectionFactory.CreateConnection();
-        await conn.ExecuteAsync(statement, new { Id = id, BoardId = boardId, Name = name, Color = color, Icon = icon });
+        await conn.ExecuteAsync(statement, new { Id = id, BoardId = boardId, Name = name, Icon = icon });
 
-        return new Label { Id = id, BoardId = boardId, Name = name, Color = color, Icon = icon };
+        return new Label { Id = id, BoardId = boardId, Name = name, Icon = icon };
     }
 
     public async Task<Label?> GetByIdAsync(string id)
@@ -37,18 +37,17 @@ public class LabelRepository(IDbConnectionFactory connectionFactory) : ILabelRep
         return await conn.QueryAsync<Label>(query, new { BoardId = boardId });
     }
 
-    public async Task UpdateAsync(string id, string name, string color, string? icon)
+    public async Task UpdateAsync(string id, string name, string? icon)
     {
         const string statement = """
                                  UPDATE labels
                                  SET name = @Name,
-                                     color = @Color,
                                      icon = @Icon
                                  WHERE id = @Id
                                  """;
 
         using IDbConnection conn = connectionFactory.CreateConnection();
-        await conn.ExecuteAsync(statement, new { Id = id, Name = name, Color = color, Icon = icon });
+        await conn.ExecuteAsync(statement, new { Id = id, Name = name, Icon = icon });
     }
 
     public async Task DeleteAsync(string id)
@@ -113,6 +112,5 @@ public record Label
     public string Id { get; set; } = "";
     public string BoardId { get; set; } = "";
     public string Name { get; set; } = "";
-    public string Color { get; set; } = "#808080";
     public string? Icon { get; set; }
 }

@@ -14,7 +14,6 @@
                     <input type="hidden" name="board_id" value="@BoardId" />
                     <div class="form-row">
                         <input type="text" name="name" placeholder="Label name" required maxlength="50" />
-                        <input type="color" name="color" value="#808080" class="color-picker" />
                         <input type="text" name="icon" placeholder="Icon" maxlength="2" />
                         <button type="submit">Create</button>
                     </div>
@@ -30,7 +29,6 @@
                               hx-target="#label-badge-@label.Id"
                               hx-swap="outerHTML">
                             <input type="text" name="name" value="@label.Name" required maxlength="50" />
-                            <input type="color" name="color" value="@label.Color" class="color-picker" />
                             <input type="text" name="icon" value="@label.Icon" placeholder="Icon" maxlength="2" />
                             <button type="submit" class="save-button">Save</button>
                         </form>

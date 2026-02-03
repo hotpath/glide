@@ -37,7 +37,6 @@ public class LabelAction(
     public async Task<Result<LabelView>> CreateAsync(
         string boardId,
         string name,
-        string color,
         string? icon,
         ClaimsPrincipal user)
     {
@@ -59,14 +58,13 @@ public class LabelAction(
             return new Result<LabelView>(Results.Forbid());
         }
 
-        Label label = await labelRepository.CreateAsync(boardId, name, color, icon);
+        Label label = await labelRepository.CreateAsync(boardId, name, icon);
         return new Result<LabelView>(LabelView.FromLabel(label));
     }
 
     public async Task<Result<LabelView>> UpdateAsync(
         string labelId,
         string name,
-        string color,
         string? icon,
         ClaimsPrincipal user)
     {
@@ -94,7 +92,7 @@ public class LabelAction(
             return new Result<LabelView>(Results.Forbid());
         }
 
-        await labelRepository.UpdateAsync(labelId, name, color, icon);
+        await labelRepository.UpdateAsync(labelId, name, icon);
 
         Label? updated = await labelRepository.GetByIdAsync(labelId);
         if (updated is null)

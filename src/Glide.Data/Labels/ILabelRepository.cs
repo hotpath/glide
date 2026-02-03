@@ -5,10 +5,10 @@ namespace Glide.Data.Labels;
 
 public interface ILabelRepository
 {
-    Task<Label> CreateAsync(string boardId, string name, string color, string? icon);
+    Task<Label> CreateAsync(string boardId, string name, string? icon);
     Task<Label?> GetByIdAsync(string id);
     Task<IEnumerable<Label>> GetByBoardIdAsync(string boardId);
-    Task UpdateAsync(string id, string name, string color, string? icon);
+    Task UpdateAsync(string id, string name, string? icon);
     Task DeleteAsync(string id);
     Task AddLabelToCardAsync(string cardId, string labelId);
     Task RemoveLabelFromCardAsync(string cardId, string labelId);

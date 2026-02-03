@@ -58,10 +58,10 @@ public record CardView(
     }
 }
 
-public record LabelView(string Id, string Name, string Color, string? Icon, string BoardId)
+public record LabelView(string Id, string Name, string? Icon, string BoardId)
 {
     public static LabelView FromLabel(Label label)
     {
-        return new LabelView(label.Id, label.Name, label.Color, label.Icon, label.BoardId);
+        return new LabelView(label.Id, label.Name, label.Icon, label.BoardId);
     }
 }

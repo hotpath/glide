@@ -313,7 +313,6 @@
         // Create a new label for a card (inline creation from card modal)
         function createLabelForCard(cardId, boardId) {
             const nameInput = document.getElementById('new-label-name-' + cardId);
-            const colorInput = document.getElementById('new-label-color-' + cardId);
             const iconInput = document.getElementById('new-label-icon-' + cardId);
 
             const name = nameInput.value.trim();
@@ -322,13 +321,11 @@
                 return;
             }
 
-            const color = colorInput.value;
             const icon = iconInput.value.trim();
 
             const formData = new FormData();
             formData.append('board_id', boardId);
             formData.append('name', name);
-            formData.append('color', color);
             if (icon) {
                 formData.append('icon', icon);
             }
