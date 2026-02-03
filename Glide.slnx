@@ -4,8 +4,6 @@
     <File Path=".github\workflows\build.yml" />
     <File Path=".github\workflows\test.yml" />
     <File Path=".gitignore" />
-    <File Path=".woodpecker\build.yml" />
-    <File Path=".woodpecker\test.yml" />
     <File Path="compose.yml" />
     <File Path="Containerfile" />
     <File Path="global.json" />

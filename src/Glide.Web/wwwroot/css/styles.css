@@ -162,9 +162,36 @@ body.login-page {
     background: #1b1f23;
 }
 
-.github-button:before {
-    content: "🐙";
+.oauth-icon {
+    display: inline-flex;
+    align-items: center;
     margin-right: 0.5rem;
+    height: 1.25rem;
+    width: 1.25rem;
+    vertical-align: middle;
+}
+
+.oauth-icon img {
+    height: 100%;
+    width: 100%;
+}
+
+.github-logo-light {
+    display: none;
+}
+
+.github-logo-dark {
+    display: block;
+}
+
+@media (prefers-color-scheme: light) {
+    .github-logo-light {
+        display: block;
+    }
+
+    .github-logo-dark {
+        display: none;
+    }
 }
 
 #error-message {
