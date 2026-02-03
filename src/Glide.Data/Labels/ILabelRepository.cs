@@ -14,5 +14,4 @@ public interface ILabelRepository
     Task AddLabelToCardAsync(string cardId, string labelId);
     Task RemoveLabelFromCardAsync(string cardId, string labelId);
     Task<IEnumerable<Label>> GetLabelsByCardIdAsync(string cardId);
-    Task<IEnumerable<string>> GetCardIdsByLabelIdAsync(string labelId);
 }

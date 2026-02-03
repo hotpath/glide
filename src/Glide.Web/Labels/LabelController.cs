@@ -50,7 +50,7 @@ public class LabelController(LabelAction labelAction, BoardAction boardAction) :
         LabelAction.Result<System.Collections.Generic.IEnumerable<LabelView>> labelsResult =
             await labelAction.GetByBoardIdAsync(result.Object.BoardId, User);
 
-        return new RazorComponentResult<LabelBadgeWithBoardRefresh>(new
+        return new RazorComponentResult<LabelBoardRefreshResponse>(new
         {
             Label = result.Object,
             Columns = columnsResult.IsError ? null : columnsResult.Object,
@@ -85,8 +85,9 @@ public class LabelController(LabelAction labelAction, BoardAction boardAction) :
         LabelAction.Result<System.Collections.Generic.IEnumerable<LabelView>> labelsResult =
             await labelAction.GetByBoardIdAsync(boardId, User);
 
-        return new RazorComponentResult<LabelDeleteWithBoardRefresh>(new
+        return new RazorComponentResult<LabelBoardRefreshResponse>(new
         {
+            Label = (LabelView?)null,
             Columns = columnsResult.IsError ? null : columnsResult.Object,
             Labels = labelsResult.IsError ? null : labelsResult.Object
         });

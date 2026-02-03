@@ -1,7 +1,10 @@
 @using Glide.Web.Columns
 
-<!-- Update the label badge in the modal -->
-<LabelBadge Label="@Label" />
+@if (Label != null)
+{
+    <!-- Update the label badge in the modal -->
+    <LabelBadge Label="@Label" />
+}
 
 @if (Columns != null)
 {
@@ -21,7 +24,7 @@
 
 @code {
     [Parameter]
-    public required LabelView Label { get; set; }
+    public LabelView? Label { get; set; }
 
     [Parameter]
     public IEnumerable<ColumnView>? Columns { get; set; }

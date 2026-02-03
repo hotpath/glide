@@ -99,18 +99,6 @@ public class LabelRepository(IDbConnectionFactory connectionFactory) : ILabelRep
         using IDbConnection conn = connectionFactory.CreateConnection();
         return await conn.QueryAsync<Label>(query, new { CardId = cardId });
     }
-
-    public async Task<IEnumerable<string>> GetCardIdsByLabelIdAsync(string labelId)
-    {
-        const string query = """
-                             SELECT card_id
-                             FROM card_labels
-                             WHERE label_id = @LabelId
-                             """;
-
-        using IDbConnection conn = connectionFactory.CreateConnection();
-        return await conn.QueryAsync<string>(query, new { LabelId = labelId });
-    }
 }
 
 public record Label

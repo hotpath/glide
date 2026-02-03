@@ -281,44 +281,6 @@ public class LabelRepositoryTests : RepositoryTestBase
     }
 
     [Test]
-    public async Task GetCardIdsByLabelIdAsync_WithMultipleCards_ReturnsAllCardIds()
-    {
-        // Arrange
-        (Board board, Column column) = await CreateTestBoardAndColumn();
-        Card card1 = await _cardRepository.CreateAsync("Card 1", board.Id, column.Id);
-        Card card2 = await _cardRepository.CreateAsync("Card 2", board.Id, column.Id);
-        Card card3 = await _cardRepository.CreateAsync("Card 3", board.Id, column.Id);
-        Label label = await _repository.CreateAsync(board.Id, "Bug");
-
-        await _repository.AddLabelToCardAsync(card1.Id, label.Id);
-        await _repository.AddLabelToCardAsync(card3.Id, label.Id);
-
-        // Act
-        IEnumerable<string> cardIds = await _repository.GetCardIdsByLabelIdAsync(label.Id);
-
-        // Assert
-        List<string> cardIdList = cardIds.ToList();
-        await Assert.That(cardIdList.Count).IsEqualTo(2);
-        await Assert.That(cardIdList.Contains(card1.Id)).IsTrue();
-        await Assert.That(cardIdList.Contains(card3.Id)).IsTrue();
-        await Assert.That(cardIdList.Contains(card2.Id)).IsFalse();
-    }
-
-    [Test]
-    public async Task GetCardIdsByLabelIdAsync_WithNoCards_ReturnsEmptyList()
-    {
-        // Arrange
-        Board board = await CreateTestBoard();
-        Label label = await _repository.CreateAsync(board.Id, "Label");
-
-        // Act
-        IEnumerable<string> cardIds = await _repository.GetCardIdsByLabelIdAsync(label.Id);
-
-        // Assert
-        await Assert.That(cardIds.Any()).IsFalse();
-    }
-
-    [Test]
     public async Task DeleteLabel_RemovesCardLabelAssociations()
     {
         // Arrange
