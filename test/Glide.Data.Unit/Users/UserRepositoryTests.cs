@@ -164,4 +164,108 @@ public class UserRepositoryTests : RepositoryTestBase
         await Assert.That(retrieved1!.DisplayName).IsEqualTo("User 1");
         await Assert.That(retrieved2!.DisplayName).IsEqualTo("User 2");
     }
+
+    [Test]
+    public async Task SearchByEmailAsync_WithPartialMatch_ReturnsMatchingUsers()
+    {
+        // Arrange
+        long now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+        User user1 = new()
+        {
+            Id = Guid.CreateVersion7().ToString(),
+            DisplayName = "Alice",
+            Email = "alice.smith@company.com",
+            CreatedAt = now,
+            UpdatedAt = now
+        };
+
+        User user2 = new()
+        {
+            Id = Guid.CreateVersion7().ToString(),
+            DisplayName = "Bob",
+            Email = "bob.smith@company.com",
+            CreatedAt = now,
+            UpdatedAt = now
+        };
+
+        User user3 = new()
+        {
+            Id = Guid.CreateVersion7().ToString(),
+            DisplayName = "Charlie",
+            Email = "charlie@other.com",
+            CreatedAt = now,
+            UpdatedAt = now
+        };
+
+        await _repository.CreateAsync(user1);
+        await _repository.CreateAsync(user2);
+        await _repository.CreateAsync(user3);
+
+        // Act
+        IEnumerable<User> results = await _repository.SearchByEmailAsync("smith");
+
+        // Assert
+        List<User> resultList = results.ToList();
+        await Assert.That(resultList.Count).IsEqualTo(2);
+        await Assert.That(resultList.Any(u => u.Email == "alice.smith@company.com")).IsTrue();
+        await Assert.That(resultList.Any(u => u.Email == "bob.smith@company.com")).IsTrue();
+    }
+
+    [Test]
+    public async Task SearchByEmailAsync_WithNoMatches_ReturnsEmpty()
+    {
+        // Act
+        IEnumerable<User> results = await _repository.SearchByEmailAsync("nonexistent");
+
+        // Assert
+        await Assert.That(results).IsEmpty();
+    }
+
+    [Test]
+    public async Task SearchByEmailAsync_WithExactMatch_ReturnsUser()
+    {
+        // Arrange
+        long now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+        User user = new()
+        {
+            Id = Guid.CreateVersion7().ToString(),
+            DisplayName = "Search Test",
+            Email = "search@test.com",
+            CreatedAt = now,
+            UpdatedAt = now
+        };
+        await _repository.CreateAsync(user);
+
+        // Act
+        IEnumerable<User> results = await _repository.SearchByEmailAsync("search@test.com");
+
+        // Assert
+        List<User> resultList = results.ToList();
+        await Assert.That(resultList.Count).IsEqualTo(1);
+        await Assert.That(resultList[0].Email).IsEqualTo("search@test.com");
+    }
+
+    [Test]
+    public async Task SearchByEmailAsync_IsCaseInsensitive()
+    {
+        // Arrange
+        long now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+        User user = new()
+        {
+            Id = Guid.CreateVersion7().ToString(),
+            DisplayName = "Case Test",
+            Email = "CaseTest@EXAMPLE.com",
+            CreatedAt = now,
+            UpdatedAt = now
+        };
+        await _repository.CreateAsync(user);
+
+        // Act
+        IEnumerable<User> results = await _repository.SearchByEmailAsync("casetest");
+
+        // Assert
+        List<User> resultList = results.ToList();
+        await Assert.That(resultList.Count).IsGreaterThanOrEqualTo(1);
+        await Assert.That(resultList.Any(u => u.Email.Contains("CaseTest", StringComparison.OrdinalIgnoreCase))).IsTrue();
+    }
 }

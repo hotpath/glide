@@ -14,12 +14,18 @@
                 </div>
             </div>
 
-            <div class="board-menu">
+                <div class="board-menu">
                 <button class="board-menu-button" onclick="toggleBoardMenu(event)">⋮</button>
                 <div class="board-menu-dropdown" id="board-menu-dropdown">
                     <div id="add-column-menu-item">
                         <button class="board-menu-item" onclick="showAddColumnForm(event)">Add column</button>
                     </div>
+                    @if (Board.BoardUserView?.IsOwner ?? false)
+                    {
+                        <button class="board-menu-item" onclick="openBoardUserManagement('@Board.Id')">
+                            Manage members
+                        </button>
+                    }
                     <button class="board-menu-item"
                             hx-get="/boards/@Board.Id/labels"
                             hx-target="body"
@@ -575,6 +581,7 @@
             }
         });
     </script>
+    <BoardUserManagement BoardId="@Board.Id" />
 </HtmxLayout>
 
 @code

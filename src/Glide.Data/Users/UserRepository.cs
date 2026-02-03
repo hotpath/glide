@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Threading;
 using System.Threading.Tasks;
@@ -23,6 +24,18 @@ public class UserRepository(IDbConnectionFactory connectionFactory) : IUserRepos
         return await conn.QuerySingleOrDefaultAsync<User>(
             "SELECT * FROM users WHERE email = @Email",
             new { Email = email });
+    }
+
+    public async Task<IEnumerable<User>> SearchByEmailAsync(string emailQuery)
+    {
+        using IDbConnection conn = connectionFactory.CreateConnection();
+        return await conn.QueryAsync<User>(
+            """
+            SELECT * FROM users WHERE email LIKE @EmailQuery
+            ORDER BY email ASC
+            LIMIT 10
+            """,
+            new { EmailQuery = $"%{emailQuery}%" });
     }
 
     public async Task<User> CreateAsync(User user)

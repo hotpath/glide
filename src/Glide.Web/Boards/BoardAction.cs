@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -7,6 +8,7 @@ using Glide.Data.Boards;
 using Glide.Data.Cards;
 using Glide.Data.Columns;
 using Glide.Data.Labels;
+using Glide.Data.Users;
 
 using Microsoft.AspNetCore.Http;
 
@@ -18,7 +20,8 @@ public class BoardAction(
     IBoardRepository boardRepository,
     IColumnRepository columnRepository,
     ICardRepository cardRepository,
-    ILabelRepository labelRepository)
+    ILabelRepository labelRepository,
+    IUserRepository userRepository)
 {
     public enum DeleteResult { Success, Unauthenticated, NoOwnership }
 
@@ -221,6 +224,138 @@ public class BoardAction(
         Card card = await cardRepository.CreateAsync(title, boardId, columnId);
         var labels = await labelRepository.GetLabelsByCardIdAsync(card.Id);
         return new Result<CardView>(CardView.FromCard(card, labels));
+    }
+
+    public async Task<Result<IEnumerable<BoardMemberView>>> GetBoardUsersAsync(string boardId, ClaimsPrincipal user)
+    {
+        string? userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (userId is null)
+        {
+            return new Result<IEnumerable<BoardMemberView>>(Results.Unauthorized());
+        }
+
+        Board? board = await boardRepository.GetByIdAsync(boardId);
+        if (board is null || board.BoardUsers.All(bu => bu.UserId != userId))
+        {
+            return new Result<IEnumerable<BoardMemberView>>(Results.NotFound("board not found"));
+        }
+
+        IEnumerable<BoardMemberDetails> members = await boardRepository.GetBoardMembersWithEmailAsync(boardId);
+        return new Result<IEnumerable<BoardMemberView>>(
+            members.Select(m => new BoardMemberView(m.UserId, m.Email, m.IsOwner)));
+    }
+
+    public async Task<Result<BoardUserView>> AddUserToBoardAsync(
+        string boardId,
+        string userId,
+        bool isOwner,
+        ClaimsPrincipal user)
+    {
+        string? requestingUserId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (requestingUserId is null)
+        {
+            return new Result<BoardUserView>(Results.Unauthorized());
+        }
+
+        Board? board = await boardRepository.GetByIdAsync(boardId);
+        if (board is null || !board.BoardUsers.Any(x => x.UserId == requestingUserId && x.IsOwner))
+        {
+            return new Result<BoardUserView>(Results.NotFound("board not found or insufficient permissions"));
+        }
+
+        // Check if user is already on the board
+        if (board.BoardUsers.Any(x => x.UserId == userId))
+        {
+            return new Result<BoardUserView>(Results.BadRequest("user is already a member of this board"));
+        }
+
+        try
+        {
+            await boardRepository.AddUserToBoardAsync(boardId, userId, isOwner);
+            return new Result<BoardUserView>(new BoardUserView(userId, isOwner));
+        }
+        catch (Exception ex)
+        {
+            return new Result<BoardUserView>(Results.BadRequest($"failed to add user: {ex.Message}"));
+        }
+    }
+
+    public async Task<Result<string>> UpdateUserRoleAsync(
+        string boardId,
+        string userId,
+        bool isOwner,
+        ClaimsPrincipal user)
+    {
+        string? requestingUserId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (requestingUserId is null)
+        {
+            return new Result<string>(Results.Unauthorized());
+        }
+
+        Board? board = await boardRepository.GetByIdAsync(boardId);
+        if (board is null || !board.BoardUsers.Any(x => x.UserId == requestingUserId && x.IsOwner))
+        {
+            return new Result<string>(Results.NotFound("board not found or insufficient permissions"));
+        }
+
+        BoardUser? targetUser = board.BoardUsers.FirstOrDefault(x => x.UserId == userId);
+        if (targetUser is null)
+        {
+            return new Result<string>(Results.NotFound("user is not a member of this board"));
+        }
+
+        // Prevent removing the last owner
+        if (!isOwner && board.BoardUsers.Count(x => x.IsOwner) == 1)
+        {
+            return new Result<string>(Results.BadRequest("cannot demote the last owner"));
+        }
+
+        await boardRepository.UpdateUserRoleAsync(boardId, userId, isOwner);
+        return new Result<string>("");
+    }
+
+    public async Task<Result<string>> RemoveUserFromBoardAsync(
+        string boardId,
+        string userId,
+        ClaimsPrincipal user)
+    {
+        string? requestingUserId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (requestingUserId is null)
+        {
+            return new Result<string>(Results.Unauthorized());
+        }
+
+        Board? board = await boardRepository.GetByIdAsync(boardId);
+        if (board is null || !board.BoardUsers.Any(x => x.UserId == requestingUserId && x.IsOwner))
+        {
+            return new Result<string>(Results.NotFound("board not found or insufficient permissions"));
+        }
+
+        BoardUser? targetUser = board.BoardUsers.FirstOrDefault(x => x.UserId == userId);
+        if (targetUser is null)
+        {
+            return new Result<string>(Results.NotFound("user is not a member of this board"));
+        }
+
+        // Prevent removing the last owner
+        if (targetUser.IsOwner && board.BoardUsers.Count(x => x.IsOwner) == 1)
+        {
+            return new Result<string>(Results.BadRequest("cannot remove the last owner"));
+        }
+
+        await boardRepository.RemoveUserFromBoardAsync(boardId, userId);
+        return new Result<string>("");
+    }
+
+    public async Task<Result<IEnumerable<UserSearchResultView>>> SearchUsersAsync(string emailQuery)
+    {
+        if (string.IsNullOrWhiteSpace(emailQuery))
+        {
+            return new Result<IEnumerable<UserSearchResultView>>(Results.BadRequest("email query is required"));
+        }
+
+        IEnumerable<User> users = await userRepository.SearchByEmailAsync(emailQuery);
+        return new Result<IEnumerable<UserSearchResultView>>(users.Select(u => UserSearchResultView.FromUser(u)));
     }
 
     public record Result<T>(T? Object, IResult? StatusResult = null)

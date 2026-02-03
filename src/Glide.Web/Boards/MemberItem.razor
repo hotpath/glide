@@ -1,0 +1,29 @@
+@{
+    var roleClass = Member.IsOwner ? "owner" : "";
+    var role = Member.IsOwner ? "Owner" : "Member";
+    var newRole = Member.IsOwner ? "Member" : "Owner";
+    var newIsOwner = Member.IsOwner ? "false" : "true";
+}
+
+<div class="member-info">
+    <span class="member-username">@Member.Email</span>
+    <span class="member-role @roleClass">@role</span>
+</div>
+<div class="member-actions">
+    <button type="button" class="btn-role-toggle" 
+        hx-put="/boards/@BoardId/users/@Member.UserId" 
+        hx-vals='{{"isOwner": @newIsOwner}}' 
+        hx-target="#member-@Member.UserId"
+        hx-confirm="Change @Member.Email to @newRole?">
+        Make @newRole
+    </button>
+    <button type="button" class="btn-remove-member" onclick="removeUserFromBoard('@BoardId', '@Member.UserId', '@Member.Email')">Remove</button>
+</div>
+
+@code {
+    [Parameter]
+    public required string BoardId { get; set; }
+
+    [Parameter]
+    public required BoardMemberView Member { get; set; }
+}

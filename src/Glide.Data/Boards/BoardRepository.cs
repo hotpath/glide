@@ -121,6 +121,66 @@ public class BoardRepository(IDbConnectionFactory connectionFactory) : IBoardRep
         using IDbConnection conn = connectionFactory.CreateConnection();
         await conn.ExecuteAsync(statement, new { BoardId = boardId });
     }
+
+    public async Task<IEnumerable<BoardUser>> GetBoardUsersAsync(string boardId)
+    {
+        const string query = """
+                             SELECT board_id AS BoardId, user_id AS UserId, is_owner AS IsOwner
+                             FROM boards_users
+                             WHERE board_id = @BoardId
+                             """;
+
+        using IDbConnection conn = connectionFactory.CreateConnection();
+        return await conn.QueryAsync<BoardUser>(query, new { BoardId = boardId });
+    }
+
+    public async Task<IEnumerable<BoardMemberDetails>> GetBoardMembersWithEmailAsync(string boardId)
+    {
+        const string query = """
+                             SELECT bu.user_id AS UserId, u.email AS Email, bu.is_owner AS IsOwner
+                             FROM boards_users bu
+                             JOIN users u ON bu.user_id = u.id
+                             WHERE bu.board_id = @BoardId
+                             ORDER BY u.email
+                             """;
+
+        using IDbConnection conn = connectionFactory.CreateConnection();
+        return await conn.QueryAsync<BoardMemberDetails>(query, new { BoardId = boardId });
+    }
+
+    public async Task AddUserToBoardAsync(string boardId, string userId, bool isOwner)
+    {
+        const string statement = """
+                                 INSERT INTO boards_users(board_id, user_id, is_owner) 
+                                 VALUES (@BoardId, @UserId, @IsOwner)
+                                 """;
+
+        using IDbConnection conn = connectionFactory.CreateConnection();
+        await conn.ExecuteAsync(statement, new { BoardId = boardId, UserId = userId, IsOwner = isOwner });
+    }
+
+    public async Task UpdateUserRoleAsync(string boardId, string userId, bool isOwner)
+    {
+        const string statement = """
+                                 UPDATE boards_users
+                                 SET is_owner = @IsOwner
+                                 WHERE board_id = @BoardId AND user_id = @UserId
+                                 """;
+
+        using IDbConnection conn = connectionFactory.CreateConnection();
+        await conn.ExecuteAsync(statement, new { BoardId = boardId, UserId = userId, IsOwner = isOwner });
+    }
+
+    public async Task RemoveUserFromBoardAsync(string boardId, string userId)
+    {
+        const string statement = """
+                                 DELETE FROM boards_users
+                                 WHERE board_id = @BoardId AND user_id = @UserId
+                                 """;
+
+        using IDbConnection conn = connectionFactory.CreateConnection();
+        await conn.ExecuteAsync(statement, new { BoardId = boardId, UserId = userId });
+    }
 }
 
 public record Board
@@ -134,5 +194,12 @@ public record BoardUser
 {
     public string BoardId { get; set; } = string.Empty;
     public string UserId { get; set; } = string.Empty;
+    public bool IsOwner { get; set; }
+}
+
+public record BoardMemberDetails
+{
+    public string UserId { get; set; } = string.Empty;
+    public string Email { get; set; } = string.Empty;
     public bool IsOwner { get; set; }
 }

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 using Glide.Web.Cards;
@@ -113,5 +114,78 @@ public class BoardController(BoardAction boardAction, LabelAction labelAction) :
         }
 
         return new RazorComponentResult<LabelManagementModal>(new { Labels = result.Object, BoardId = boardId });
+    }
+
+    [HttpGet("{boardId}/users")]
+    [Authorize]
+    public async Task<IResult> GetBoardUsersAsync([FromRoute] string boardId)
+    {
+        BoardAction.Result<IEnumerable<BoardMemberView>> result = await boardAction.GetBoardUsersAsync(boardId, User);
+        return result.IsError
+            ? result.StatusResult!
+            : Results.Json(result.Object);
+    }
+
+    [HttpPost("{boardId}/users")]
+    [Authorize]
+    public async Task<IResult> AddUserToBoardAsync(
+        [FromRoute] string boardId,
+        [FromForm] string userId,
+        [FromForm] bool isOwner)
+    {
+        BoardAction.Result<BoardUserView>
+            result = await boardAction.AddUserToBoardAsync(boardId, userId, isOwner, User);
+        return result.IsError
+            ? result.StatusResult!
+            : Results.Json(result.Object, statusCode: StatusCodes.Status201Created);
+    }
+
+    [HttpPut("{boardId}/users/{userId}")]
+    [Authorize]
+    public async Task<IResult> UpdateUserRoleAsync(
+        [FromRoute] string boardId,
+        [FromRoute] string userId,
+        [FromForm] bool isOwner)
+    {
+        BoardAction.Result<string> result = await boardAction.UpdateUserRoleAsync(boardId, userId, isOwner, User);
+        if (result.IsError)
+        {
+            return result.StatusResult!;
+        }
+
+        // Fetch the updated member to return component
+        BoardAction.Result<IEnumerable<BoardMemberView>> members = await boardAction.GetBoardUsersAsync(boardId, User);
+        if (members.IsError)
+        {
+            return Results.BadRequest();
+        }
+
+        BoardMemberView? member = members.Object?.FirstOrDefault(m => m.UserId == userId);
+        if (member == null)
+        {
+            return Results.BadRequest();
+        }
+
+        return new RazorComponentResult<MemberItem>(new { BoardId = boardId, Member = member });
+    }
+
+    [HttpDelete("{boardId}/users/{userId}")]
+    [Authorize]
+    public async Task<IResult> RemoveUserFromBoardAsync(
+        [FromRoute] string boardId,
+        [FromRoute] string userId)
+    {
+        BoardAction.Result<string> result = await boardAction.RemoveUserFromBoardAsync(boardId, userId, User);
+        return result.IsError ? result.StatusResult! : Results.Ok();
+    }
+
+    [HttpGet("search-users")]
+    [Authorize]
+    public async Task<IResult> SearchUsersAsync([FromQuery] string q)
+    {
+        BoardAction.Result<IEnumerable<UserSearchResultView>> result = await boardAction.SearchUsersAsync(q);
+        return result.IsError
+            ? result.StatusResult!
+            : Results.Json(result.Object);
     }
 }
