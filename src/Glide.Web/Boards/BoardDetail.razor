@@ -5,9 +5,9 @@
             <a href="/dashboard" class="back-link" title="Back to Dashboard">←</a>
             <h2 class="board-title">@Board.Name</h2>
             <div class="label-filter">
-                <button class="filter-button" onclick="toggleLabelFilter(event)">Filter</button>
+                <button class="filter-button" id="filter-button" onclick="toggleLabelFilter(event)">Filter</button>
                 <div class="label-filter-dropdown" id="label-filter-dropdown" style="display: none;">
-                    <button type="button" onclick="filterByLabel(null)">Show All</button>
+                    <button type="button" class="filter-option" data-filter-id="" onclick="filterByLabel(null, 'Show All')">Show All</button>
                     <div id="filter-labels" hx-get="/boards/@Board.Id/labels?view=filter" hx-trigger="load" hx-swap="innerHTML">
                         Loading labels...
                     </div>
@@ -372,7 +372,7 @@
             dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
         }
 
-        function filterByLabel(labelId) {
+        function filterByLabel(labelId, labelName) {
             currentLabelFilter = labelId;
             const cards = document.querySelectorAll('.card-card');
 
@@ -384,6 +384,24 @@
                     // Check if card has the label
                     const hasLabel = card.querySelector(`[data-label-id="${labelId}"]`);
                     card.style.display = hasLabel ? '' : 'none';
+                }
+            });
+
+            // Update filter button text
+            const filterButton = document.getElementById('filter-button');
+            if (labelId === null) {
+                filterButton.textContent = 'Filter';
+            } else {
+                filterButton.textContent = `Filter: ${labelName}`;
+            }
+
+            // Update active state on filter options
+            document.querySelectorAll('.filter-option').forEach(option => {
+                const optionId = option.getAttribute('data-filter-id');
+                if ((labelId === null && optionId === '') || optionId === labelId) {
+                    option.classList.add('active');
+                } else {
+                    option.classList.remove('active');
                 }
             });
 

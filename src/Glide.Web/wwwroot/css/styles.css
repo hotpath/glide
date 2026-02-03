@@ -1951,3 +1951,14 @@ textarea#card-description {
 .filter-label-option:hover {
     background: var(--bg-elevated);
 }
+
+.filter-option.active {
+    background: var(--bg-elevated);
+    font-weight: 600;
+}
+
+.filter-option.active::after {
+    content: ' ✓';
+    float: right;
+    color: var(--accent-blue);
+}
