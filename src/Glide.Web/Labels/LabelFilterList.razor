@@ -1,0 +1,18 @@
+@using Glide.Web
+
+@foreach (var label in Labels)
+{
+    <button type="button"
+            class="filter-option filter-label-option"
+            data-filter-id="@label.Id"
+            onclick="filterByLabel('@label.Id', '@label.Name')">
+        <span class="label-badge">
+            @label.Name
+        </span>
+    </button>
+}
+
+@code {
+    [Parameter]
+    public required IEnumerable<LabelView> Labels { get; set; }
+}

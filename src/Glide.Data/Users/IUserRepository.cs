@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -5,10 +7,9 @@ namespace Glide.Data.Users;
 
 public interface IUserRepository
 {
-    Task<User?> GetAsync(string provider, string providerId, CancellationToken cancellationToken = default);
-    Task Create(User user);
+    Task<User?> GetByIdAsync(string id);
+    Task<User?> GetByEmailAsync(string email);
+    Task<IEnumerable<User>> SearchByEmailAsync(string emailQuery);
+    Task<User> CreateAsync(User user);
     Task UpdateAsync(User user);
-
-    Task<User> CreateOrUpdateFromOAuthAsync(string provider, string providerId, string displayName,
-        string email);
 }

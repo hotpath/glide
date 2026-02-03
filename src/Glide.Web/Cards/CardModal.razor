@@ -1,8 +1,10 @@
+@using Glide.Web.Labels
+
 <form class="modal-card-form"
       hx-put="/cards/@Card.Id"
       hx-target="#card-@Card.Id"
       hx-swap="outerHTML"
-      hx-on::after-request="if(event.detail.successful) closeModal()">
+      hx-on::after-request="if(event.detail.successful && event.detail.elt.tagName === 'FORM') closeModal()">
     <div class="form-group">
         <label for="card-title">Title</label>
         <input type="text"
@@ -28,6 +30,13 @@
         <div id="preview-content" class="markdown-preview"></div>
     </div>
 
+    <div class="form-group">
+        <LabelPicker CardId="@Card.Id"
+                     BoardId="@Card.BoardId"
+                     CurrentLabels="@Card.Labels"
+                     AvailableLabels="@AllBoardLabels" />
+    </div>
+
     <div class="modal-actions">
         <button type="submit" class="btn-primary">Save</button>
         <button type="button" class="btn-secondary" onclick="closeModal()">Cancel</button>
@@ -37,4 +46,5 @@
 @code
 {
     [Parameter] public required CardView Card { get; init; }
+    [Parameter] public required IEnumerable<LabelView> AllBoardLabels { get; init; }
 }

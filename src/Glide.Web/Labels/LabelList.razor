@@ -1,0 +1,13 @@
+@using Glide.Web
+
+<div class="label-list">
+    @foreach (var label in Labels)
+    {
+        <LabelBadge Label="@label" />
+    }
+</div>
+
+@code {
+    [Parameter]
+    public required IEnumerable<LabelView> Labels { get; set; }
+}

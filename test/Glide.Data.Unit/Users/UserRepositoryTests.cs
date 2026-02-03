@@ -12,57 +12,57 @@ public class UserRepositoryTests : RepositoryTestBase
     }
 
     [Test]
-    public async Task GetAsync_WithNonExistentUser_ReturnsNull()
+    public async Task GetByIdAsync_WithNonExistentUser_ReturnsNull()
     {
         // Act
-        User? result = await _repository.GetAsync("forgejo", "nonexistent");
+        User? result = await _repository.GetByIdAsync("nonexistent");
 
         // Assert
         await Assert.That(result).IsNull();
     }
 
     [Test]
-    public async Task Create_WithValidUser_InsertsUser()
+    public async Task CreateAsync_WithValidUser_InsertsUser()
     {
         // Arrange
+        long now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
         User user = new()
         {
-            Id = Guid.NewGuid().ToString(),
-            OAuthProvider = "forgejo",
-            OAuthProviderId = "123",
+            Id = Guid.CreateVersion7().ToString(),
             DisplayName = "Test User",
-            Email = "test@example.com"
+            Email = "test@example.com",
+            CreatedAt = now,
+            UpdatedAt = now
         };
 
         // Act
-        await _repository.Create(user);
+        await _repository.CreateAsync(user);
 
         // Assert
-        User? retrieved = await _repository.GetAsync("forgejo", "123");
+        User? retrieved = await _repository.GetByIdAsync(user.Id);
         await Assert.That(retrieved).IsNotNull();
         await Assert.That(retrieved!.Id).IsEqualTo(user.Id);
-        await Assert.That(retrieved.OAuthProvider).IsEqualTo(user.OAuthProvider);
-        await Assert.That(retrieved.OAuthProviderId).IsEqualTo(user.OAuthProviderId);
         await Assert.That(retrieved.DisplayName).IsEqualTo(user.DisplayName);
         await Assert.That(retrieved.Email).IsEqualTo(user.Email);
     }
 
     [Test]
-    public async Task GetAsync_WithExistingUser_ReturnsUser()
+    public async Task GetByIdAsync_WithExistingUser_ReturnsUser()
     {
         // Arrange
+        long now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
         User user = new()
         {
-            Id = Guid.NewGuid().ToString(),
-            OAuthProvider = "forgejo",
-            OAuthProviderId = "456",
+            Id = Guid.CreateVersion7().ToString(),
             DisplayName = "Existing User",
-            Email = "existing@example.com"
+            Email = "existing@example.com",
+            CreatedAt = now,
+            UpdatedAt = now
         };
-        await _repository.Create(user);
+        await _repository.CreateAsync(user);
 
         // Act
-        User? result = await _repository.GetAsync("forgejo", "456");
+        User? result = await _repository.GetByIdAsync(user.Id);
 
         // Assert
         await Assert.That(result).IsNotNull();
@@ -70,21 +70,33 @@ public class UserRepositoryTests : RepositoryTestBase
     }
 
     [Test]
-    public async Task GetAsync_WithDifferentProvider_ReturnsNull()
+    public async Task GetByEmailAsync_WithExistingUser_ReturnsUser()
     {
         // Arrange
+        long now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
         User user = new()
         {
-            Id = Guid.NewGuid().ToString(),
-            OAuthProvider = "forgejo",
-            OAuthProviderId = "789",
-            DisplayName = "User",
-            Email = "user@example.com"
+            Id = Guid.CreateVersion7().ToString(),
+            DisplayName = "Email User",
+            Email = "email@example.com",
+            CreatedAt = now,
+            UpdatedAt = now
         };
-        await _repository.Create(user);
+        await _repository.CreateAsync(user);
 
         // Act
-        User? result = await _repository.GetAsync("github", "789");
+        User? result = await _repository.GetByEmailAsync("email@example.com");
+
+        // Assert
+        await Assert.That(result).IsNotNull();
+        await Assert.That(result!.Id).IsEqualTo(user.Id);
+    }
+
+    [Test]
+    public async Task GetByEmailAsync_WithNonExistentEmail_ReturnsNull()
+    {
+        // Act
+        User? result = await _repository.GetByEmailAsync("nonexistent@example.com");
 
         // Assert
         await Assert.That(result).IsNull();
@@ -94,121 +106,58 @@ public class UserRepositoryTests : RepositoryTestBase
     public async Task UpdateAsync_WithExistingUser_UpdatesFields()
     {
         // Arrange
+        long now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
         User user = new()
         {
-            Id = Guid.NewGuid().ToString(),
-            OAuthProvider = "forgejo",
-            OAuthProviderId = "update123",
+            Id = Guid.CreateVersion7().ToString(),
             DisplayName = "Original Name",
-            Email = "original@example.com"
+            Email = "original@example.com",
+            CreatedAt = now,
+            UpdatedAt = now
         };
-        await _repository.Create(user);
+        await _repository.CreateAsync(user);
 
         // Act
         User updated = user with { DisplayName = "Updated Name", Email = "updated@example.com" };
         await _repository.UpdateAsync(updated);
 
         // Assert
-        User? retrieved = await _repository.GetAsync("forgejo", "update123");
+        User? retrieved = await _repository.GetByIdAsync(user.Id);
         await Assert.That(retrieved).IsNotNull();
         await Assert.That(retrieved!.DisplayName).IsEqualTo("Updated Name");
         await Assert.That(retrieved.Email).IsEqualTo("updated@example.com");
     }
 
     [Test]
-    public async Task CreateOrUpdateFromOAuthAsync_WithNewUser_CreatesUser()
-    {
-        // Act
-        User user = await _repository.CreateOrUpdateFromOAuthAsync(
-            "forgejo",
-            "oauth123",
-            "OAuth User",
-            "oauth@example.com"
-        );
-
-        // Assert
-        await Assert.That(user).IsNotNull();
-        await Assert.That(user.OAuthProvider).IsEqualTo("forgejo");
-        await Assert.That(user.OAuthProviderId).IsEqualTo("oauth123");
-        await Assert.That(user.DisplayName).IsEqualTo("OAuth User");
-        await Assert.That(user.Email).IsEqualTo("oauth@example.com");
-
-        // Verify it's in the database
-        User? retrieved = await _repository.GetAsync("forgejo", "oauth123");
-        await Assert.That(retrieved).IsNotNull();
-    }
-
-    [Test]
-    public async Task CreateOrUpdateFromOAuthAsync_WithExistingUser_UpdatesUser()
+    public async Task CreateAsync_WithMultipleUsers_AllStoredCorrectly()
     {
         // Arrange
-        User existingUser = await _repository.CreateOrUpdateFromOAuthAsync(
-            "forgejo",
-            "oauth456",
-            "Original Name",
-            "original@example.com"
-        );
-
-        // Act
-        User updatedUser = await _repository.CreateOrUpdateFromOAuthAsync(
-            "forgejo",
-            "oauth456",
-            "Updated Name",
-            "updated@example.com"
-        );
-
-        // Assert
-        await Assert.That(updatedUser.Id).IsEqualTo(existingUser.Id);
-        await Assert.That(updatedUser.DisplayName).IsEqualTo("Updated Name");
-        await Assert.That(updatedUser.Email).IsEqualTo("updated@example.com");
-
-        // Verify only one user exists
-        IEnumerable<User> allUsers = await QueryAsync<User>("SELECT * FROM users WHERE oauth_provider_id = @ProviderId",
-            new { ProviderId = "oauth456" });
-        await Assert.That(allUsers.Count()).IsEqualTo(1);
-    }
-
-    [Test]
-    public async Task GetAsync_WithCancellationToken_CanBeCancelled()
-    {
-        // Arrange
-        CancellationTokenSource cts = new();
-        await cts.CancelAsync();
-
-        // Act & Assert
-        await Assert.That(async () => await _repository.GetAsync("forgejo", "test", cts.Token))
-            .ThrowsException();
-    }
-
-    [Test]
-    public async Task Create_WithMultipleUsers_AllStoredCorrectly()
-    {
-        // Arrange
+        long now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
         User user1 = new()
         {
-            Id = Guid.NewGuid().ToString(),
-            OAuthProvider = "forgejo",
-            OAuthProviderId = "multi1",
+            Id = Guid.CreateVersion7().ToString(),
             DisplayName = "User 1",
-            Email = "user1@example.com"
+            Email = "user1@example.com",
+            CreatedAt = now,
+            UpdatedAt = now
         };
 
         User user2 = new()
         {
-            Id = Guid.NewGuid().ToString(),
-            OAuthProvider = "forgejo",
-            OAuthProviderId = "multi2",
+            Id = Guid.CreateVersion7().ToString(),
             DisplayName = "User 2",
-            Email = "user2@example.com"
+            Email = "user2@example.com",
+            CreatedAt = now,
+            UpdatedAt = now
         };
 
         // Act
-        await _repository.Create(user1);
-        await _repository.Create(user2);
+        await _repository.CreateAsync(user1);
+        await _repository.CreateAsync(user2);
 
         // Assert
-        User? retrieved1 = await _repository.GetAsync("forgejo", "multi1");
-        User? retrieved2 = await _repository.GetAsync("forgejo", "multi2");
+        User? retrieved1 = await _repository.GetByIdAsync(user1.Id);
+        User? retrieved2 = await _repository.GetByIdAsync(user2.Id);
 
         await Assert.That(retrieved1).IsNotNull();
         await Assert.That(retrieved2).IsNotNull();
@@ -217,19 +166,106 @@ public class UserRepositoryTests : RepositoryTestBase
     }
 
     [Test]
-    public async Task CreateOrUpdateFromOAuthAsync_WithEmptyEmail_HandlesCorrectly()
+    public async Task SearchByEmailAsync_WithPartialMatch_ReturnsMatchingUsers()
     {
+        // Arrange
+        long now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+        User user1 = new()
+        {
+            Id = Guid.CreateVersion7().ToString(),
+            DisplayName = "Alice",
+            Email = "alice.smith@company.com",
+            CreatedAt = now,
+            UpdatedAt = now
+        };
+
+        User user2 = new()
+        {
+            Id = Guid.CreateVersion7().ToString(),
+            DisplayName = "Bob",
+            Email = "bob.smith@company.com",
+            CreatedAt = now,
+            UpdatedAt = now
+        };
+
+        User user3 = new()
+        {
+            Id = Guid.CreateVersion7().ToString(),
+            DisplayName = "Charlie",
+            Email = "charlie@other.com",
+            CreatedAt = now,
+            UpdatedAt = now
+        };
+
+        await _repository.CreateAsync(user1);
+        await _repository.CreateAsync(user2);
+        await _repository.CreateAsync(user3);
+
         // Act
-        User user = await _repository.CreateOrUpdateFromOAuthAsync(
-            "forgejo",
-            "noemail",
-            "No Email User",
-            ""
-        );
+        IEnumerable<User> results = await _repository.SearchByEmailAsync("smith");
 
         // Assert
-        await Assert.That(user.Email).IsEqualTo("");
-        User? retrieved = await _repository.GetAsync("forgejo", "noemail");
-        await Assert.That(retrieved).IsNotNull();
+        List<User> resultList = results.ToList();
+        await Assert.That(resultList.Count).IsEqualTo(2);
+        await Assert.That(resultList.Any(u => u.Email == "alice.smith@company.com")).IsTrue();
+        await Assert.That(resultList.Any(u => u.Email == "bob.smith@company.com")).IsTrue();
+    }
+
+    [Test]
+    public async Task SearchByEmailAsync_WithNoMatches_ReturnsEmpty()
+    {
+        // Act
+        IEnumerable<User> results = await _repository.SearchByEmailAsync("nonexistent");
+
+        // Assert
+        await Assert.That(results).IsEmpty();
+    }
+
+    [Test]
+    public async Task SearchByEmailAsync_WithExactMatch_ReturnsUser()
+    {
+        // Arrange
+        long now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+        User user = new()
+        {
+            Id = Guid.CreateVersion7().ToString(),
+            DisplayName = "Search Test",
+            Email = "search@test.com",
+            CreatedAt = now,
+            UpdatedAt = now
+        };
+        await _repository.CreateAsync(user);
+
+        // Act
+        IEnumerable<User> results = await _repository.SearchByEmailAsync("search@test.com");
+
+        // Assert
+        List<User> resultList = results.ToList();
+        await Assert.That(resultList.Count).IsEqualTo(1);
+        await Assert.That(resultList[0].Email).IsEqualTo("search@test.com");
+    }
+
+    [Test]
+    public async Task SearchByEmailAsync_IsCaseInsensitive()
+    {
+        // Arrange
+        long now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+        User user = new()
+        {
+            Id = Guid.CreateVersion7().ToString(),
+            DisplayName = "Case Test",
+            Email = "CaseTest@EXAMPLE.com",
+            CreatedAt = now,
+            UpdatedAt = now
+        };
+        await _repository.CreateAsync(user);
+
+        // Act
+        IEnumerable<User> results = await _repository.SearchByEmailAsync("casetest");
+
+        // Assert
+        List<User> resultList = results.ToList();
+        await Assert.That(resultList.Count).IsGreaterThanOrEqualTo(1);
+        await Assert.That(resultList.Any(u => u.Email.Contains("CaseTest", StringComparison.OrdinalIgnoreCase))).IsTrue();
     }
 }

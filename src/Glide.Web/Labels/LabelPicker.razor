@@ -1,0 +1,70 @@
+@using Glide.Web
+
+<div class="label-picker" id="label-picker-@CardId">
+    <div class="label-picker-header">
+        <button type="button" class="label-picker-toggle" onclick="toggleLabelPicker('@CardId')">
+            Manage Labels
+        </button>
+    </div>
+
+    <div class="current-labels-preview" id="card-labels-@CardId">
+        <LabelList Labels="@CurrentLabels" />
+    </div>
+
+    <div class="label-picker-menu" id="label-picker-menu-@CardId" style="display: none;">
+        <div class="label-picker-section">
+            <h4>Available labels</h4>
+            <div class="label-options" id="label-options-@CardId">
+                @foreach (var label in AvailableLabels)
+                {
+                    var isSelected = CurrentLabels.Any(c => c.Id == label.Id);
+                    if (isSelected)
+                    {
+                        <button type="button"
+                                class="label-option selected"
+                                hx-delete="/cards/@CardId/labels/@label.Id"
+                                hx-target="#label-options-@CardId"
+                                hx-swap="innerHTML">
+                            <span class="label-badge">@label.Name</span>
+                            <span class="label-action">✓</span>
+                        </button>
+                    }
+                    else
+                    {
+                        <button type="button"
+                                class="label-option"
+                                hx-post="/cards/@CardId/labels"
+                                hx-vals='{"label_id": "@label.Id"}'
+                                hx-target="#label-options-@CardId"
+                                hx-swap="innerHTML">
+                            <span class="label-badge">@label.Name</span>
+                            <span class="label-action">+</span>
+                        </button>
+                    }
+                }
+            </div>
+        </div>
+
+        <div class="label-picker-section">
+            <h4>Create new label</h4>
+            <div class="create-label-inline">
+                <input type="text" id="new-label-name-@CardId" placeholder="Label name" maxlength="50" />
+                <button type="button" onclick="createLabelForCard('@CardId', '@BoardId')">Create & Add</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public required string CardId { get; set; }
+
+    [Parameter]
+    public required string BoardId { get; set; }
+
+    [Parameter]
+    public required IEnumerable<LabelView> CurrentLabels { get; set; }
+
+    [Parameter]
+    public required IEnumerable<LabelView> AvailableLabels { get; set; }
+}

@@ -3,9 +3,15 @@ using System.Threading;
 
 namespace Glide.Web.Auth;
 
-public class AuthContext(ForgejoOAuthConfig forgejoOAuthConfig)
+public class AuthContext
 {
     public HashSet<string> States { get; } = [];
-    public ForgejoOAuthConfig ForgejoOAuthConfig { get; init; } = forgejoOAuthConfig;
+    public Dictionary<string, string> StateToProvider { get; } = new(); // state -> provider
+    public Dictionary<string, OAuthProviderConfig> ProviderConfigs { get; }
     public Lock StateLock { get; } = new();
+
+    public AuthContext(Dictionary<string, OAuthProviderConfig> providerConfigs)
+    {
+        ProviderConfigs = providerConfigs;
+    }
 }

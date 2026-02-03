@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 using Dapper;
 
@@ -10,14 +11,17 @@ using Glide.Data;
 using Glide.Data.Boards;
 using Glide.Data.Cards;
 using Glide.Data.Columns;
+using Glide.Data.Labels;
 using Glide.Data.Migrations;
 using Glide.Data.Sessions;
+using Glide.Data.UserOAuthProviders;
 using Glide.Data.Users;
 using Glide.Web.Auth;
 using Glide.Web.Boards;
 using Glide.Web.Cards;
 using Glide.Web.Columns;
 using Glide.Web.Features;
+using Glide.Web.Labels;
 
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
@@ -35,8 +39,13 @@ DefaultTypeMap.MatchNamesWithUnderscores = true;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 builder.Configuration.AddEnvironmentVariables();
+
+// Validate required configuration early
+ConfigurationValidator.ValidateRequired(builder.Configuration);
+
 builder.Services.AddRazorComponents();
 builder.Services.AddControllers();
+builder.Services.AddHttpContextAccessor();
 builder.Logging.AddConsole();
 builder.Logging.SetMinimumLevel(LogLevel.Trace);
 
@@ -46,16 +55,44 @@ builder.WebHost.ConfigureKestrel(options =>
     options.ListenAnyIP(int.Parse(port));
 });
 
-builder.Services.AddSingleton<ForgejoOAuthConfig>(sp =>
-    ForgejoOAuthConfig.FromConfig(sp.GetRequiredService<IConfiguration>()));
-
-builder.Services.AddSingleton<AuthContext>()
-    .AddSingleton<OAuthClient>();
-
-builder.Services.AddHttpClient("ForgejoOAuth", (sp, client) =>
+// Provider configurations
+builder.Services.AddSingleton(sp =>
 {
-    ForgejoOAuthConfig config = sp.GetRequiredService<ForgejoOAuthConfig>();
-    client.BaseAddress = config.BaseUri;
+    var config = sp.GetRequiredService<IConfiguration>();
+    return new Dictionary<string, OAuthProviderConfig>
+    {
+        ["github"] = OAuthProviderConfig.FromConfig(config, "GITHUB")
+    };
+});
+
+// Update AuthContext to use new config dictionary
+builder.Services.AddSingleton<AuthContext>(sp =>
+{
+    var configs = sp.GetRequiredService<Dictionary<string, OAuthProviderConfig>>();
+    return new AuthContext(configs);
+});
+
+// Register session configuration (applies to all auth methods)
+builder.Services.AddSingleton(sp =>
+{
+    var config = sp.GetRequiredService<IConfiguration>();
+    return SessionConfig.FromConfiguration(config);
+});
+
+// Register provider implementations
+builder.Services.AddSingleton<IOAuthProvider, GitHubOAuthProvider>();
+
+// Register factory
+builder.Services.AddSingleton<OAuthProviderFactory>();
+
+// Register password authentication service
+builder.Services.AddSingleton<PasswordAuthService>();
+
+// HTTP clients for each provider
+builder.Services.AddHttpClient("githubOAuth", (sp, client) =>
+{
+    var configs = sp.GetRequiredService<Dictionary<string, OAuthProviderConfig>>();
+    client.BaseAddress = configs["github"].BaseUri;
 });
 
 // DB Migrations
@@ -63,14 +100,17 @@ string dbPath = Environment.GetEnvironmentVariable("GLIDE_DATABASE_PATH") ?? "/a
 
 builder.Services.AddSingleton<IDbConnectionFactory>(new SqliteConnectionFactory($"Data Source={dbPath}"))
     .AddSingleton<IUserRepository, UserRepository>()
+    .AddSingleton<IUserOAuthProviderRepository, UserOAuthProviderRepository>()
     .AddSingleton<ISessionRepository, SessionRepository>()
     .AddSingleton<IBoardRepository, BoardRepository>()
     .AddSingleton<IColumnRepository, ColumnRepository>()
-    .AddSingleton<ICardRepository, CardRepository>();
+    .AddSingleton<ICardRepository, CardRepository>()
+    .AddSingleton<ILabelRepository, LabelRepository>();
 
 builder.Services.AddSingleton<BoardAction>()
     .AddSingleton<CardAction>()
-    .AddSingleton<ColumnAction>();
+    .AddSingleton<ColumnAction>()
+    .AddSingleton<LabelAction>();
 
 builder.Services
     .AddFluentMigratorCore()

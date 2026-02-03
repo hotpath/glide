@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Glide.Data.Boards;
 using Glide.Data.Cards;
 using Glide.Data.Columns;
+using Glide.Data.Labels;
 
 using Microsoft.AspNetCore.Http;
 
@@ -15,7 +16,8 @@ namespace Glide.Web.Cards;
 public class CardAction(
     ICardRepository cardRepository,
     IBoardRepository boardRepository,
-    IColumnRepository columnRepository)
+    IColumnRepository columnRepository,
+    ILabelRepository labelRepository)
 {
     public async Task<Result<CardView>> GetForEditAsync(string cardId, ClaimsPrincipal user)
     {
@@ -38,7 +40,8 @@ public class CardAction(
             return new Result<CardView>(Results.NotFound("Card not found"));
         }
 
-        return new Result<CardView>(CardView.FromCard(card));
+        var labels = await labelRepository.GetLabelsByCardIdAsync(cardId);
+        return new Result<CardView>(CardView.FromCard(card, labels));
     }
 
     public async Task<Result<CardView>> UpdateAsync(
@@ -74,7 +77,8 @@ public class CardAction(
             return new Result<CardView>(Results.InternalServerError("Failed to retrieve updated card"));
         }
 
-        return new Result<CardView>(CardView.FromCard(updated));
+        var labels = await labelRepository.GetLabelsByCardIdAsync(cardId);
+        return new Result<CardView>(CardView.FromCard(updated, labels));
     }
 
     public async Task<Result<string>> DeleteAsync(string cardId, ClaimsPrincipal user)
@@ -147,7 +151,8 @@ public class CardAction(
             return new Result<CardView>(Results.InternalServerError("Could not retrieve moved card"));
         }
 
-        return new Result<CardView>(CardView.FromCard(moved));
+        var labels = await labelRepository.GetLabelsByCardIdAsync(cardId);
+        return new Result<CardView>(CardView.FromCard(moved, labels));
     }
 
     public record Result<T>(T? Object, IResult? StatusResult = null)

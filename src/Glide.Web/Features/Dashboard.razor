@@ -1,5 +1,5 @@
 @using Glide.Web.Features.Shared
-<HtmxLayout Title="Dashboard" BodyClass="dashboard-page">
+<HtmxLayout Title="Dashboard" BodyClass="dashboard-page" ShowNavBar="true">
     <main>
         <div id="welcome-banner" class="welcome-message">
             <h3>Welcome to Glide!</h3>
@@ -22,10 +22,6 @@
     </main>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            document.getElementById('user-name').textContent = 'User';
-        });
-
         function hideEmptyState() {
             const emptyState = document.getElementById('empty-state');
             if (emptyState) {

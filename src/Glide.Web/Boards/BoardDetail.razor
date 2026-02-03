@@ -1,15 +1,38 @@
 @using Glide.Web.Features.Shared
-<HtmxLayout Title="@Board.Name" BodyClass="board-page">
+<HtmxLayout Title="@Board.Name" BodyClass="board-page" ShowNavBar="true">
     <main>
         <div class="board-header">
             <a href="/dashboard" class="back-link" title="Back to Dashboard">←</a>
             <h2 class="board-title">@Board.Name</h2>
-            <div class="board-menu">
+            <div class="label-filter">
+                <button class="filter-button" id="filter-button" onclick="toggleLabelFilter(event)">Filter</button>
+                <div class="label-filter-dropdown" id="label-filter-dropdown" style="display: none;">
+                    <button type="button" class="filter-option" data-filter-id="" onclick="filterByLabel(null, 'Show All')">Show All</button>
+                    <div id="filter-labels" hx-get="/boards/@Board.Id/labels?view=filter" hx-trigger="load" hx-swap="innerHTML">
+                        Loading labels...
+                    </div>
+                </div>
+            </div>
+
+                <div class="board-menu">
                 <button class="board-menu-button" onclick="toggleBoardMenu(event)">⋮</button>
                 <div class="board-menu-dropdown" id="board-menu-dropdown">
                     <div id="add-column-menu-item">
                         <button class="board-menu-item" onclick="showAddColumnForm(event)">Add column</button>
                     </div>
+                    @if (Board.BoardUserView?.IsOwner ?? false)
+                    {
+                        <button class="board-menu-item" onclick="openBoardUserManagement('@Board.Id')">
+                            Manage members
+                        </button>
+                    }
+                    <button class="board-menu-item"
+                            hx-get="/boards/@Board.Id/labels"
+                            hx-target="body"
+                            hx-swap="beforeend"
+                            hx-on::after-request="document.body.style.overflow = 'hidden'; document.getElementById('board-menu-dropdown').classList.remove('show');">
+                        Manage labels
+                    </button>
                     <form id="add-column-form" class="add-column-form" style="display: none;"
                           novalidate
                           hx-post="/boards/@Board.Id/columns"
@@ -299,36 +322,111 @@
             }
         });
 
-        // Create a new label for a board
-        function createLabel(boardId, cardId) {
+        // Create a new label for a card (inline creation from card modal)
+        function createLabelForCard(cardId, boardId) {
             const nameInput = document.getElementById('new-label-name-' + cardId);
-            const colorInput = document.getElementById('new-label-color-' + cardId);
 
             const name = nameInput.value.trim();
             if (!name) {
+                alert('Please enter a label name');
                 return;
             }
 
-            const color = colorInput.value;
+            const formData = new FormData();
+            formData.append('board_id', boardId);
+            formData.append('name', name);
 
-            fetch('/boards/' + boardId + '/labels', {
+            fetch('/labels', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: 'name=' + encodeURIComponent(name) + '&color=' + encodeURIComponent(color)
+                body: formData
             }).then(response => {
                 if (response.ok) {
-                    // Refresh the modal content to show the new label
-                    fetch('/cards/' + cardId + '/edit')
-                        .then(r => r.text())
-                        .then(html => {
-                            document.getElementById('modal-body').innerHTML = html;
-                            htmx.process(document.getElementById('modal-body'));
-                        });
+                    return response.json();
+                }
+            }).then(label => {
+                if (label) {
+                    // Add the label to the card using HTMX to properly handle OOB swaps
+                    htmx.ajax('POST', '/cards/' + cardId + '/labels', {
+                        target: '#label-options-' + cardId,
+                        swap: 'innerHTML',
+                        values: { label_id: label.id }
+                    }).then(() => {
+                        // Clear the input field
+                        nameInput.value = '';
+                    });
                 }
             });
         }
+
+        // Toggle label picker dropdown
+        function toggleLabelPicker(cardId) {
+            const menu = document.getElementById('label-picker-menu-' + cardId);
+            if (menu.style.display === 'none') {
+                menu.style.display = 'block';
+            } else {
+                menu.style.display = 'none';
+            }
+        }
+
+
+        // Label filtering
+        let currentLabelFilter = null;
+
+        function toggleLabelFilter(event) {
+            event.stopPropagation();
+            const dropdown = document.getElementById('label-filter-dropdown');
+            dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function filterByLabel(labelId, labelName) {
+            currentLabelFilter = labelId;
+            const cards = document.querySelectorAll('.card-card');
+
+            cards.forEach(card => {
+                if (labelId === null) {
+                    // Show all cards
+                    card.style.display = '';
+                } else {
+                    // Check if card has the label
+                    const hasLabel = card.querySelector(`[data-label-id="${labelId}"]`);
+                    card.style.display = hasLabel ? '' : 'none';
+                }
+            });
+
+            // Update filter button text
+            const filterButton = document.getElementById('filter-button');
+            if (labelId === null) {
+                filterButton.textContent = 'Filter';
+            } else {
+                filterButton.textContent = `Filter: ${labelName}`;
+            }
+
+            // Update active state on filter options
+            document.querySelectorAll('.filter-option').forEach(option => {
+                const optionId = option.getAttribute('data-filter-id');
+                if ((labelId === null && optionId === '') || optionId === labelId) {
+                    option.classList.add('active');
+                } else {
+                    option.classList.remove('active');
+                }
+            });
+
+            // Update card counts
+            updateCardCounts();
+
+            // Close the filter dropdown
+            document.getElementById('label-filter-dropdown').style.display = 'none';
+        }
+
+        // Close filter dropdown when clicking outside
+        document.addEventListener('click', function (event) {
+            if (!event.target.closest('.label-filter')) {
+                const dropdown = document.getElementById('label-filter-dropdown');
+                if (dropdown) {
+                    dropdown.style.display = 'none';
+                }
+            }
+        });
 
         let markdownDebounceTimer = null;
 
@@ -387,6 +485,11 @@
 
             // Don't close if form is visible
             if (form && form.style.display === 'block') {
+                return;
+            }
+
+            // Don't close if clicking inside the board menu area
+            if (event.target.closest('.board-menu')) {
                 return;
             }
 
@@ -478,6 +581,7 @@
             }
         });
     </script>
+    <BoardUserManagement BoardId="@Board.Id" />
 </HtmxLayout>
 
 @code

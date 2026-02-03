@@ -250,17 +250,162 @@ public class BoardRepositoryTests : RepositoryTestBase
         await Assert.That(userBoards.Count(b => b.Name == name)).IsEqualTo(3);
     }
 
+    [Test]
+    public async Task GetBoardUsersAsync_WithMultipleUsers_ReturnsAllUsers()
+    {
+        // Arrange
+        User owner = await CreateTestUser("board-owner");
+        User user1 = await CreateTestUser("board-user-12");
+        User user2 = await CreateTestUser("board-user-13");
+
+        Board board = await _repository.CreateAsync("Multi-User Board", owner.Id);
+        await _repository.AddUserToBoardAsync(board.Id, user1.Id, false);
+        await _repository.AddUserToBoardAsync(board.Id, user2.Id, true);
+
+        // Act
+        IEnumerable<BoardUser> users = await _repository.GetBoardUsersAsync(board.Id);
+
+        // Assert
+        List<BoardUser> userList = users.ToList();
+        await Assert.That(userList.Count).IsEqualTo(3);
+        await Assert.That(userList.Any(u => u.UserId == owner.Id && u.IsOwner)).IsTrue();
+        await Assert.That(userList.Any(u => u.UserId == user1.Id && !u.IsOwner)).IsTrue();
+        await Assert.That(userList.Any(u => u.UserId == user2.Id && u.IsOwner)).IsTrue();
+    }
+
+    [Test]
+    public async Task GetBoardUsersAsync_WithNoUsers_ReturnsEmpty()
+    {
+        // Act
+        IEnumerable<BoardUser> users = await _repository.GetBoardUsersAsync("nonexistent-board");
+
+        // Assert
+        await Assert.That(users).IsEmpty();
+    }
+
+    [Test]
+    public async Task AddUserToBoardAsync_WithNewUser_AddsUserAsNonOwner()
+    {
+        // Arrange
+        User owner = await CreateTestUser("board-owner-2");
+        User newUser = await CreateTestUser("board-user-14");
+        Board board = await _repository.CreateAsync("Add User Board", owner.Id);
+
+        // Act
+        await _repository.AddUserToBoardAsync(board.Id, newUser.Id, false);
+
+        // Assert
+        Board? updated = await _repository.GetByIdAsync(board.Id);
+        await Assert.That(updated).IsNotNull();
+        await Assert.That(updated!.BoardUsers.Any(u => u.UserId == newUser.Id && !u.IsOwner)).IsTrue();
+    }
+
+    [Test]
+    public async Task AddUserToBoardAsync_WithNewUser_AddsUserAsOwner()
+    {
+        // Arrange
+        User owner = await CreateTestUser("board-owner-3");
+        User newOwner = await CreateTestUser("board-user-15");
+        Board board = await _repository.CreateAsync("Add Owner Board", owner.Id);
+
+        // Act
+        await _repository.AddUserToBoardAsync(board.Id, newOwner.Id, true);
+
+        // Assert
+        Board? updated = await _repository.GetByIdAsync(board.Id);
+        await Assert.That(updated).IsNotNull();
+        await Assert.That(updated!.BoardUsers.Any(u => u.UserId == newOwner.Id && u.IsOwner)).IsTrue();
+    }
+
+    [Test]
+    public async Task UpdateUserRoleAsync_TogglesOwnershipStatus()
+    {
+        // Arrange
+        User owner = await CreateTestUser("board-owner-4");
+        User user = await CreateTestUser("board-user-16");
+        Board board = await _repository.CreateAsync("Update Role Board", owner.Id);
+        await _repository.AddUserToBoardAsync(board.Id, user.Id, false);
+
+        // Act - Promote to owner
+        await _repository.UpdateUserRoleAsync(board.Id, user.Id, true);
+
+        // Assert
+        Board? afterPromote = await _repository.GetByIdAsync(board.Id);
+        await Assert.That(afterPromote!.BoardUsers.First(u => u.UserId == user.Id).IsOwner).IsTrue();
+
+        // Act - Demote to non-owner
+        await _repository.UpdateUserRoleAsync(board.Id, user.Id, false);
+
+        // Assert
+        Board? afterDemote = await _repository.GetByIdAsync(board.Id);
+        await Assert.That(afterDemote!.BoardUsers.First(u => u.UserId == user.Id).IsOwner).IsFalse();
+    }
+
+    [Test]
+    public async Task RemoveUserFromBoardAsync_WithExistingUser_RemovesUser()
+    {
+        // Arrange
+        User owner = await CreateTestUser("board-owner-5");
+        User user = await CreateTestUser("board-user-17");
+        Board board = await _repository.CreateAsync("Remove User Board", owner.Id);
+        await _repository.AddUserToBoardAsync(board.Id, user.Id, false);
+
+        // Verify user exists
+        Board? beforeRemove = await _repository.GetByIdAsync(board.Id);
+        await Assert.That(beforeRemove!.BoardUsers.Any(u => u.UserId == user.Id)).IsTrue();
+
+        // Act
+        await _repository.RemoveUserFromBoardAsync(board.Id, user.Id);
+
+        // Assert
+        Board? afterRemove = await _repository.GetByIdAsync(board.Id);
+        await Assert.That(afterRemove!.BoardUsers.Any(u => u.UserId == user.Id)).IsFalse();
+        await Assert.That(afterRemove.BoardUsers.Count()).IsEqualTo(1);
+    }
+
+    [Test]
+    public async Task RemoveUserFromBoardAsync_WithNonExistentUser_DoesNotThrow()
+    {
+        // Arrange
+        User owner = await CreateTestUser("board-owner-6");
+        Board board = await _repository.CreateAsync("Remove Nonexistent Board", owner.Id);
+
+        // Act & Assert - Should not throw
+        await _repository.RemoveUserFromBoardAsync(board.Id, "nonexistent-user");
+    }
+
+    [Test]
+    public async Task AddUserToBoardAsync_AllowsDuplicateAddition()
+    {
+        // Note: The database has a unique constraint, so the second insert should fail silently or throw.
+        // This test documents the current behavior - adjust based on desired behavior.
+        // Arrange
+        User owner = await CreateTestUser("board-owner-7");
+        User user = await CreateTestUser("board-user-18");
+        Board board = await _repository.CreateAsync("Duplicate Add Board", owner.Id);
+
+        // Act & Assert
+        // First add should succeed
+        await _repository.AddUserToBoardAsync(board.Id, user.Id, false);
+
+        // Second add should throw due to unique constraint
+        await Assert.ThrowsAsync<Exception>(
+            async () => await _repository.AddUserToBoardAsync(board.Id, user.Id, true)
+        );
+    }
+
     private async Task<User> CreateTestUser(string providerId)
     {
+        long now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
         User user = new()
         {
-            Id = Guid.NewGuid().ToString(),
-            OAuthProvider = "forgejo",
-            OAuthProviderId = providerId,
+            Id = Guid.CreateVersion7().ToString(),
             DisplayName = "Test User",
-            Email = $"{providerId}@example.com"
+            Email = $"{providerId}@example.com",
+            CreatedAt = now,
+            UpdatedAt = now
         };
-        await _userRepository.Create(user);
+        await _userRepository.CreateAsync(user);
         return user;
     }
 }
