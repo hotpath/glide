@@ -7,7 +7,7 @@ namespace Glide.Web.Auth;
 
 public interface IOAuthProvider
 {
-    string Name { get; }           // "forgejo" or "github"
+    string Name { get; }           // "github"
     string DisplayName { get; }    // "Codeberg" or "GitHub"
 
     Uri GetAuthorizeUrl(string clientId, Uri redirectUri, string state, Uri baseUri);

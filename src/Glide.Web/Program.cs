@@ -57,7 +57,6 @@ builder.Services.AddSingleton(sp =>
     var config = sp.GetRequiredService<IConfiguration>();
     return new Dictionary<string, OAuthProviderConfig>
     {
-        ["forgejo"] = OAuthProviderConfig.FromConfig(config, "FORGEJO"),
         ["github"] = OAuthProviderConfig.FromConfig(config, "GITHUB")
     };
 });
@@ -77,7 +76,6 @@ builder.Services.AddSingleton(sp =>
 });
 
 // Register provider implementations
-builder.Services.AddSingleton<IOAuthProvider, ForgejoOAuthProvider>();
 builder.Services.AddSingleton<IOAuthProvider, GitHubOAuthProvider>();
 
 // Register factory
@@ -87,12 +85,6 @@ builder.Services.AddSingleton<OAuthProviderFactory>();
 builder.Services.AddSingleton<PasswordAuthService>();
 
 // HTTP clients for each provider
-builder.Services.AddHttpClient("forgejoOAuth", (sp, client) =>
-{
-    var configs = sp.GetRequiredService<Dictionary<string, OAuthProviderConfig>>();
-    client.BaseAddress = configs["forgejo"].BaseUri;
-});
-
 builder.Services.AddHttpClient("githubOAuth", (sp, client) =>
 {
     var configs = sp.GetRequiredService<Dictionary<string, OAuthProviderConfig>>();

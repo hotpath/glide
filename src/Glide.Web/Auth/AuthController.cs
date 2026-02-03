@@ -29,7 +29,7 @@ public class AuthController(
     ISessionRepository sessionRepository) : ControllerBase
 {
     [HttpGet("login")]
-    public IActionResult Login([FromQuery] string provider = "forgejo")
+    public IActionResult Login([FromQuery] string provider = "github")
     {
         string state = Csrf.GenerateState();
 
@@ -64,7 +64,7 @@ public class AuthController(
             authContext.StateToProvider.Remove(state);
         }
 
-        string provider = providerFromState ?? "forgejo";
+        string provider = providerFromState ?? "github";
 
         if (!stateValid)
         {

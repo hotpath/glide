@@ -141,18 +141,6 @@ body.login-page {
     background: var(--accent-blue-hover);
 }
 
-.forgejo-button {
-    background: #2185d0;
-}
-
-.forgejo-button:hover {
-    background: #1e77ba;
-}
-
-.forgejo-button:before {
-    content: "🌲";
-    margin-right: 0.5rem;
-}
 
 .github-button {
     background: #24292e;
