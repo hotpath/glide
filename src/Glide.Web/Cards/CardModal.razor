@@ -4,7 +4,7 @@
       hx-put="/cards/@Card.Id"
       hx-target="#card-@Card.Id"
       hx-swap="outerHTML"
-      hx-on::after-request="if(event.detail.successful) closeModal()">
+      hx-on::after-request="if(event.detail.successful && event.detail.elt.tagName === 'FORM') closeModal()">
     <div class="form-group">
         <label for="card-title">Title</label>
         <input type="text"

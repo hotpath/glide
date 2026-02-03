@@ -16,6 +16,29 @@ public class LabelAction(
     IBoardRepository boardRepository,
     ICardRepository cardRepository)
 {
+    public async Task<Result<LabelView>> GetByIdAsync(string labelId, ClaimsPrincipal user)
+    {
+        string? userId = user.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrWhiteSpace(userId))
+        {
+            return new Result<LabelView>(Results.Unauthorized());
+        }
+
+        Label? label = await labelRepository.GetByIdAsync(labelId);
+        if (label is null)
+        {
+            return new Result<LabelView>(Results.NotFound("Label not found"));
+        }
+
+        Board? board = await boardRepository.GetByIdAsync(label.BoardId);
+        if (board is null || board.BoardUsers.All(x => x.UserId != userId))
+        {
+            return new Result<LabelView>(Results.NotFound("Label not found"));
+        }
+
+        return new Result<LabelView>(LabelView.FromLabel(label));
+    }
+
     public async Task<Result<IEnumerable<LabelView>>> GetByBoardIdAsync(string boardId, ClaimsPrincipal user)
     {
         string? userId = user.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -37,7 +60,6 @@ public class LabelAction(
     public async Task<Result<LabelView>> CreateAsync(
         string boardId,
         string name,
-        string? icon,
         ClaimsPrincipal user)
     {
         string? userId = user.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -58,14 +80,20 @@ public class LabelAction(
             return new Result<LabelView>(Results.Forbid());
         }
 
-        Label label = await labelRepository.CreateAsync(boardId, name, icon);
+        // Check if a label with this name already exists (case-insensitive)
+        Label? existingLabel = await labelRepository.GetByBoardIdAndNameAsync(boardId, name);
+        if (existingLabel is not null)
+        {
+            return new Result<LabelView>(LabelView.FromLabel(existingLabel));
+        }
+
+        Label label = await labelRepository.CreateAsync(boardId, name);
         return new Result<LabelView>(LabelView.FromLabel(label));
     }
 
     public async Task<Result<LabelView>> UpdateAsync(
         string labelId,
         string name,
-        string? icon,
         ClaimsPrincipal user)
     {
         string? userId = user.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -92,7 +120,7 @@ public class LabelAction(
             return new Result<LabelView>(Results.Forbid());
         }
 
-        await labelRepository.UpdateAsync(labelId, name, icon);
+        await labelRepository.UpdateAsync(labelId, name);
 
         Label? updated = await labelRepository.GetByIdAsync(labelId);
         if (updated is null)

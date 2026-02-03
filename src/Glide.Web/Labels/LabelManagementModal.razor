@@ -1,10 +1,10 @@
 @using Glide.Web
 
-<div class="modal-overlay" onclick="closeModal(event)">
+<div class="modal modal-open label-management-modal" onclick="closeLabelModal(event)">
     <div class="modal-content label-management" onclick="event.stopPropagation()">
         <div class="modal-header">
             <h2>Manage Labels</h2>
-            <button type="button" class="close-button" onclick="closeModal()">&times;</button>
+            <button type="button" class="close-button" onclick="closeLabelModal()">&times;</button>
         </div>
 
         <div class="modal-body">
@@ -14,7 +14,6 @@
                     <input type="hidden" name="board_id" value="@BoardId" />
                     <div class="form-row">
                         <input type="text" name="name" placeholder="Label name" required maxlength="50" />
-                        <input type="text" name="icon" placeholder="Icon" maxlength="2" />
                         <button type="submit">Create</button>
                     </div>
                 </form>
@@ -29,7 +28,6 @@
                               hx-target="#label-badge-@label.Id"
                               hx-swap="outerHTML">
                             <input type="text" name="name" value="@label.Name" required maxlength="50" />
-                            <input type="text" name="icon" value="@label.Icon" placeholder="Icon" maxlength="2" />
                             <button type="submit" class="save-button">Save</button>
                         </form>
 
@@ -53,9 +51,14 @@
 </div>
 
 <script>
-    function closeModal(event) {
-        if (!event || event.target.classList.contains('modal-overlay') || event.target.classList.contains('close-button')) {
-            document.querySelector('.modal-overlay').remove();
+    function closeLabelModal(event) {
+        if (!event || event.target.classList.contains('modal') || event.target.classList.contains('close-button')) {
+            // Find the modal element and remove it
+            const modal = event?.target?.closest('.modal') || document.querySelector('.modal.label-management-modal');
+            if (modal) {
+                modal.remove();
+                document.body.style.overflow = '';
+            }
         }
     }
 </script>

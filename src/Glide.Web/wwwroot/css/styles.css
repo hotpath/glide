@@ -1615,15 +1615,6 @@ textarea#card-description {
     white-space: nowrap;
 }
 
-.label-icon {
-    font-size: 0.875rem;
-    line-height: 1;
-}
-
-.label-name {
-    line-height: 1;
-}
-
 /* Label List */
 .label-list {
     display: flex;
@@ -1641,31 +1632,37 @@ textarea#card-description {
     margin-bottom: 1rem;
 }
 
-.label-picker label {
-    display: block;
+.label-picker-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     margin-bottom: 0.5rem;
-    font-weight: 600;
-    color: var(--text-bright);
 }
 
-.current-labels {
-    margin-bottom: 0.5rem;
-    min-height: 2rem;
+.label-picker-header label {
+    font-weight: 600;
+    color: var(--text-bright);
+    margin: 0;
 }
 
 .label-picker-toggle {
     background: var(--bg-elevated);
-    color: var(--text-primary);
-    padding: 0.5rem 1rem;
+    color: var(--text-secondary);
+    padding: 0.375rem 0.75rem;
     border-radius: 4px;
     border: 1px solid var(--border-color);
     cursor: pointer;
-    font-size: 0.875rem;
+    font-size: 0.75rem;
 }
 
 .label-picker-toggle:hover {
     background: var(--bg-surface);
     border-color: var(--border-light);
+}
+
+.current-labels-preview {
+    margin-bottom: 0.5rem;
+    min-height: 2rem;
 }
 
 .label-picker-menu {
@@ -1674,19 +1671,34 @@ textarea#card-description {
     border: 1px solid var(--border-color);
     border-radius: 4px;
     padding: 0.75rem;
-    max-height: 300px;
+    max-height: 400px;
     overflow-y: auto;
 }
 
-.available-labels {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+.label-picker-section {
     margin-bottom: 1rem;
 }
 
-.label-option,
-.label-remove {
+.label-picker-section:last-child {
+    margin-bottom: 0;
+}
+
+.label-picker-section h4 {
+    margin: 0 0 0.5rem 0;
+    font-size: 0.875rem;
+    color: var(--text-bright);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 600;
+}
+
+.label-options {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+}
+
+.label-option {
     background: transparent;
     border: none;
     padding: 0.5rem;
@@ -1697,41 +1709,62 @@ textarea#card-description {
     align-items: center;
     justify-content: space-between;
     width: 100%;
+    transition: background-color 0.15s;
 }
 
-.label-option:hover,
-.label-remove:hover {
+.label-option:hover {
     background: var(--bg-elevated);
 }
 
-.label-remove .remove-icon {
-    color: var(--accent-red);
-    font-size: 1.25rem;
+.label-option .label-action {
+    color: var(--text-secondary);
+    font-size: 1rem;
     font-weight: bold;
-    margin-left: 0.5rem;
+    min-width: 1.5rem;
+    text-align: center;
+}
+
+.label-option.selected {
+    background: rgba(34, 197, 94, 0.1);
+}
+
+.label-option.selected:hover {
+    background: rgba(34, 197, 94, 0.15);
+}
+
+.label-option.selected .label-action {
+    color: rgb(34, 197, 94);
 }
 
 .create-label-inline {
-    border-top: 1px solid var(--border-color);
-    padding-top: 1rem;
-    margin-bottom: 1rem;
-}
-
-.create-label-inline h4 {
-    margin-bottom: 0.5rem;
-    font-size: 0.875rem;
-    color: var(--text-bright);
+    display: flex;
+    gap: 0.5rem;
 }
 
 .create-label-inline input[type="text"] {
-    width: 100%;
+    flex: 1;
     padding: 0.5rem;
-    margin-bottom: 0.5rem;
     background: var(--bg-elevated);
     border: 1px solid var(--border-color);
     border-radius: 4px;
     color: var(--text-primary);
     font-size: 0.875rem;
+}
+
+.create-label-inline button {
+    padding: 0.5rem 0.75rem;
+    background: var(--accent-blue);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.875rem;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.create-label-inline button:hover {
+    opacity: 0.9;
 }
 
 .create-label-inline input[type="color"] {
@@ -1741,10 +1774,6 @@ textarea#card-description {
     border: 1px solid var(--border-color);
     border-radius: 4px;
     cursor: pointer;
-}
-
-.create-label-inline button {
-    width: 100%;
 }
 
 /* Label Management Modal */

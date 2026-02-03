@@ -9,18 +9,18 @@ namespace Glide.Data.Labels;
 
 public class LabelRepository(IDbConnectionFactory connectionFactory) : ILabelRepository
 {
-    public async Task<Label> CreateAsync(string boardId, string name, string? icon)
+    public async Task<Label> CreateAsync(string boardId, string name)
     {
         string id = Guid.CreateVersion7().ToString();
         const string statement = """
-                                 INSERT INTO labels(id, board_id, name, icon)
-                                 VALUES (@Id, @BoardId, @Name, @Icon)
+                                 INSERT INTO labels(id, board_id, name)
+                                 VALUES (@Id, @BoardId, @Name)
                                  """;
 
         using IDbConnection conn = connectionFactory.CreateConnection();
-        await conn.ExecuteAsync(statement, new { Id = id, BoardId = boardId, Name = name, Icon = icon });
+        await conn.ExecuteAsync(statement, new { Id = id, BoardId = boardId, Name = name });
 
-        return new Label { Id = id, BoardId = boardId, Name = name, Icon = icon };
+        return new Label { Id = id, BoardId = boardId, Name = name };
     }
 
     public async Task<Label?> GetByIdAsync(string id)
@@ -30,6 +30,13 @@ public class LabelRepository(IDbConnectionFactory connectionFactory) : ILabelRep
         return await conn.QuerySingleOrDefaultAsync<Label>(query, new { Id = id });
     }
 
+    public async Task<Label?> GetByBoardIdAndNameAsync(string boardId, string name)
+    {
+        const string query = "SELECT * FROM labels WHERE board_id = @BoardId AND LOWER(name) = LOWER(@Name)";
+        using IDbConnection conn = connectionFactory.CreateConnection();
+        return await conn.QuerySingleOrDefaultAsync<Label>(query, new { BoardId = boardId, Name = name });
+    }
+
     public async Task<IEnumerable<Label>> GetByBoardIdAsync(string boardId)
     {
         const string query = "SELECT * FROM labels WHERE board_id = @BoardId ORDER BY name";
@@ -37,17 +44,16 @@ public class LabelRepository(IDbConnectionFactory connectionFactory) : ILabelRep
         return await conn.QueryAsync<Label>(query, new { BoardId = boardId });
     }
 
-    public async Task UpdateAsync(string id, string name, string? icon)
+    public async Task UpdateAsync(string id, string name)
     {
         const string statement = """
                                  UPDATE labels
-                                 SET name = @Name,
-                                     icon = @Icon
+                                 SET name = @Name
                                  WHERE id = @Id
                                  """;
 
         using IDbConnection conn = connectionFactory.CreateConnection();
-        await conn.ExecuteAsync(statement, new { Id = id, Name = name, Icon = icon });
+        await conn.ExecuteAsync(statement, new { Id = id, Name = name });
     }
 
     public async Task DeleteAsync(string id)
@@ -112,5 +118,4 @@ public record Label
     public string Id { get; set; } = "";
     public string BoardId { get; set; } = "";
     public string Name { get; set; } = "";
-    public string? Icon { get; set; }
 }

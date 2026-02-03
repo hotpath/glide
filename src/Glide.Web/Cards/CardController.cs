@@ -95,9 +95,31 @@ public class CardController(CardAction cardAction, LabelAction labelAction) : Co
         [FromForm(Name = "label_id")] string labelId)
     {
         LabelAction.Result<IEnumerable<LabelView>> result = await labelAction.AddLabelToCardAsync(cardId, labelId, User);
-        return result.IsError
-            ? result.StatusResult!
-            : new RazorComponentResult<LabelList>(new { Labels = result.Object });
+        if (result.IsError)
+        {
+            return result.StatusResult!;
+        }
+
+        // Get the updated card to refresh the board view
+        CardAction.Result<CardView> cardResult = await cardAction.GetForEditAsync(cardId, User);
+        if (cardResult.IsError)
+        {
+            return cardResult.StatusResult!;
+        }
+
+        // Get all labels for the board to refresh the picker
+        LabelAction.Result<IEnumerable<LabelView>> allLabelsResult =
+            await labelAction.GetByBoardIdAsync(cardResult.Object!.BoardId, User);
+        if (allLabelsResult.IsError)
+        {
+            return allLabelsResult.StatusResult!;
+        }
+
+        return new RazorComponentResult<LabelUpdateResponse>(new
+        {
+            Card = cardResult.Object,
+            AllBoardLabels = allLabelsResult.Object
+        });
     }
 
     [HttpDelete("{cardId}/labels/{labelId}")]
@@ -105,8 +127,30 @@ public class CardController(CardAction cardAction, LabelAction labelAction) : Co
     public async Task<IResult> RemoveLabelAsync([FromRoute] string cardId, [FromRoute] string labelId)
     {
         LabelAction.Result<IEnumerable<LabelView>> result = await labelAction.RemoveLabelFromCardAsync(cardId, labelId, User);
-        return result.IsError
-            ? result.StatusResult!
-            : new RazorComponentResult<LabelList>(new { Labels = result.Object });
+        if (result.IsError)
+        {
+            return result.StatusResult!;
+        }
+
+        // Get the updated card to refresh the board view
+        CardAction.Result<CardView> cardResult = await cardAction.GetForEditAsync(cardId, User);
+        if (cardResult.IsError)
+        {
+            return cardResult.StatusResult!;
+        }
+
+        // Get all labels for the board to refresh the picker
+        LabelAction.Result<IEnumerable<LabelView>> allLabelsResult =
+            await labelAction.GetByBoardIdAsync(cardResult.Object!.BoardId, User);
+        if (allLabelsResult.IsError)
+        {
+            return allLabelsResult.StatusResult!;
+        }
+
+        return new RazorComponentResult<LabelUpdateResponse>(new
+        {
+            Card = cardResult.Object,
+            AllBoardLabels = allLabelsResult.Object
+        });
     }
 }

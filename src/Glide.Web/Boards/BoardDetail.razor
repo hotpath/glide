@@ -20,7 +20,13 @@
                     <div id="add-column-menu-item">
                         <button class="board-menu-item" onclick="showAddColumnForm(event)">Add column</button>
                     </div>
-                    <button class="board-menu-item" onclick="openLabelManagement('@Board.Id')">Manage labels</button>
+                    <button class="board-menu-item"
+                            hx-get="/boards/@Board.Id/labels"
+                            hx-target="body"
+                            hx-swap="beforeend"
+                            hx-on::after-request="document.body.style.overflow = 'hidden'; document.getElementById('board-menu-dropdown').classList.remove('show');">
+                        Manage labels
+                    </button>
                     <form id="add-column-form" class="add-column-form" style="display: none;"
                           novalidate
                           hx-post="/boards/@Board.Id/columns"
@@ -313,7 +319,6 @@
         // Create a new label for a card (inline creation from card modal)
         function createLabelForCard(cardId, boardId) {
             const nameInput = document.getElementById('new-label-name-' + cardId);
-            const iconInput = document.getElementById('new-label-icon-' + cardId);
 
             const name = nameInput.value.trim();
             if (!name) {
@@ -321,14 +326,9 @@
                 return;
             }
 
-            const icon = iconInput.value.trim();
-
             const formData = new FormData();
             formData.append('board_id', boardId);
             formData.append('name', name);
-            if (icon) {
-                formData.append('icon', icon);
-            }
 
             fetch('/labels', {
                 method: 'POST',
@@ -339,21 +339,14 @@
                 }
             }).then(label => {
                 if (label) {
-                    // Add the label to the card
-                    const addFormData = new FormData();
-                    addFormData.append('label_id', label.id);
-
-                    fetch('/cards/' + cardId + '/labels', {
-                        method: 'POST',
-                        body: addFormData
+                    // Add the label to the card using HTMX to properly handle OOB swaps
+                    htmx.ajax('POST', '/cards/' + cardId + '/labels', {
+                        target: '#label-options-' + cardId,
+                        swap: 'innerHTML',
+                        values: { label_id: label.id }
                     }).then(() => {
-                        // Refresh modal to show the new label
-                        fetch('/cards/' + cardId + '/edit')
-                            .then(r => r.text())
-                            .then(html => {
-                                document.getElementById('modal-body').innerHTML = html;
-                                htmx.process(document.getElementById('modal-body'));
-                            });
+                        // Clear the input field
+                        nameInput.value = '';
                     });
                 }
             });
@@ -369,19 +362,6 @@
             }
         }
 
-        // Open label management modal
-        function openLabelManagement(boardId) {
-            fetch('/boards/' + boardId + '/labels')
-                .then(r => r.text())
-                .then(html => {
-                    const modalContainer = document.createElement('div');
-                    modalContainer.id = 'label-modal-container';
-                    modalContainer.innerHTML = html;
-                    document.body.appendChild(modalContainer);
-                    htmx.process(modalContainer);
-                    document.body.style.overflow = 'hidden';
-                });
-        }
 
         // Label filtering
         let currentLabelFilter = null;
@@ -481,6 +461,11 @@
 
             // Don't close if form is visible
             if (form && form.style.display === 'block') {
+                return;
+            }
+
+            // Don't close if clicking inside the board menu area
+            if (event.target.closest('.board-menu')) {
                 return;
             }
 
