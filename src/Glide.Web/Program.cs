@@ -114,7 +114,8 @@ builder.Services.AddSingleton<IDbConnectionFactory>(new SqliteConnectionFactory(
     .AddSingleton<ICardRepository, CardRepository>()
     .AddSingleton<ILabelRepository, LabelRepository>();
 
-builder.Services.AddSingleton<BoardAction>()
+builder.Services.AddSingleton<AuthAction>()
+    .AddSingleton<BoardAction>()
     .AddSingleton<CardAction>()
     .AddSingleton<ColumnAction>()
     .AddSingleton<LabelAction>();
