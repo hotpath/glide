@@ -1,6 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -23,6 +21,7 @@ public class AuthController(
     IHttpClientFactory clientFactory,
     PasswordAuthService passwordAuthService,
     SessionConfig sessionConfig,
+    AdminConfig adminConfig,
     ILogger<AuthController> logger,
     IUserRepository userRepository,
     IUserOAuthProviderRepository oauthProviderRepository,
@@ -115,6 +114,13 @@ public class AuthController(
                     await userRepository.UpdateAsync(user with { DisplayName = oauthUser.DisplayName });
                     user = user with { DisplayName = oauthUser.DisplayName };
                 }
+
+                // Ensure admin status is correct
+                if (!user.IsAdmin && oauthUser.Email == adminConfig.AdminEmail)
+                {
+                    await userRepository.SetAdminStatusAsync(user.Id, true);
+                    user = user with { IsAdmin = true };
+                }
             }
             else
             {
@@ -161,7 +167,8 @@ public class AuthController(
                         DisplayName = oauthUser.DisplayName,
                         Email = oauthUser.Email,
                         CreatedAt = now,
-                        UpdatedAt = now
+                        UpdatedAt = now,
+                        IsAdmin = oauthUser.Email == adminConfig.AdminEmail
                     };
 
                     await userRepository.CreateAsync(user);
@@ -225,7 +232,8 @@ public class AuthController(
                     DisplayName = oauthUser.DisplayName,
                     Email = oauthUser.Email,
                     CreatedAt = now,
-                    UpdatedAt = now
+                    UpdatedAt = now,
+                    IsAdmin = oauthUser.Email == adminConfig.AdminEmail
                 };
 
                 await userRepository.CreateAsync(user);
@@ -318,7 +326,8 @@ public class AuthController(
             DisplayName = displayName ?? email.Split('@')[0], // Use email prefix as default display name
             PasswordHash = passwordHash,
             CreatedAt = now,
-            UpdatedAt = now
+            UpdatedAt = now,
+            IsAdmin = email == adminConfig.AdminEmail
         };
 
         await userRepository.CreateAsync(newUser);

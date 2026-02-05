@@ -79,6 +79,13 @@ builder.Services.AddSingleton(sp =>
     return SessionConfig.FromConfiguration(config);
 });
 
+// Register admin email configuration
+builder.Services.AddSingleton(sp =>
+{
+    string? adminEmail = Environment.GetEnvironmentVariable("GLIDE_ADMIN_EMAIL");
+    return new AdminConfig { AdminEmail = adminEmail };
+});
+
 // Register provider implementations
 builder.Services.AddSingleton<IOAuthProvider, GitHubOAuthProvider>();
 

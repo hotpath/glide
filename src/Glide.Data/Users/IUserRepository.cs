@@ -12,4 +12,5 @@ public interface IUserRepository
     Task<IEnumerable<User>> SearchByEmailAsync(string emailQuery);
     Task<User> CreateAsync(User user);
     Task UpdateAsync(User user);
+    Task SetAdminStatusAsync(string userId, bool isAdmin);
 }

@@ -8,4 +8,5 @@ public record User
     public string? PasswordHash { get; init; }
     public long CreatedAt { get; init; }
     public long UpdatedAt { get; init; }
+    public bool IsAdmin { get; init; }
 }
