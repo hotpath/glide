@@ -145,9 +145,13 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {
-        options.Cookie.Name = "glide_session";
+        options.Cookie.Name = ".AspNetCore.Glide.Auth";
         options.Cookie.HttpOnly = true;
-        options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+        // Always use Secure cookies when not in development to work properly behind reverse proxies
+        options.Cookie.SecurePolicy = builder.Environment.EnvironmentName == "Development"
+            ? CookieSecurePolicy.SameAsRequest
+            : CookieSecurePolicy.Always;
+        options.Cookie.SameSite = SameSiteMode.Lax;
         options.ExpireTimeSpan = TimeSpan.FromHours(720);
         options.SlidingExpiration = true;
         options.LoginPath = "/auth/login";
