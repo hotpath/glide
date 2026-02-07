@@ -1,6 +1,8 @@
 @using Glide.Web.Auth
 @using Glide.Web.Features.Shared
+@using Glide.Data.SiteSettings
 @inject Dictionary<string, OAuthProviderConfig> OAuthConfigs
+@inject ISiteSettingsRepository SiteSettingsRepository
 
 <HtmxLayout Title="Login" BodyClass="login-page">
     <div class="login-container">
@@ -11,7 +13,10 @@
         <!-- Tab navigation -->
         <div class="auth-tabs">
             <button class="auth-tab active" onclick="showTab('login')">Login</button>
-            <button class="auth-tab" onclick="showTab('register')">Register</button>
+            @if (IsRegistrationOpen)
+            {
+                <button class="auth-tab" onclick="showTab('register')">Register</button>
+            }
         </div>
 
         <!-- Login tab -->
@@ -47,42 +52,54 @@
         </div>
 
         <!-- Register tab -->
-        <div id="register-tab" class="auth-tab-content">
-            <form method="post" action="/auth/register" class="auth-form">
-                <div class="form-group">
-                    <label for="register-email">Email</label>
-                    <input type="email" id="register-email" name="email" required autocomplete="email">
-                </div>
-                <div class="form-group">
-                    <label for="register-displayname">Display Name (optional)</label>
-                    <input type="text" id="register-displayname" name="displayName" autocomplete="name">
-                </div>
-                <div class="form-group">
-                    <label for="register-password">Password</label>
-                    <input type="password" id="register-password" name="password" required autocomplete="new-password"
-                           minlength="8">
-                    <small class="help-text">Minimum 8 characters</small>
-                </div>
-                <button type="submit" class="auth-submit-button">Create Account</button>
-            </form>
+        @if (IsRegistrationOpen)
+        {
+            <div id="register-tab" class="auth-tab-content">
+                <form method="post" action="/auth/register" class="auth-form">
+                    <div class="form-group">
+                        <label for="register-email">Email</label>
+                        <input type="email" id="register-email" name="email" required autocomplete="email">
+                    </div>
+                    <div class="form-group">
+                        <label for="register-displayname">Display Name (optional)</label>
+                        <input type="text" id="register-displayname" name="displayName" autocomplete="name">
+                    </div>
+                    <div class="form-group">
+                        <label for="register-password">Password</label>
+                        <input type="password" id="register-password" name="password" required autocomplete="new-password"
+                               minlength="8">
+                        <small class="help-text">Minimum 8 characters</small>
+                    </div>
+                    <button type="submit" class="auth-submit-button">Create Account</button>
+                </form>
 
-            @if (IsGitHubConfigured)
-            {
-                <div class="auth-divider">
-                    <span>or sign up with</span>
-                </div>
+                @if (IsGitHubConfigured)
+                {
+                    <div class="auth-divider">
+                        <span>or sign up with</span>
+                    </div>
 
-                <div class="oauth-buttons">
-                    <a href="/auth/login?provider=github" class="oauth-button github-button">
-                        <span class="oauth-icon">
-                            <img src="/images/GitHub_Invertocat_Black_Clearspace.svg" alt="" class="github-logo-light"/>
-                            <img src="/images/GitHub_Invertocat_White_Clearspace.svg" alt="" class="github-logo-dark"/>
-                        </span>
-                        Sign up with GitHub
-                    </a>
+                    <div class="oauth-buttons">
+                        <a href="/auth/login?provider=github" class="oauth-button github-button">
+                            <span class="oauth-icon">
+                                <img src="/images/GitHub_Invertocat_Black_Clearspace.svg" alt="" class="github-logo-light"/>
+                                <img src="/images/GitHub_Invertocat_White_Clearspace.svg" alt="" class="github-logo-dark"/>
+                            </span>
+                            Sign up with GitHub
+                        </a>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div id="register-tab" class="auth-tab-content">
+                <div class="registration-disabled-message">
+                    <p>Registration is currently disabled.</p>
+                    <p>Please contact an administrator for an account.</p>
                 </div>
-            }
-        </div>
+            </div>
+        }
 
         <div id="error-message"></div>
     </div>
@@ -106,4 +123,13 @@
 
 @code {
     private bool IsGitHubConfigured => OAuthConfigs.TryGetValue("github", out var config) && !string.IsNullOrEmpty(config.ClientId);
+
+    private bool IsRegistrationOpen
+    {
+        get
+        {
+            SiteSetting? setting = SiteSettingsRepository.GetByKeyAsync("registration_open").Result;
+            return setting?.Value == "true";
+        }
+    }
 }

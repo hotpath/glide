@@ -4,11 +4,13 @@
 
 @{
     var displayName = "User";
+    var isAdmin = false;
 
     if (HttpContextAccessor.HttpContext?.User.Identity?.IsAuthenticated == true)
     {
         var user = HttpContextAccessor.HttpContext.User;
         displayName = user.FindFirst("DisplayName")?.Value ?? user.FindFirst(ClaimTypes.Email)?.Value ?? "User";
+        isAdmin = user.FindFirst("is_admin")?.Value == "True";
     }
 }
 
@@ -25,7 +27,10 @@
         <div class="user-menu-dropdown" id="user-menu">
             <div class="user-menu-header">@displayName</div>
             <a href="/profile" class="user-menu-item">Profile / Account</a>
-            <a href="/settings" class="user-menu-item">App Settings</a>
+            @if (isAdmin)
+            {
+                <a href="/settings" class="user-menu-item">App Settings</a>
+            }
             <a href="/about" class="user-menu-item">Help / About</a>
             <button class="user-menu-item logout" hx-post="/auth/logout" hx-swap="none"
                     hx-on::after-request="window.location.href='/'">

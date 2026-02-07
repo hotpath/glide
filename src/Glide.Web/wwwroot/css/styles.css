@@ -304,6 +304,23 @@ body.login-page {
     background: var(--accent-blue-hover);
 }
 
+/* Registration disabled message */
+.registration-disabled-message {
+    text-align: center;
+    padding: 2rem 1rem;
+    color: var(--text-muted);
+}
+
+.registration-disabled-message p {
+    margin: 0.5rem 0;
+}
+
+.registration-disabled-message p:first-child {
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 1rem;
+}
+
 /* Auth divider */
 .auth-divider {
     position: relative;
