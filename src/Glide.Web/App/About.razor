@@ -1,3 +1,4 @@
+@using System.Reflection
 @using Glide.Web.Features.Shared
 <HtmxLayout Title="About" BodyClass="about-page" ShowNavBar="true">
     <main>
@@ -8,7 +9,7 @@
             <p><strong>Glide</strong> is a simple and elegant Kanban board management system.</p>
 
             <h3 style="margin-top: 2rem; color: var(--text-bright);">Version</h3>
-            <p>Version 0.2.0</p>
+            <p>Version @AppVersion</p>
 
             <h3 style="margin-top: 2rem; color: var(--text-bright);">Resources</h3>
             <p>Documentation and help resources coming soon.</p>
@@ -18,3 +19,14 @@
         </div>
     </main>
 </HtmxLayout>
+
+@code {
+    private string AppVersion
+    {
+        get
+        {
+            var version = Assembly.GetExecutingAssembly().GetName().Version;
+            return version?.ToString(3) ?? "Unknown";
+        }
+    }
+}
