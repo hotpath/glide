@@ -1,12 +1,9 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 
 using Glide.Data.Sessions;
-using Glide.Data.UserOAuthProviders;
 using Glide.Data.Users;
 
 using Microsoft.AspNetCore.Http;
@@ -21,12 +18,9 @@ public class AuthController(
     AuthContext authContext,
     OAuthProviderFactory providerFactory,
     IHttpClientFactory clientFactory,
-    PasswordAuthService passwordAuthService,
     SessionConfig sessionConfig,
     ILogger<AuthController> logger,
-    IUserRepository userRepository,
-    IUserOAuthProviderRepository oauthProviderRepository,
-    ISessionRepository sessionRepository) : ControllerBase
+    AuthAction authAction) : ControllerBase
 {
     [HttpGet("login")]
     public IActionResult Login([FromQuery] string provider = "github")
@@ -94,160 +88,14 @@ public class AuthController(
 
         logger.LogTrace("Retrieved user {oauthUser}", oauthUser);
 
-        // Check if OAuth provider link already exists
-        UserOAuthProvider? oauthProviderRecord = await oauthProviderRepository.GetByProviderAndProviderUserIdAsync(
-            provider, oauthUser.ProviderId, cancellationToken);
-
-        User user;
-        if (oauthProviderRecord is not null)
+        AuthAction.Result<User> result =
+            await authAction.HandleOAuthCallbackAsync(oauthUser, provider, cancellationToken);
+        if (result.IsError)
         {
-            // User has logged in with this provider before
-            logger.LogTrace("Found existing OAuth provider record for user {userId}", oauthProviderRecord.UserId);
-            User? existingUser = await userRepository.GetByIdAsync(oauthProviderRecord.UserId);
-
-            if (existingUser is not null)
-            {
-                user = existingUser;
-
-                // Update user info if display name changed
-                if (user.DisplayName != oauthUser.DisplayName)
-                {
-                    await userRepository.UpdateAsync(user with { DisplayName = oauthUser.DisplayName });
-                    user = user with { DisplayName = oauthUser.DisplayName };
-                }
-            }
-            else
-            {
-                // Orphaned OAuth provider record (user was deleted). Clean it up and link to existing user if available.
-                logger.LogDebug("OAuth provider record found but user missing. Deleting orphaned record.");
-                await oauthProviderRepository.DeleteAsync(oauthProviderRecord.Id);
-
-                // Check if user exists by email and link provider to them
-                User? userByEmail = await userRepository.GetByEmailAsync(oauthUser.Email);
-
-                long now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-                if (userByEmail is not null)
-                {
-                    logger.LogTrace("Linking OAuth provider to existing user {userId}", userByEmail.Id);
-                    user = userByEmail;
-
-                    UserOAuthProvider newProviderLink = new()
-                    {
-                        Id = Guid.CreateVersion7().ToString(),
-                        UserId = user.Id,
-                        Provider = provider,
-                        ProviderUserId = oauthUser.ProviderId,
-                        ProviderEmail = oauthUser.Email,
-                        CreatedAt = now,
-                        UpdatedAt = now
-                    };
-
-                    await oauthProviderRepository.CreateAsync(newProviderLink);
-
-                    // Update display name if different
-                    if (user.DisplayName != oauthUser.DisplayName)
-                    {
-                        await userRepository.UpdateAsync(user with { DisplayName = oauthUser.DisplayName });
-                        user = user with { DisplayName = oauthUser.DisplayName };
-                    }
-                }
-                else
-                {
-                    // Create new user
-                    logger.LogTrace("Creating new user for OAuth provider {provider}", provider);
-                    user = new User
-                    {
-                        Id = Guid.CreateVersion7().ToString(),
-                        DisplayName = oauthUser.DisplayName,
-                        Email = oauthUser.Email,
-                        CreatedAt = now,
-                        UpdatedAt = now
-                    };
-
-                    await userRepository.CreateAsync(user);
-
-                    UserOAuthProvider newProviderLink = new()
-                    {
-                        Id = Guid.CreateVersion7().ToString(),
-                        UserId = user.Id,
-                        Provider = provider,
-                        ProviderUserId = oauthUser.ProviderId,
-                        ProviderEmail = oauthUser.Email,
-                        CreatedAt = now,
-                        UpdatedAt = now
-                    };
-
-                    await oauthProviderRepository.CreateAsync(newProviderLink);
-                }
-            }
-        }
-        else
-        {
-            // Check if user exists by email (for account linking)
-            User? existingUser = await userRepository.GetByEmailAsync(oauthUser.Email);
-
-            if (existingUser is not null)
-            {
-                // Link new OAuth provider to existing user account
-                logger.LogTrace("Linking OAuth provider to existing user {userId}", existingUser.Id);
-                user = existingUser;
-
-                long now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-                UserOAuthProvider newProviderLink = new()
-                {
-                    Id = Guid.CreateVersion7().ToString(),
-                    UserId = user.Id,
-                    Provider = provider,
-                    ProviderUserId = oauthUser.ProviderId,
-                    ProviderEmail = oauthUser.Email,
-                    CreatedAt = now,
-                    UpdatedAt = now
-                };
-
-                await oauthProviderRepository.CreateAsync(newProviderLink);
-
-                // Update display name if different
-                if (user.DisplayName != oauthUser.DisplayName)
-                {
-                    await userRepository.UpdateAsync(user with { DisplayName = oauthUser.DisplayName });
-                    user = user with { DisplayName = oauthUser.DisplayName };
-                }
-            }
-            else
-            {
-                // Create new user and OAuth provider link
-                logger.LogTrace("Creating new user for OAuth provider {provider}", provider);
-
-                long now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-                user = new User
-                {
-                    Id = Guid.CreateVersion7().ToString(),
-                    DisplayName = oauthUser.DisplayName,
-                    Email = oauthUser.Email,
-                    CreatedAt = now,
-                    UpdatedAt = now
-                };
-
-                await userRepository.CreateAsync(user);
-
-                UserOAuthProvider newProviderLink = new()
-                {
-                    Id = Guid.CreateVersion7().ToString(),
-                    UserId = user.Id,
-                    Provider = provider,
-                    ProviderUserId = oauthUser.ProviderId,
-                    ProviderEmail = oauthUser.Email,
-                    CreatedAt = now,
-                    UpdatedAt = now
-                };
-
-                await oauthProviderRepository.CreateAsync(newProviderLink);
-            }
+            return (IActionResult)result.StatusResult!;
         }
 
-        logger.LogTrace("Authenticated user {user}", user);
-
-        Session session = await sessionRepository.CreateAsync(user.Id, config.SessionDurationSeconds);
+        Session session = await authAction.CreateSessionAsync(result.Object!.Id, config.SessionDurationSeconds);
 
         logger.LogTrace("Session created: {session}", session.Id);
 
@@ -271,7 +119,7 @@ public class AuthController(
 
         if (!string.IsNullOrEmpty(sessionId))
         {
-            await sessionRepository.DeleteAsync(sessionId);
+            await authAction.DeleteSessionAsync(sessionId);
         }
 
         HttpContext.Response.Cookies.Delete("glide_session");
@@ -284,48 +132,13 @@ public class AuthController(
         [FromForm] string password,
         [FromForm] string? displayName = null)
     {
-        logger.LogTrace("Registration attempt for email: {email}", email);
-
-        // Validate email
-        if (string.IsNullOrWhiteSpace(email))
+        AuthAction.Result<User> result = await authAction.RegisterAsync(email, password, displayName);
+        if (result.IsError)
         {
-            return BadRequest("Email is required");
+            return (IActionResult)result.StatusResult!;
         }
 
-        // Validate password strength
-        string? passwordError = passwordAuthService.ValidatePasswordStrength(password);
-        if (passwordError is not null)
-        {
-            return BadRequest(passwordError);
-        }
-
-        // Check if user already exists
-        User? existingUser = await userRepository.GetByEmailAsync(email);
-        if (existingUser is not null)
-        {
-            return BadRequest("An account with this email already exists");
-        }
-
-        // Hash the password
-        string passwordHash = passwordAuthService.HashPassword(password);
-
-        // Create new user
-        long now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-        User newUser = new()
-        {
-            Id = Guid.CreateVersion7().ToString(),
-            Email = email,
-            DisplayName = displayName ?? email.Split('@')[0], // Use email prefix as default display name
-            PasswordHash = passwordHash,
-            CreatedAt = now,
-            UpdatedAt = now
-        };
-
-        await userRepository.CreateAsync(newUser);
-        logger.LogTrace("Created new user: {userId}", newUser.Id);
-
-        // Create session
-        Session session = await sessionRepository.CreateAsync(newUser.Id, sessionConfig.DurationSeconds);
+        Session session = await authAction.CreateSessionAsync(result.Object!.Id, sessionConfig.DurationSeconds);
         logger.LogTrace("Session created: {sessionId}", session.Id);
 
         // Set cookie
@@ -347,40 +160,13 @@ public class AuthController(
         [FromForm] string email,
         [FromForm] string password)
     {
-        logger.LogTrace("Password login attempt for email: {email}", email);
-
-        // Validate inputs
-        if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
+        AuthAction.Result<User> result = await authAction.LoginWithPasswordAsync(email, password);
+        if (result.IsError)
         {
-            return BadRequest("Email and password are required");
+            return (IActionResult)result.StatusResult!;
         }
 
-        // Find user by email
-        User? user = await userRepository.GetByEmailAsync(email);
-        if (user is null)
-        {
-            // Don't reveal whether user exists
-            return BadRequest("Invalid email or password");
-        }
-
-        // Check if user has a password set
-        if (string.IsNullOrWhiteSpace(user.PasswordHash))
-        {
-            return BadRequest("This account uses OAuth login. Please use the OAuth buttons to log in.");
-        }
-
-        // Verify password
-        bool passwordValid = passwordAuthService.VerifyPassword(password, user.PasswordHash);
-        if (!passwordValid)
-        {
-            logger.LogDebug("Invalid password for user: {userId}", user.Id);
-            return BadRequest("Invalid email or password");
-        }
-
-        logger.LogTrace("Password verified for user: {userId}", user.Id);
-
-        // Create session
-        Session session = await sessionRepository.CreateAsync(user.Id, sessionConfig.DurationSeconds);
+        Session session = await authAction.CreateSessionAsync(result.Object!.Id, sessionConfig.DurationSeconds);
         logger.LogTrace("Session created: {sessionId}", session.Id);
 
         // Set cookie

@@ -1,10 +1,7 @@
-@using Glide.Web
-
 <span class="label-badge" data-label-id="@Label.Id">
     @Label.Name
 </span>
 
 @code {
-    [Parameter]
-    public required LabelView Label { get; set; }
+    [Parameter] public required LabelView Label { get; set; }
 }

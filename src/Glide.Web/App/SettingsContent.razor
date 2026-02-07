@@ -1,0 +1,45 @@
+@{
+    var isAdmin = IsAdmin;
+    var isRegistrationOpen = IsRegistrationOpen;
+}
+
+<div id="settings-content">
+    @if (!isAdmin)
+    {
+        <p>You do not have permission to access application settings.</p>
+        <a href="/dashboard" class="btn-primary" style="margin-top: 1rem; display: inline-block;">Back to Dashboard</a>
+    }
+    else
+    {
+        <div class="settings-section">
+            <h3>Registration Settings</h3>
+            <div class="setting-item">
+                <div class="setting-description">
+                    <strong>Public Registration</strong>
+                    <p>Control whether new users can register for accounts.</p>
+                </div>
+                <div class="setting-control">
+                    <label class="toggle-switch">
+                        <input type="checkbox"
+                               checked="@isRegistrationOpen"
+                               hx-post="/settings/toggle-registration"
+                               hx-target="#settings-content"
+                               hx-swap="outerHTML"/>
+                        <span class="toggle-slider"></span>
+                    </label>
+                    <span class="toggle-status">@(isRegistrationOpen ? "Enabled" : "Disabled")</span>
+                </div>
+            </div>
+        </div>
+
+        <div style="margin-top: 2rem;">
+            <a href="/dashboard" class="btn-secondary">Back to Dashboard</a>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public bool IsAdmin { get; set; }
+
+    [Parameter] public bool IsRegistrationOpen { get; set; }
+}

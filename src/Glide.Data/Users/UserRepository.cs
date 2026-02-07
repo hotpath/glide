@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Threading;
 using System.Threading.Tasks;
 
 using Dapper;
@@ -43,8 +42,8 @@ public class UserRepository(IDbConnectionFactory connectionFactory) : IUserRepos
         using IDbConnection conn = connectionFactory.CreateConnection();
 
         const string insertStatement = """
-                                       INSERT INTO users (id, display_name, email, password_hash, created_at, updated_at)
-                                       VALUES (@Id, @DisplayName, @Email, @PasswordHash, @CreatedAt, @UpdatedAt)
+                                       INSERT INTO users (id, display_name, email, password_hash, created_at, updated_at, is_admin)
+                                       VALUES (@Id, @DisplayName, @Email, @PasswordHash, @CreatedAt, @UpdatedAt, @IsAdmin)
                                        """;
 
         await conn.ExecuteAsync(insertStatement, user);
@@ -60,6 +59,7 @@ public class UserRepository(IDbConnectionFactory connectionFactory) : IUserRepos
                                        SET display_name = @DisplayName,
                                            email = @Email,
                                            password_hash = @PasswordHash,
+                                           is_admin = @IsAdmin,
                                            updated_at = @UpdatedAt
                                        WHERE id = @Id
                                        """;
@@ -67,5 +67,20 @@ public class UserRepository(IDbConnectionFactory connectionFactory) : IUserRepos
         User updatedUser = user with { UpdatedAt = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() };
 
         await conn.ExecuteAsync(updateStatement, updatedUser);
+    }
+
+    public async Task SetAdminStatusAsync(string userId, bool isAdmin)
+    {
+        using IDbConnection conn = connectionFactory.CreateConnection();
+
+        const string updateStatement = """
+                                       UPDATE users
+                                       SET is_admin = @IsAdmin,
+                                           updated_at = @UpdatedAt
+                                       WHERE id = @Id
+                                       """;
+
+        await conn.ExecuteAsync(updateStatement,
+            new { Id = userId, IsAdmin = isAdmin, UpdatedAt = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() });
     }
 }

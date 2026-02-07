@@ -1,5 +1,3 @@
-@using Glide.Web
-
 @foreach (var label in Labels)
 {
     <button type="button"
@@ -13,6 +11,5 @@
 }
 
 @code {
-    [Parameter]
-    public required IEnumerable<LabelView> Labels { get; set; }
+    [Parameter] public required IEnumerable<LabelView> Labels { get; set; }
 }

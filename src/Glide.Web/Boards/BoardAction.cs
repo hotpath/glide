@@ -124,17 +124,17 @@ public class BoardAction(
         IEnumerable<Column> columns = await columnRepository.GetAllByBoardIdAsync(boardId);
 
         // Load labels for all cards in all columns
-        var cardIds = columns.SelectMany(c => c.Cards).Select(card => card.Id).ToList();
-        var cardLabelsDict = new Dictionary<string, IEnumerable<Label>>();
+        List<string> cardIds = columns.SelectMany(c => c.Cards).Select(card => card.Id).ToList();
+        Dictionary<string, IEnumerable<Label>> cardLabelsDict = new();
 
-        foreach (var cardId in cardIds)
+        foreach (string cardId in cardIds)
         {
-            var labels = await labelRepository.GetLabelsByCardIdAsync(cardId);
+            IEnumerable<Label> labels = await labelRepository.GetLabelsByCardIdAsync(cardId);
             cardLabelsDict[cardId] = labels;
         }
 
         // Create ColumnViews with labels
-        var columnViews = columns.Select(col => new ColumnView(
+        IEnumerable<ColumnView> columnViews = columns.Select(col => new ColumnView(
             col.Id,
             col.Name,
             col.BoardId,
@@ -175,16 +175,16 @@ public class BoardAction(
         IEnumerable<Column> allColumns = await columnRepository.GetAllByBoardIdAsync(boardId);
 
         // Load labels for all cards
-        var cardIds = allColumns.SelectMany(c => c.Cards).Select(card => card.Id).ToList();
-        var cardLabelsDict = new Dictionary<string, IEnumerable<Label>>();
+        List<string> cardIds = allColumns.SelectMany(c => c.Cards).Select(card => card.Id).ToList();
+        Dictionary<string, IEnumerable<Label>> cardLabelsDict = new();
 
-        foreach (var cardId in cardIds)
+        foreach (string cardId in cardIds)
         {
-            var labels = await labelRepository.GetLabelsByCardIdAsync(cardId);
+            IEnumerable<Label> labels = await labelRepository.GetLabelsByCardIdAsync(cardId);
             cardLabelsDict[cardId] = labels;
         }
 
-        var columnViews = allColumns.Select(col => new ColumnView(
+        IEnumerable<ColumnView> columnViews = allColumns.Select(col => new ColumnView(
             col.Id,
             col.Name,
             col.BoardId,
@@ -222,7 +222,7 @@ public class BoardAction(
         }
 
         Card card = await cardRepository.CreateAsync(title, boardId, columnId);
-        var labels = await labelRepository.GetLabelsByCardIdAsync(card.Id);
+        IEnumerable<Label> labels = await labelRepository.GetLabelsByCardIdAsync(card.Id);
         return new Result<CardView>(CardView.FromCard(card, labels));
     }
 

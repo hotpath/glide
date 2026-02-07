@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Net;
 
 using Dapper;
 
@@ -14,8 +15,10 @@ using Glide.Data.Columns;
 using Glide.Data.Labels;
 using Glide.Data.Migrations;
 using Glide.Data.Sessions;
+using Glide.Data.SiteSettings;
 using Glide.Data.UserOAuthProviders;
 using Glide.Data.Users;
+using Glide.Web.App;
 using Glide.Web.Auth;
 using Glide.Web.Boards;
 using Glide.Web.Cards;
@@ -28,6 +31,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -58,7 +62,7 @@ builder.WebHost.ConfigureKestrel(options =>
 // Provider configurations
 builder.Services.AddSingleton(sp =>
 {
-    var config = sp.GetRequiredService<IConfiguration>();
+    IConfiguration config = sp.GetRequiredService<IConfiguration>();
     return new Dictionary<string, OAuthProviderConfig>
     {
         ["github"] = OAuthProviderConfig.FromConfig(config, "GITHUB")
@@ -68,15 +72,22 @@ builder.Services.AddSingleton(sp =>
 // Update AuthContext to use new config dictionary
 builder.Services.AddSingleton<AuthContext>(sp =>
 {
-    var configs = sp.GetRequiredService<Dictionary<string, OAuthProviderConfig>>();
+    Dictionary<string, OAuthProviderConfig> configs = sp.GetRequiredService<Dictionary<string, OAuthProviderConfig>>();
     return new AuthContext(configs);
 });
 
 // Register session configuration (applies to all auth methods)
 builder.Services.AddSingleton(sp =>
 {
-    var config = sp.GetRequiredService<IConfiguration>();
+    IConfiguration config = sp.GetRequiredService<IConfiguration>();
     return SessionConfig.FromConfiguration(config);
+});
+
+// Register admin email configuration
+builder.Services.AddSingleton(sp =>
+{
+    string? adminEmail = Environment.GetEnvironmentVariable("GLIDE_ADMIN_EMAIL");
+    return new AdminConfig { AdminEmail = adminEmail };
 });
 
 // Register provider implementations
@@ -91,7 +102,7 @@ builder.Services.AddSingleton<PasswordAuthService>();
 // HTTP clients for each provider
 builder.Services.AddHttpClient("githubOAuth", (sp, client) =>
 {
-    var configs = sp.GetRequiredService<Dictionary<string, OAuthProviderConfig>>();
+    Dictionary<string, OAuthProviderConfig> configs = sp.GetRequiredService<Dictionary<string, OAuthProviderConfig>>();
     client.BaseAddress = configs["github"].BaseUri;
 });
 
@@ -105,12 +116,15 @@ builder.Services.AddSingleton<IDbConnectionFactory>(new SqliteConnectionFactory(
     .AddSingleton<IBoardRepository, BoardRepository>()
     .AddSingleton<IColumnRepository, ColumnRepository>()
     .AddSingleton<ICardRepository, CardRepository>()
-    .AddSingleton<ILabelRepository, LabelRepository>();
+    .AddSingleton<ILabelRepository, LabelRepository>()
+    .AddSingleton<ISiteSettingsRepository, SiteSettingsRepository>();
 
-builder.Services.AddSingleton<BoardAction>()
+builder.Services.AddSingleton<AuthAction>()
+    .AddSingleton<BoardAction>()
     .AddSingleton<CardAction>()
     .AddSingleton<ColumnAction>()
-    .AddSingleton<LabelAction>();
+    .AddSingleton<LabelAction>()
+    .AddSingleton<SettingsAction>();
 
 builder.Services
     .AddFluentMigratorCore()
@@ -119,6 +133,14 @@ builder.Services
         .WithGlobalConnectionString($"Data Source={dbPath}")
         .ScanIn(typeof(CreateInitialSchema).Assembly).For.All())
     .AddLogging(lb => lb.AddFluentMigratorConsole());
+
+// Configure forwarded headers for reverse proxy support
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    options.KnownIPNetworks.Clear();
+    options.KnownProxies.Clear();
+});
 
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
@@ -140,6 +162,9 @@ using (IServiceScope scope = app.Services.CreateScope())
     IMigrationRunner runner = scope.ServiceProvider.GetRequiredService<IMigrationRunner>();
     runner.MigrateUp();
 }
+
+// Enable forwarded headers for reverse proxy support
+app.UseForwardedHeaders();
 
 app.UseStaticFiles();
 
