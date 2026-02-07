@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 
 namespace Glide.Data.Cards;
@@ -6,7 +7,7 @@ public interface ICardRepository
 {
     Task<Card> CreateAsync(string title, string boardId, string columnId);
     Task<Card?> GetByIdAsync(string id);
-    Task UpdateAsync(string id, string title, string? description);
+    Task UpdateAsync(string id, string title, string? description, DateOnly? dueDate = null);
     Task MoveToColumnAsync(string id, string columnId, int? position = null);
     Task DeleteAsync(string id);
 }

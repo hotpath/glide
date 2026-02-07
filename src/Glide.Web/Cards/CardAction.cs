@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
@@ -49,6 +50,7 @@ public class CardAction(
         string cardId,
         string title,
         string? description,
+        DateOnly? dueDate,
         ClaimsPrincipal user)
     {
         string? userId = user.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -70,7 +72,7 @@ public class CardAction(
             return new Result<CardView>(Results.NotFound("Card not found"));
         }
 
-        await cardRepository.UpdateAsync(cardId, title, description);
+        await cardRepository.UpdateAsync(cardId, title, description, dueDate);
 
         Card? updated = await cardRepository.GetByIdAsync(cardId);
         if (updated is null)

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -43,6 +44,7 @@ public record CardView(
     string? ColumnId,
     string? AssignedTo,
     int Position,
+    DateOnly? DueDate,
     IEnumerable<LabelView> Labels = null!)
 {
     public static CardView FromCard(Card card, IEnumerable<Label>? labels = null)
@@ -55,6 +57,7 @@ public record CardView(
             card.ColumnId,
             card.AssignedTo,
             card.Position,
+            card.DueDate,
             labels?.Select(LabelView.FromLabel) ?? Enumerable.Empty<LabelView>());
     }
 }

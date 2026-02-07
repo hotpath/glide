@@ -1,4 +1,7 @@
+@using System
+@using Glide.Web.App
 @using Glide.Web.Labels
+@inject DateFormatService DateFormatService
 <div class="card-card"
      id="card-@Card.Id"
      draggable="true"
@@ -11,6 +14,12 @@
         @if (!string.IsNullOrWhiteSpace(Card.Description))
         {
             <div class="card-description">@Card.Description</div>
+        }
+        @if (Card.DueDate.HasValue)
+        {
+            <div class="card-due-date @GetDueDateClass()">
+                Due: @DateFormatService.FormatDate(Card.DueDate.Value)
+            </div>
         }
         @if (Card.Labels.Any())
         {
@@ -34,4 +43,20 @@
 @code
 {
     [Parameter] public required CardView Card { get; init; }
+
+    private string GetDueDateClass()
+    {
+        if (!Card.DueDate.HasValue)
+            return "";
+
+        DateOnly today = DateOnly.FromDateTime(DateTime.Today);
+
+        if (Card.DueDate.Value < today)
+            return "due-date-overdue";
+
+        if (Card.DueDate.Value == today)
+            return "due-date-today";
+
+        return "";
+    }
 }

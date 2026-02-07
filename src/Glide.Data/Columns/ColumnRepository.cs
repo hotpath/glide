@@ -52,7 +52,7 @@ public class ColumnRepository(IDbConnectionFactory connectionFactory) : IColumnR
     {
         string query = """
                        SELECT c.id, c.name, c.board_id, c.position,
-                              ca.id, ca.title, ca.description, ca.board_id, ca.column_id, ca.assigned_to, ca.position
+                              ca.id, ca.title, ca.description, ca.board_id, ca.column_id, ca.assigned_to, ca.position, ca.due_date
                        FROM columns AS c
                        LEFT JOIN cards AS ca ON c.id = ca.column_id
                        WHERE c.id = @Id
@@ -88,7 +88,7 @@ public class ColumnRepository(IDbConnectionFactory connectionFactory) : IColumnR
     {
         string query = """
                        SELECT c.id, c.name, c.board_id, c.position,
-                              ca.id, ca.title, ca.description, ca.board_id, ca.column_id, ca.assigned_to, ca.position
+                              ca.id, ca.title, ca.description, ca.board_id, ca.column_id, ca.assigned_to, ca.position, ca.due_date
                        FROM columns AS c
                        LEFT JOIN cards AS ca ON c.id = ca.column_id
                        WHERE c.board_id = @BoardId

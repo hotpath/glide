@@ -1,4 +1,6 @@
+@using Glide.Web.App
 @using Glide.Web.Labels
+@inject DateFormatService DateFormatService
 <form class="modal-card-form"
       hx-put="/cards/@Card.Id"
       hx-target="#card-@Card.Id"
@@ -27,6 +29,22 @@
     <div class="form-group">
         <label>Preview</label>
         <div id="preview-content" class="markdown-preview"></div>
+    </div>
+
+    <div class="form-group">
+        <label for="card-due-date">Due Date</label>
+        @if (Card.DueDate.HasValue)
+        {
+            <div class="help-text" style="margin-bottom: 0.5rem;">
+                Currently: @DateFormatService.FormatDate(Card.DueDate.Value)
+            </div>
+        }
+        <input type="date"
+               id="card-due-date"
+               name="due_date"
+               value="@(Card.DueDate?.ToString("yyyy-MM-dd"))"
+               class="form-input">
+        <div class="help-text">Browser will display date in your system locale</div>
     </div>
 
     <div class="form-group">

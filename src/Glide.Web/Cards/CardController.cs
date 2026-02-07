@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -48,9 +49,16 @@ public class CardController(CardAction cardAction, LabelAction labelAction) : Co
     public async Task<IResult> UpdateAsync(
         [FromRoute] string id,
         [FromForm] string title,
-        [FromForm] string? description)
+        [FromForm] string? description,
+        [FromForm(Name = "due_date")] string? dueDate)
     {
-        CardAction.Result<CardView> result = await cardAction.UpdateAsync(id, title, description, User);
+        DateOnly? parsedDueDate = null;
+        if (!string.IsNullOrWhiteSpace(dueDate) && DateOnly.TryParse(dueDate, out DateOnly date))
+        {
+            parsedDueDate = date;
+        }
+
+        CardAction.Result<CardView> result = await cardAction.UpdateAsync(id, title, description, parsedDueDate, User);
         return result.IsError
             ? result.StatusResult!
             : new RazorComponentResult<CardCard>(new { Card = result.Object });
