@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Threading;
 using System.Threading.Tasks;
 
 using Dapper;
@@ -81,11 +80,7 @@ public class UserRepository(IDbConnectionFactory connectionFactory) : IUserRepos
                                        WHERE id = @Id
                                        """;
 
-        await conn.ExecuteAsync(updateStatement, new
-        {
-            Id = userId,
-            IsAdmin = isAdmin,
-            UpdatedAt = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
-        });
+        await conn.ExecuteAsync(updateStatement,
+            new { Id = userId, IsAdmin = isAdmin, UpdatedAt = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() });
     }
 }

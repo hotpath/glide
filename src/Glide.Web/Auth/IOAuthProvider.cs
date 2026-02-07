@@ -7,10 +7,11 @@ namespace Glide.Web.Auth;
 
 public interface IOAuthProvider
 {
-    string Name { get; }           // "github"
-    string DisplayName { get; }    // "Codeberg" or "GitHub"
+    string Name { get; } // "github"
+    string DisplayName { get; } // "Codeberg" or "GitHub"
 
     Uri GetAuthorizeUrl(string clientId, Uri redirectUri, string state, Uri baseUri);
+
     Task<string?> ExchangeCodeForTokenAsync(
         HttpClient client,
         string code,
@@ -18,6 +19,7 @@ public interface IOAuthProvider
         string clientSecret,
         Uri redirectUri,
         CancellationToken cancellationToken = default);
+
     Task<OAuthUserInfo?> GetUserInfoAsync(
         HttpClient client,
         string accessToken,

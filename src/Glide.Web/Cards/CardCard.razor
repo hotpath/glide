@@ -1,5 +1,4 @@
 @using Glide.Web.Labels
-
 <div class="card-card"
      id="card-@Card.Id"
      draggable="true"
@@ -16,7 +15,7 @@
         @if (Card.Labels.Any())
         {
             <div class="card-labels-compact">
-                <LabelList Labels="@Card.Labels" />
+                <LabelList Labels="@Card.Labels"/>
             </div>
         }
     </div>

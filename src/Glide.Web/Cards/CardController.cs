@@ -38,13 +38,9 @@ public class CardController(CardAction cardAction, LabelAction labelAction) : Co
         LabelAction.Result<IEnumerable<LabelView>> labelsResult =
             await labelAction.GetByBoardIdAsync(result.Object!.BoardId, User);
 
-        var allLabels = labelsResult.IsError ? Enumerable.Empty<LabelView>() : labelsResult.Object!;
+        IEnumerable<LabelView>? allLabels = labelsResult.IsError ? Enumerable.Empty<LabelView>() : labelsResult.Object!;
 
-        return new RazorComponentResult<CardModal>(new
-        {
-            Card = result.Object,
-            AllBoardLabels = allLabels
-        });
+        return new RazorComponentResult<CardModal>(new { Card = result.Object, AllBoardLabels = allLabels });
     }
 
     [HttpPut("{id}")]
@@ -94,7 +90,8 @@ public class CardController(CardAction cardAction, LabelAction labelAction) : Co
         [FromRoute] string cardId,
         [FromForm(Name = "label_id")] string labelId)
     {
-        LabelAction.Result<IEnumerable<LabelView>> result = await labelAction.AddLabelToCardAsync(cardId, labelId, User);
+        LabelAction.Result<IEnumerable<LabelView>>
+            result = await labelAction.AddLabelToCardAsync(cardId, labelId, User);
         if (result.IsError)
         {
             return result.StatusResult!;
@@ -126,7 +123,8 @@ public class CardController(CardAction cardAction, LabelAction labelAction) : Co
     [Authorize]
     public async Task<IResult> RemoveLabelAsync([FromRoute] string cardId, [FromRoute] string labelId)
     {
-        LabelAction.Result<IEnumerable<LabelView>> result = await labelAction.RemoveLabelFromCardAsync(cardId, labelId, User);
+        LabelAction.Result<IEnumerable<LabelView>> result =
+            await labelAction.RemoveLabelFromCardAsync(cardId, labelId, User);
         if (result.IsError)
         {
             return result.StatusResult!;

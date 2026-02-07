@@ -19,12 +19,6 @@ public class AuthAction(
     PasswordAuthService passwordAuthService,
     ILogger<AuthAction> logger)
 {
-    public record Result<T>(T? Object, IResult? StatusResult = null)
-    {
-        public Result(IResult statusResult) : this(default, statusResult) { }
-        public bool IsError => StatusResult is not null;
-    }
-
     public async Task<Result<User>> HandleOAuthCallbackAsync(
         OAuthUserInfo oauthUser,
         string provider,
@@ -260,7 +254,8 @@ public class AuthAction(
         // Check if user has a password set
         if (string.IsNullOrWhiteSpace(user.PasswordHash))
         {
-            return new Result<User>(Results.BadRequest("This account uses OAuth login. Please use the OAuth buttons to log in."));
+            return new Result<User>(
+                Results.BadRequest("This account uses OAuth login. Please use the OAuth buttons to log in."));
         }
 
         // Verify password
@@ -285,5 +280,11 @@ public class AuthAction(
     public async Task DeleteSessionAsync(string sessionId)
     {
         await sessionRepository.DeleteAsync(sessionId);
+    }
+
+    public record Result<T>(T? Object, IResult? StatusResult = null)
+    {
+        public Result(IResult statusResult) : this(default, statusResult) { }
+        public bool IsError => StatusResult is not null;
     }
 }

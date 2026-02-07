@@ -1,5 +1,4 @@
 @using Glide.Web.Labels
-
 <form class="modal-card-form"
       hx-put="/cards/@Card.Id"
       hx-target="#card-@Card.Id"
@@ -34,7 +33,7 @@
         <LabelPicker CardId="@Card.Id"
                      BoardId="@Card.BoardId"
                      CurrentLabels="@Card.Labels"
-                     AvailableLabels="@AllBoardLabels" />
+                     AvailableLabels="@AllBoardLabels"/>
     </div>
 
     <div class="modal-actions">

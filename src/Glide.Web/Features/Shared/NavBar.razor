@@ -3,7 +3,7 @@
 @inject IHttpContextAccessor HttpContextAccessor
 
 @{
-    string displayName = "User";
+    var displayName = "User";
 
     if (HttpContextAccessor.HttpContext?.User.Identity?.IsAuthenticated == true)
     {

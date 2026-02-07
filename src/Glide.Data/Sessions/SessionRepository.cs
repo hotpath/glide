@@ -32,7 +32,7 @@ public class SessionRepository(IDbConnectionFactory connectionFactory) : ISessio
     public async Task<SessionUser?> GetAsync(string sessionId)
     {
         const string query = """
-                             SELECT s.id, s.user_id AS UserId, s.expires_at, u.email, u.display_name AS DisplayName
+                             SELECT s.id, s.user_id AS UserId, s.expires_at, u.email, u.display_name AS DisplayName, u.is_admin AS IsAdmin
                              FROM sessions s
                              JOIN users u ON s.user_id = u.id
                              WHERE s.id = @SessionId AND s.expires_at > @Now
@@ -57,6 +57,7 @@ public record SessionUser
     public long ExpiresAt { get; init; }
     public required string Email { get; init; }
     public string? DisplayName { get; init; }
+    public bool IsAdmin { get; init; }
 }
 
 public record Session(string Id, string UserId, long CreatedAt, long ExpiresAt);

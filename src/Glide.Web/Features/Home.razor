@@ -1,5 +1,5 @@
-@using Glide.Web.Features.Shared
 @using Glide.Web.Auth
+@using Glide.Web.Features.Shared
 @inject Dictionary<string, OAuthProviderConfig> OAuthConfigs
 
 <HtmxLayout Title="Login" BodyClass="login-page">
@@ -37,8 +37,8 @@
                 <div class="oauth-buttons">
                     <a href="/auth/login?provider=github" class="oauth-button github-button">
                         <span class="oauth-icon">
-                            <img src="/images/GitHub_Invertocat_Black_Clearspace.svg" alt="" class="github-logo-light" />
-                            <img src="/images/GitHub_Invertocat_White_Clearspace.svg" alt="" class="github-logo-dark" />
+                            <img src="/images/GitHub_Invertocat_Black_Clearspace.svg" alt="" class="github-logo-light"/>
+                            <img src="/images/GitHub_Invertocat_White_Clearspace.svg" alt="" class="github-logo-dark"/>
                         </span>
                         Login with GitHub
                     </a>
@@ -59,7 +59,8 @@
                 </div>
                 <div class="form-group">
                     <label for="register-password">Password</label>
-                    <input type="password" id="register-password" name="password" required autocomplete="new-password" minlength="8">
+                    <input type="password" id="register-password" name="password" required autocomplete="new-password"
+                           minlength="8">
                     <small class="help-text">Minimum 8 characters</small>
                 </div>
                 <button type="submit" class="auth-submit-button">Create Account</button>
@@ -74,8 +75,8 @@
                 <div class="oauth-buttons">
                     <a href="/auth/login?provider=github" class="oauth-button github-button">
                         <span class="oauth-icon">
-                            <img src="/images/GitHub_Invertocat_Black_Clearspace.svg" alt="" class="github-logo-light" />
-                            <img src="/images/GitHub_Invertocat_White_Clearspace.svg" alt="" class="github-logo-dark" />
+                            <img src="/images/GitHub_Invertocat_Black_Clearspace.svg" alt="" class="github-logo-light"/>
+                            <img src="/images/GitHub_Invertocat_White_Clearspace.svg" alt="" class="github-logo-dark"/>
                         </span>
                         Sign up with GitHub
                     </a>

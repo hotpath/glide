@@ -266,6 +266,7 @@ public class UserRepositoryTests : RepositoryTestBase
         // Assert
         List<User> resultList = results.ToList();
         await Assert.That(resultList.Count).IsGreaterThanOrEqualTo(1);
-        await Assert.That(resultList.Any(u => u.Email.Contains("CaseTest", StringComparison.OrdinalIgnoreCase))).IsTrue();
+        await Assert.That(resultList.Any(u => u.Email.Contains("CaseTest", StringComparison.OrdinalIgnoreCase)))
+            .IsTrue();
     }
 }

@@ -18,8 +18,6 @@ public class CreateInitialSchema : Migration
             .WithColumn("updated_at").AsInt64();
 
 
-
-
         Create.Table("boards")
             .WithColumn("id").AsString().NotNullable().PrimaryKey()
             .WithColumn("name").AsString().NotNullable();
@@ -87,9 +85,9 @@ public class CreateInitialSchema : Migration
         Create.Table("user_oauth_providers")
             .WithColumn("id").AsString().NotNullable().PrimaryKey()
             .WithColumn("user_id").AsString().NotNullable()
-                .ForeignKey("fk_user_oauth_providers_user_id", "users", "id")
-                .OnDelete(Rule.Cascade)
-                .Indexed("idx_user_oauth_providers_user_id")
+            .ForeignKey("fk_user_oauth_providers_user_id", "users", "id")
+            .OnDelete(Rule.Cascade)
+            .Indexed("idx_user_oauth_providers_user_id")
             .WithColumn("provider").AsString().NotNullable()
             .WithColumn("provider_user_id").AsString().NotNullable()
             .WithColumn("provider_email").AsString().Nullable()

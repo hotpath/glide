@@ -1,16 +1,15 @@
 @using Glide.Web.Columns
-
 @if (Label != null)
 {
     <!-- Update the label badge in the modal -->
-    <LabelBadge Label="@Label" />
+    <LabelBadge Label="@Label"/>
 }
 
 @if (Columns != null)
 {
     <!-- Refresh the kanban board using out-of-band swap -->
     <div hx-swap-oob="innerHTML:#kanban-board">
-        <ColumnLayout Columns="@Columns" />
+        <ColumnLayout Columns="@Columns"/>
     </div>
 }
 
@@ -18,17 +17,14 @@
 {
     <!-- Refresh the filter labels using out-of-band swap -->
     <div hx-swap-oob="innerHTML:#filter-labels">
-        <LabelFilterList Labels="@Labels" />
+        <LabelFilterList Labels="@Labels"/>
     </div>
 }
 
 @code {
-    [Parameter]
-    public LabelView? Label { get; set; }
+    [Parameter] public LabelView? Label { get; set; }
 
-    [Parameter]
-    public IEnumerable<ColumnView>? Columns { get; set; }
+    [Parameter] public IEnumerable<ColumnView>? Columns { get; set; }
 
-    [Parameter]
-    public IEnumerable<LabelView>? Labels { get; set; }
+    [Parameter] public IEnumerable<LabelView>? Labels { get; set; }
 }

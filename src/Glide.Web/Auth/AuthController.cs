@@ -4,7 +4,6 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using Glide.Data.Sessions;
-using Glide.Data.UserOAuthProviders;
 using Glide.Data.Users;
 
 using Microsoft.AspNetCore.Http;
@@ -89,7 +88,8 @@ public class AuthController(
 
         logger.LogTrace("Retrieved user {oauthUser}", oauthUser);
 
-        var result = await authAction.HandleOAuthCallbackAsync(oauthUser, provider, cancellationToken);
+        AuthAction.Result<User> result =
+            await authAction.HandleOAuthCallbackAsync(oauthUser, provider, cancellationToken);
         if (result.IsError)
         {
             return (IActionResult)result.StatusResult!;
@@ -132,7 +132,7 @@ public class AuthController(
         [FromForm] string password,
         [FromForm] string? displayName = null)
     {
-        var result = await authAction.RegisterAsync(email, password, displayName);
+        AuthAction.Result<User> result = await authAction.RegisterAsync(email, password, displayName);
         if (result.IsError)
         {
             return (IActionResult)result.StatusResult!;
@@ -160,7 +160,7 @@ public class AuthController(
         [FromForm] string email,
         [FromForm] string password)
     {
-        var result = await authAction.LoginWithPasswordAsync(email, password);
+        AuthAction.Result<User> result = await authAction.LoginWithPasswordAsync(email, password);
         if (result.IsError)
         {
             return (IActionResult)result.StatusResult!;

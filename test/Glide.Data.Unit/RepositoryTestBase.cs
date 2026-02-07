@@ -14,8 +14,8 @@ namespace Glide.Data.Unit;
 public abstract class RepositoryTestBase : IDisposable, IAsyncDisposable
 {
     private readonly SqliteConnection _connection;
-    private readonly ServiceProvider _serviceProvider;
     private readonly string _databasePath;
+    private readonly ServiceProvider _serviceProvider;
 
     protected RepositoryTestBase()
     {

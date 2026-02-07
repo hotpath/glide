@@ -1,5 +1,4 @@
 @using Glide.Web.Labels
-
 <!-- Update label option buttons in the picker menu -->
 @foreach (var label in AllBoardLabels)
 {
@@ -31,18 +30,16 @@
 
 <!-- Update label preview in the modal using out-of-band swap -->
 <div hx-swap-oob="innerHTML:#card-labels-@Card.Id">
-    <LabelList Labels="@Card.Labels" />
+    <LabelList Labels="@Card.Labels"/>
 </div>
 
 <!-- Update card in the board view using out-of-band swap -->
 <div hx-swap-oob="outerHTML:#card-@Card.Id">
-    <CardCard Card="@Card" />
+    <CardCard Card="@Card"/>
 </div>
 
 @code {
-    [Parameter]
-    public required CardView Card { get; set; }
+    [Parameter] public required CardView Card { get; set; }
 
-    [Parameter]
-    public required IEnumerable<LabelView> AllBoardLabels { get; set; }
+    [Parameter] public required IEnumerable<LabelView> AllBoardLabels { get; set; }
 }

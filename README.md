@@ -5,7 +5,9 @@
 [![Coverage](https://img.shields.io/badge/coverage-≥80%25-brightgreen)](#)
 [![License](https://img.shields.io/badge/license-MIT-blue)](./LICENSE)
 
-A simple Kanban board management system built with ASP.NET Core 10.0, featuring server-side Razor Components with HTMX for dynamic interactions, SQLite for data storage, and OAuth for authentication (supports GitHub, Forgejo, and other OAuth2 providers).
+A simple Kanban board management system built with ASP.NET Core 10.0, featuring server-side Razor Components with HTMX
+for dynamic interactions, SQLite for data storage, and OAuth for authentication (supports GitHub, Forgejo, and other
+OAuth2 providers).
 
 ## Features
 
@@ -109,6 +111,7 @@ Code coverage must be ≥80% line coverage (enforced in CI).
 ## Contributing
 
 Contributions are welcome! See [CONTRIBUTING.md](./CONTRIBUTING.md) for guidelines on:
+
 - Setting up a local development environment
 - Writing and running tests
 - Database migration guidelines

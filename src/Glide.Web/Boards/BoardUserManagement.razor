@@ -13,9 +13,9 @@
                     <div class="form-group">
                         <label for="email-search-input">Search by Email</label>
                         <div class="search-wrapper">
-                            <input type="email" 
-                                   id="email-search-input" 
-                                   placeholder="Enter email address" 
+                            <input type="email"
+                                   id="email-search-input"
+                                   placeholder="Enter email address"
                                    autocomplete="off"
                                    class="search-input">
                             <div id="search-results" class="search-results"></div>
@@ -57,385 +57,385 @@
 </div>
 
 <style>
-.board-user-management-modal {
-    display: none;
-    position: fixed;
-    z-index: 1000;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background-color: var(--modal-backdrop);
-    animation: fadeIn 0.3s ease-in-out;
-}
+    .board-user-management-modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: var(--modal-backdrop);
+        animation: fadeIn 0.3s ease-in-out;
+    }
 
-.board-user-management-modal.modal-open {
-    display: flex;
-}
+    .board-user-management-modal.modal-open {
+        display: flex;
+    }
 
-.add-user-section {
-    margin-bottom: 1.5rem;
-}
+    .add-user-section {
+        margin-bottom: 1.5rem;
+    }
 
-.add-user-section h4,
-.members-section h4 {
-    margin: 0 0 1rem 0;
-    font-size: 0.95rem;
-    font-weight: 600;
-    color: var(--text-bright);
-}
+    .add-user-section h4,
+    .members-section h4 {
+        margin: 0 0 1rem 0;
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: var(--text-bright);
+    }
 
-.user-search-form {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-}
+    .user-search-form {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
 
-.form-group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.35rem;
-}
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+    }
 
-.form-group label {
-    font-size: 0.85rem;
-    font-weight: 500;
-    color: var(--text-muted);
-}
+    .form-group label {
+        font-size: 0.85rem;
+        font-weight: 500;
+        color: var(--text-muted);
+    }
 
-.search-input,
-.role-select {
-    padding: 0.5rem;
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
-    font-size: 0.9rem;
-    font-family: inherit;
-    background: var(--bg-elevated);
-    color: var(--text-primary);
-}
+    .search-input,
+    .role-select {
+        padding: 0.5rem;
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        font-size: 0.9rem;
+        font-family: inherit;
+        background: var(--bg-elevated);
+        color: var(--text-primary);
+    }
 
-.search-wrapper {
-    position: relative;
-}
+    .search-wrapper {
+        position: relative;
+    }
 
-.search-results {
-    position: absolute;
-    width: 100%;
-    max-width: 100%;
-    background: var(--bg-surface);
-    border: 1px solid var(--border-color);
-    border-top: none;
-    border-radius: 0 0 4px 4px;
-    max-height: 250px;
-    overflow-y: auto;
-    display: none;
-    z-index: 10;
-    box-shadow: var(--shadow-md);
-}
+    .search-results {
+        position: absolute;
+        width: 100%;
+        max-width: 100%;
+        background: var(--bg-surface);
+        border: 1px solid var(--border-color);
+        border-top: none;
+        border-radius: 0 0 4px 4px;
+        max-height: 250px;
+        overflow-y: auto;
+        display: none;
+        z-index: 10;
+        box-shadow: var(--shadow-md);
+    }
 
-.search-results.show {
-    display: block;
-}
+    .search-results.show {
+        display: block;
+    }
 
-.search-result-item {
-    padding: 0.75rem;
-    cursor: pointer;
-    border-bottom: 1px solid var(--border-color);
-    font-size: 0.9rem;
-    transition: background-color 0.15s;
-    color: var(--text-primary);
-}
+    .search-result-item {
+        padding: 0.75rem;
+        cursor: pointer;
+        border-bottom: 1px solid var(--border-color);
+        font-size: 0.9rem;
+        transition: background-color 0.15s;
+        color: var(--text-primary);
+    }
 
-.search-result-item:last-child {
-    border-bottom: none;
-}
+    .search-result-item:last-child {
+        border-bottom: none;
+    }
 
-.search-result-item:hover {
-    background-color: var(--bg-elevated);
-}
+    .search-result-item:hover {
+        background-color: var(--bg-elevated);
+    }
 
-.search-result-email {
-    font-weight: 500;
-    color: var(--text-bright);
-}
+    .search-result-email {
+        font-weight: 500;
+        color: var(--text-bright);
+    }
 
-.search-result-name {
-    font-size: 0.85rem;
-    color: var(--text-muted);
-    margin-top: 0.15rem;
-}
+    .search-result-name {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        margin-top: 0.15rem;
+    }
 
-.selected-user-display {
-    padding: 0.75rem;
-    background-color: var(--bg-elevated);
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
+    .selected-user-display {
+        padding: 0.75rem;
+        background-color: var(--bg-elevated);
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
 
-.selected-user-info {
-    display: flex;
-    flex-direction: column;
-    gap: 0.2rem;
-}
+    .selected-user-info {
+        display: flex;
+        flex-direction: column;
+        gap: 0.2rem;
+    }
 
-.selected-user-info strong {
-    color: var(--text-bright);
-    font-size: 0.9rem;
-}
+    .selected-user-info strong {
+        color: var(--text-bright);
+        font-size: 0.9rem;
+    }
 
-.selected-user-info small {
-    color: var(--text-muted);
-    font-size: 0.8rem;
-}
+    .selected-user-info small {
+        color: var(--text-muted);
+        font-size: 0.8rem;
+    }
 
-.btn-clear-selection {
-    padding: 0.35rem 0.75rem;
-    background-color: var(--bg-surface);
-    border: 1px solid var(--border-color);
-    border-radius: 3px;
-    cursor: pointer;
-    font-size: 0.85rem;
-    color: var(--text-primary);
-    transition: all 0.2s;
-}
+    .btn-clear-selection {
+        padding: 0.35rem 0.75rem;
+        background-color: var(--bg-surface);
+        border: 1px solid var(--border-color);
+        border-radius: 3px;
+        cursor: pointer;
+        font-size: 0.85rem;
+        color: var(--text-primary);
+        transition: all 0.2s;
+    }
 
-.btn-clear-selection:hover {
-    border-color: var(--border-light);
-    background-color: var(--bg-elevated);
-}
+    .btn-clear-selection:hover {
+        border-color: var(--border-light);
+        background-color: var(--bg-elevated);
+    }
 
-.search-input:focus,
-.role-select:focus {
-    outline: none;
-    border-color: var(--accent-blue);
-    box-shadow: 0 0 0 2px rgba(97, 175, 239, 0.2);
-}
+    .search-input:focus,
+    .role-select:focus {
+        outline: none;
+        border-color: var(--accent-blue);
+        box-shadow: 0 0 0 2px rgba(97, 175, 239, 0.2);
+    }
 
-.members-list {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    max-height: 300px;
-    overflow-y: auto;
-}
+    .members-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        max-height: 300px;
+        overflow-y: auto;
+    }
 
-.member-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0.75rem;
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
-    font-size: 0.9rem;
-    background-color: var(--bg-elevated);
-}
+    .member-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem;
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        font-size: 0.9rem;
+        background-color: var(--bg-elevated);
+    }
 
-.member-info {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    flex: 1;
-}
+    .member-info {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        flex: 1;
+    }
 
-.member-username {
-    font-weight: 500;
-    color: var(--text-bright);
-}
+    .member-username {
+        font-weight: 500;
+        color: var(--text-bright);
+    }
 
-.member-role {
-    display: inline-block;
-    padding: 0.2rem 0.5rem;
-    background-color: var(--bg-surface);
-    border: 1px solid var(--border-color);
-    border-radius: 3px;
-    font-size: 0.8rem;
-    font-weight: 500;
-    color: var(--text-muted);
-    margin-left: 0.5rem;
-}
+    .member-role {
+        display: inline-block;
+        padding: 0.2rem 0.5rem;
+        background-color: var(--bg-surface);
+        border: 1px solid var(--border-color);
+        border-radius: 3px;
+        font-size: 0.8rem;
+        font-weight: 500;
+        color: var(--text-muted);
+        margin-left: 0.5rem;
+    }
 
-.member-role.owner {
-    background-color: rgba(229, 192, 123, 0.15);
-    color: var(--accent-yellow);
-    border-color: var(--accent-yellow);
-}
+    .member-role.owner {
+        background-color: rgba(229, 192, 123, 0.15);
+        color: var(--accent-yellow);
+        border-color: var(--accent-yellow);
+    }
 
-.member-actions {
-    display: flex;
-    gap: 0.35rem;
-    align-items: center;
-}
+    .member-actions {
+        display: flex;
+        gap: 0.35rem;
+        align-items: center;
+    }
 
-.btn-role-toggle,
-.btn-remove-member {
-    padding: 0.35rem 0.6rem;
-    font-size: 0.8rem;
-    border: 1px solid var(--border-color);
-    border-radius: 3px;
-    background-color: var(--bg-surface);
-    color: var(--text-primary);
-    cursor: pointer;
-    transition: all 0.2s;
-}
+    .btn-role-toggle,
+    .btn-remove-member {
+        padding: 0.35rem 0.6rem;
+        font-size: 0.8rem;
+        border: 1px solid var(--border-color);
+        border-radius: 3px;
+        background-color: var(--bg-surface);
+        color: var(--text-primary);
+        cursor: pointer;
+        transition: all 0.2s;
+    }
 
-.btn-role-toggle:hover {
-    background-color: var(--bg-elevated);
-    border-color: var(--border-light);
-}
+    .btn-role-toggle:hover {
+        background-color: var(--bg-elevated);
+        border-color: var(--border-light);
+    }
 
-.btn-remove-member {
-    color: var(--accent-red);
-    border-color: var(--accent-red);
-}
+    .btn-remove-member {
+        color: var(--accent-red);
+        border-color: var(--accent-red);
+    }
 
-.btn-remove-member:hover {
-    background-color: rgba(224, 108, 117, 0.1);
-}
+    .btn-remove-member:hover {
+        background-color: rgba(224, 108, 117, 0.1);
+    }
 
-.btn-save {
-    padding: 0.5rem 1rem;
-    background-color: var(--accent-blue);
-    color: var(--bg-dark);
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 0.9rem;
-    font-weight: 500;
-    transition: background-color 0.2s;
-}
+    .btn-save {
+        padding: 0.5rem 1rem;
+        background-color: var(--accent-blue);
+        color: var(--bg-dark);
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        font-weight: 500;
+        transition: background-color 0.2s;
+    }
 
-.btn-save:hover:not(:disabled) {
-    background-color: var(--accent-blue-hover);
-}
+    .btn-save:hover:not(:disabled) {
+        background-color: var(--accent-blue-hover);
+    }
 
-.btn-save:disabled {
-    background-color: var(--text-muted);
-    cursor: not-allowed;
-    opacity: 0.6;
-}
+    .btn-save:disabled {
+        background-color: var(--text-muted);
+        cursor: not-allowed;
+        opacity: 0.6;
+    }
 
-hr {
-    margin: 1rem 0;
-    border: none;
-    border-top: 1px solid var(--border-color);
-}
+    hr {
+        margin: 1rem 0;
+        border: none;
+        border-top: 1px solid var(--border-color);
+    }
 
-.loading {
-    padding: 1rem;
-    text-align: center;
-    color: var(--text-muted);
-}
+    .loading {
+        padding: 1rem;
+        text-align: center;
+        color: var(--text-muted);
+    }
 
-.error-message {
-    padding: 0.75rem;
-    background-color: rgba(224, 108, 117, 0.15);
-    border: 1px solid var(--accent-red);
-    border-radius: 4px;
-    color: var(--accent-red);
-    font-size: 0.9rem;
-    margin-bottom: 0.5rem;
-}
+    .error-message {
+        padding: 0.75rem;
+        background-color: rgba(224, 108, 117, 0.15);
+        border: 1px solid var(--accent-red);
+        border-radius: 4px;
+        color: var(--accent-red);
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+    }
 </style>
 
 <script>
-let boardUserManagementBoardId = null;
-let searchTimeout = null;
+    let boardUserManagementBoardId = null;
+    let searchTimeout = null;
 
-function openBoardUserManagement(boardId) {
-    boardUserManagementBoardId = boardId;
-    const modal = document.getElementById('board-user-management');
-    modal.classList.add('modal-open');
-    document.body.style.overflow = 'hidden';
-    
-    // Load board members
-    loadBoardMembers(boardId);
-    
-    // Setup email input with search
-    const emailInput = document.getElementById('email-search-input');
-    emailInput.value = '';
-    emailInput.focus();
-}
+    function openBoardUserManagement(boardId) {
+        boardUserManagementBoardId = boardId;
+        const modal = document.getElementById('board-user-management');
+        modal.classList.add('modal-open');
+        document.body.style.overflow = 'hidden';
 
-function closeBoardUserManagement(event) {
-    if (event && event.target.id !== 'board-user-management') return;
-    
-    const modal = document.getElementById('board-user-management');
-    modal.classList.remove('modal-open');
-    document.body.style.overflow = '';
-    document.getElementById('add-user-form').reset();
-    document.getElementById('search-results').classList.remove('show');
-    clearUserSelection();
-}
+        // Load board members
+        loadBoardMembers(boardId);
 
-function loadBoardMembers(boardId) {
-    fetch('/boards/' + boardId + '/users')
-        .then(r => r.json())
-        .then(users => {
-            const membersList = document.getElementById('board-members-list');
-            membersList.innerHTML = '';
-            
-            users.forEach(user => {
-                const item = document.createElement('div');
-                item.innerHTML = renderMemberItem(boardId, user);
-                membersList.appendChild(item.firstElementChild);
-            });
-            
-            htmx.process(membersList);
-        })
-        .catch(error => {
-            console.error('Failed to load board members:', error);
-            document.getElementById('board-members-list').innerHTML = '<div class="error-message">Failed to load members</div>';
-        });
-}
-
-function searchUsers(query) {
-    if (!query || query.trim().length < 2) {
-        document.getElementById('search-results').classList.remove('show');
-        return;
+        // Setup email input with search
+        const emailInput = document.getElementById('email-search-input');
+        emailInput.value = '';
+        emailInput.focus();
     }
 
-    fetch('/boards/search-users?q=' + encodeURIComponent(query))
-        .then(r => r.json())
-        .then(users => {
-            const resultsContainer = document.getElementById('search-results');
-            resultsContainer.innerHTML = '';
+    function closeBoardUserManagement(event) {
+        if (event && event.target.id !== 'board-user-management') return;
 
-            if (users.length === 0) {
-                resultsContainer.innerHTML = '<div class="search-result-item" style="color: #999; cursor: default;">No users found</div>';
-                resultsContainer.classList.add('show');
-                return;
-            }
+        const modal = document.getElementById('board-user-management');
+        modal.classList.remove('modal-open');
+        document.body.style.overflow = '';
+        document.getElementById('add-user-form').reset();
+        document.getElementById('search-results').classList.remove('show');
+        clearUserSelection();
+    }
 
-            users.forEach(user => {
-                const item = document.createElement('div');
-                item.className = 'search-result-item';
-                item.onclick = () => selectUser(user.id, user.email, user.displayName);
+    function loadBoardMembers(boardId) {
+        fetch('/boards/' + boardId + '/users')
+            .then(r => r.json())
+            .then(users => {
+                const membersList = document.getElementById('board-members-list');
+                membersList.innerHTML = '';
 
-                const displayName = user.displayName || '(no name)';
-                item.innerHTML = `
+                users.forEach(user => {
+                    const item = document.createElement('div');
+                    item.innerHTML = renderMemberItem(boardId, user);
+                    membersList.appendChild(item.firstElementChild);
+                });
+
+                htmx.process(membersList);
+            })
+            .catch(error => {
+                console.error('Failed to load board members:', error);
+                document.getElementById('board-members-list').innerHTML = '<div class="error-message">Failed to load members</div>';
+            });
+    }
+
+    function searchUsers(query) {
+        if (!query || query.trim().length < 2) {
+            document.getElementById('search-results').classList.remove('show');
+            return;
+        }
+
+        fetch('/boards/search-users?q=' + encodeURIComponent(query))
+            .then(r => r.json())
+            .then(users => {
+                const resultsContainer = document.getElementById('search-results');
+                resultsContainer.innerHTML = '';
+
+                if (users.length === 0) {
+                    resultsContainer.innerHTML = '<div class="search-result-item" style="color: #999; cursor: default;">No users found</div>';
+                    resultsContainer.classList.add('show');
+                    return;
+                }
+
+                users.forEach(user => {
+                    const item = document.createElement('div');
+                    item.className = 'search-result-item';
+                    item.onclick = () => selectUser(user.id, user.email, user.displayName);
+
+                    const displayName = user.displayName || '(no name)';
+                    item.innerHTML = `
                     <div class="search-result-email">${escapeHtml(user.email)}</div>
                     <div class="search-result-name">${escapeHtml(displayName)}</div>
                 `;
 
-                resultsContainer.appendChild(item);
+                    resultsContainer.appendChild(item);
+                });
+
+                resultsContainer.classList.add('show');
+            })
+            .catch(error => {
+                console.error('Search failed:', error);
             });
+    }
 
-            resultsContainer.classList.add('show');
-        })
-        .catch(error => {
-            console.error('Search failed:', error);
-        });
-}
+    function renderMemberItem(boardId, user) {
+        const role = user.isOwner ? 'Owner' : 'Member';
+        const roleClass = user.isOwner ? 'owner' : '';
+        const newRole = user.isOwner ? 'Member' : 'Owner';
 
-function renderMemberItem(boardId, user) {
-    const role = user.isOwner ? 'Owner' : 'Member';
-    const roleClass = user.isOwner ? 'owner' : '';
-    const newRole = user.isOwner ? 'Member' : 'Owner';
-    
-    return `
+        return `
         <div class="member-item" id="member-${user.userId}">
             <div class="member-info">
                 <span class="member-username">${escapeHtml(user.email)}</span>
@@ -453,116 +453,116 @@ function renderMemberItem(boardId, user) {
             </div>
         </div>
     `;
-}
-
-function selectUser(userId, email, displayName) {
-    document.getElementById('selected-user-id').value = userId;
-    document.getElementById('email-search-input').value = email;
-    document.getElementById('selected-user-email').textContent = email;
-    document.getElementById('selected-user-name').textContent = displayName || '(no name)';
-    document.getElementById('selected-user-display').style.display = 'flex';
-    document.getElementById('search-results').classList.remove('show');
-    document.getElementById('add-user-button').disabled = false;
-}
-
-function clearUserSelection() {
-    document.getElementById('selected-user-id').value = '';
-    document.getElementById('email-search-input').value = '';
-    document.getElementById('selected-user-display').style.display = 'none';
-    document.getElementById('add-user-button').disabled = true;
-}
-
-function removeUserFromBoard(boardId, userId, userEmail) {
-    if (confirm(`Remove ${escapeHtml(userEmail)} from the board?`)) {
-        fetch(`/boards/${boardId}/users/${userId}`, {
-            method: 'DELETE'
-        })
-            .then(r => {
-                if (r.ok) {
-                    loadBoardMembers(boardId);
-                } else {
-                    alert('Failed to remove user');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Failed to remove user');
-            });
-    }
-}
-
-function escapeHtml(text) {
-    if (!text) return '';
-    const map = {
-        '&': '&amp;',
-        '<': '&lt;',
-        '>': '&gt;',
-        '"': '&quot;',
-        "'": '&#039;'
-    };
-    return text.replace(/[&<>"']/g, m => map[m]);
-}
-
-// Setup form submission
-document.addEventListener('DOMContentLoaded', function() {
-    // Email search with debounce
-    const emailInput = document.getElementById('email-search-input');
-    if (emailInput) {
-        emailInput.addEventListener('input', function(e) {
-            clearTimeout(searchTimeout);
-            searchTimeout = setTimeout(() => {
-                searchUsers(e.target.value);
-            }, 300);
-        });
-
-        // Hide results when clicking outside
-        document.addEventListener('click', function(e) {
-            if (e.target !== emailInput && !e.target.closest('.search-results')) {
-                document.getElementById('search-results').classList.remove('show');
-            }
-        });
     }
 
-    // Form submission
-    const form = document.getElementById('add-user-form');
-    if (form) {
-        form.addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const userId = document.getElementById('selected-user-id').value;
-            const isOwner = document.getElementById('new-user-role').value === 'true';
-            
-            if (!userId || !boardUserManagementBoardId) {
-                alert('Please select a user');
-                return;
-            }
-            
-            const formData = new FormData();
-            formData.append('userId', userId);
-            formData.append('isOwner', isOwner);
-            
-            fetch(`/boards/${boardUserManagementBoardId}/users`, {
-                method: 'POST',
-                body: formData
+    function selectUser(userId, email, displayName) {
+        document.getElementById('selected-user-id').value = userId;
+        document.getElementById('email-search-input').value = email;
+        document.getElementById('selected-user-email').textContent = email;
+        document.getElementById('selected-user-name').textContent = displayName || '(no name)';
+        document.getElementById('selected-user-display').style.display = 'flex';
+        document.getElementById('search-results').classList.remove('show');
+        document.getElementById('add-user-button').disabled = false;
+    }
+
+    function clearUserSelection() {
+        document.getElementById('selected-user-id').value = '';
+        document.getElementById('email-search-input').value = '';
+        document.getElementById('selected-user-display').style.display = 'none';
+        document.getElementById('add-user-button').disabled = true;
+    }
+
+    function removeUserFromBoard(boardId, userId, userEmail) {
+        if (confirm(`Remove ${escapeHtml(userEmail)} from the board?`)) {
+            fetch(`/boards/${boardId}/users/${userId}`, {
+                method: 'DELETE'
             })
                 .then(r => {
                     if (r.ok) {
-                        form.reset();
-                        clearUserSelection();
-                        loadBoardMembers(boardUserManagementBoardId);
+                        loadBoardMembers(boardId);
                     } else {
-                        return r.json().then(err => {
-                            alert('Error: ' + (err.title || 'Failed to add user'));
-                        });
+                        alert('Failed to remove user');
                     }
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    alert('Failed to add user');
+                    alert('Failed to remove user');
                 });
-        });
+        }
     }
-});
+
+    function escapeHtml(text) {
+        if (!text) return '';
+        const map = {
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#039;'
+        };
+        return text.replace(/[&<>"']/g, m => map[m]);
+    }
+
+    // Setup form submission
+    document.addEventListener('DOMContentLoaded', function () {
+        // Email search with debounce
+        const emailInput = document.getElementById('email-search-input');
+        if (emailInput) {
+            emailInput.addEventListener('input', function (e) {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(() => {
+                    searchUsers(e.target.value);
+                }, 300);
+            });
+
+            // Hide results when clicking outside
+            document.addEventListener('click', function (e) {
+                if (e.target !== emailInput && !e.target.closest('.search-results')) {
+                    document.getElementById('search-results').classList.remove('show');
+                }
+            });
+        }
+
+        // Form submission
+        const form = document.getElementById('add-user-form');
+        if (form) {
+            form.addEventListener('submit', function (e) {
+                e.preventDefault();
+
+                const userId = document.getElementById('selected-user-id').value;
+                const isOwner = document.getElementById('new-user-role').value === 'true';
+
+                if (!userId || !boardUserManagementBoardId) {
+                    alert('Please select a user');
+                    return;
+                }
+
+                const formData = new FormData();
+                formData.append('userId', userId);
+                formData.append('isOwner', isOwner);
+
+                fetch(`/boards/${boardUserManagementBoardId}/users`, {
+                    method: 'POST',
+                    body: formData
+                })
+                    .then(r => {
+                        if (r.ok) {
+                            form.reset();
+                            clearUserSelection();
+                            loadBoardMembers(boardUserManagementBoardId);
+                        } else {
+                            return r.json().then(err => {
+                                alert('Error: ' + (err.title || 'Failed to add user'));
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Failed to add user');
+                    });
+            });
+        }
+    });
 </script>
 
 @code {
