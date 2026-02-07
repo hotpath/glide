@@ -8,10 +8,10 @@ namespace Glide.Data.Unit.Labels;
 
 public class LabelRepositoryTests : RepositoryTestBase
 {
-    private readonly ILabelRepository _repository;
     private readonly IBoardRepository _boardRepository;
-    private readonly IColumnRepository _columnRepository;
     private readonly ICardRepository _cardRepository;
+    private readonly IColumnRepository _columnRepository;
+    private readonly ILabelRepository _repository;
     private readonly IUserRepository _userRepository;
 
     public LabelRepositoryTests()

@@ -389,8 +389,7 @@ public class BoardRepositoryTests : RepositoryTestBase
         await _repository.AddUserToBoardAsync(board.Id, user.Id, false);
 
         // Second add should throw due to unique constraint
-        await Assert.ThrowsAsync<Exception>(
-            async () => await _repository.AddUserToBoardAsync(board.Id, user.Id, true)
+        await Assert.ThrowsAsync<Exception>(async () => await _repository.AddUserToBoardAsync(board.Id, user.Id, true)
         );
     }
 

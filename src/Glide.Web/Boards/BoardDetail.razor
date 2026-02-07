@@ -7,14 +7,17 @@
             <div class="label-filter">
                 <button class="filter-button" id="filter-button" onclick="toggleLabelFilter(event)">Filter</button>
                 <div class="label-filter-dropdown" id="label-filter-dropdown" style="display: none;">
-                    <button type="button" class="filter-option" data-filter-id="" onclick="filterByLabel(null, 'Show All')">Show All</button>
-                    <div id="filter-labels" hx-get="/boards/@Board.Id/labels?view=filter" hx-trigger="load" hx-swap="innerHTML">
+                    <button type="button" class="filter-option" data-filter-id=""
+                            onclick="filterByLabel(null, 'Show All')">Show All
+                    </button>
+                    <div id="filter-labels" hx-get="/boards/@Board.Id/labels?view=filter" hx-trigger="load"
+                         hx-swap="innerHTML">
                         Loading labels...
                     </div>
                 </div>
             </div>
 
-                <div class="board-menu">
+            <div class="board-menu">
                 <button class="board-menu-button" onclick="toggleBoardMenu(event)">⋮</button>
                 <div class="board-menu-dropdown" id="board-menu-dropdown">
                     <div id="add-column-menu-item">
@@ -349,7 +352,7 @@
                     htmx.ajax('POST', '/cards/' + cardId + '/labels', {
                         target: '#label-options-' + cardId,
                         swap: 'innerHTML',
-                        values: { label_id: label.id }
+                        values: {label_id: label.id}
                     }).then(() => {
                         // Clear the input field
                         nameInput.value = '';
@@ -562,7 +565,7 @@
         }
 
         // Close column menus after successful delete
-        document.body.addEventListener('htmx:afterSwap', function(event) {
+        document.body.addEventListener('htmx:afterSwap', function (event) {
             if (event.detail.requestConfig &&
                 event.detail.requestConfig.verb === 'delete' &&
                 event.detail.requestConfig.path.includes('/columns/')) {
@@ -581,7 +584,7 @@
             }
         });
     </script>
-    <BoardUserManagement BoardId="@Board.Id" />
+    <BoardUserManagement BoardId="@Board.Id"/>
 </HtmxLayout>
 
 @code

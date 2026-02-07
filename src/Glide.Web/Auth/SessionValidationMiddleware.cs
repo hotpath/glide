@@ -26,7 +26,8 @@ public class SessionValidationMiddleware(RequestDelegate next)
                     new(ClaimTypes.NameIdentifier, session.UserId),
                     new(ClaimTypes.Email, session.Email),
                     new("SessionId", session.Id),
-                    new("DisplayName", session.DisplayName ?? session.Email)
+                    new("DisplayName", session.DisplayName ?? session.Email),
+                    new("is_admin", session.IsAdmin.ToString())
                 ];
 
                 ClaimsIdentity identity = new(claims, "DatabaseSession");

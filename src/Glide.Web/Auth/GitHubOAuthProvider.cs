@@ -18,12 +18,9 @@ public class GitHubOAuthProvider : IOAuthProvider
 
     public Uri GetAuthorizeUrl(string clientId, Uri redirectUri, string state, Uri baseUri)
     {
-        string query = $"client_id={Uri.EscapeDataString(clientId)}&redirect_uri={Uri.EscapeDataString(redirectUri.ToString())}&state={Uri.EscapeDataString(state)}&scope=user:email";
-        UriBuilder builder = new(baseUri)
-        {
-            Path = "/login/oauth/authorize",
-            Query = query
-        };
+        string query =
+            $"client_id={Uri.EscapeDataString(clientId)}&redirect_uri={Uri.EscapeDataString(redirectUri.ToString())}&state={Uri.EscapeDataString(state)}&scope=user:email";
+        UriBuilder builder = new(baseUri) { Path = "/login/oauth/authorize", Query = query };
         return builder.Uri;
     }
 
@@ -45,10 +42,8 @@ public class GitHubOAuthProvider : IOAuthProvider
 
         FormUrlEncodedContent content = new(formData);
 
-        HttpRequestMessage request = new(HttpMethod.Post, "https://github.com/login/oauth/access_token")
-        {
-            Content = content
-        };
+        using HttpRequestMessage request =
+            new(HttpMethod.Post, "https://github.com/login/oauth/access_token") { Content = content };
         request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
         HttpResponseMessage response = await client.SendAsync(request, cancellationToken);
@@ -94,10 +89,10 @@ public class GitHubOAuthProvider : IOAuthProvider
         }
 
         return new OAuthUserInfo(
-            ProviderId: user.Id.ToString(),
-            Username: user.Login,
-            Email: email,
-            DisplayName: user.Name ?? user.Login
+            user.Id.ToString(),
+            user.Login,
+            email,
+            user.Name ?? user.Login
         );
     }
 
@@ -118,7 +113,8 @@ public class GitHubOAuthProvider : IOAuthProvider
             return null;
         }
 
-        List<GitHubEmail>? emails = await response.Content.ReadFromJsonAsync<List<GitHubEmail>>(_jsonOpts, cancellationToken);
+        List<GitHubEmail>? emails =
+            await response.Content.ReadFromJsonAsync<List<GitHubEmail>>(_jsonOpts, cancellationToken);
 
         if (emails is null || emails.Count == 0)
         {

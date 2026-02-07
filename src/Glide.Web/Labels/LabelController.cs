@@ -1,4 +1,4 @@
-using System.Text.Json;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 using Glide.Web.Boards;
@@ -43,11 +43,11 @@ public class LabelController(LabelAction labelAction, BoardAction boardAction) :
         }
 
         // Fetch board columns to refresh the board view
-        BoardAction.Result<System.Collections.Generic.IEnumerable<ColumnView>> columnsResult =
+        BoardAction.Result<IEnumerable<ColumnView>> columnsResult =
             await boardAction.GetColumnsAsync(result.Object!.BoardId, User);
 
         // Fetch filter labels
-        LabelAction.Result<System.Collections.Generic.IEnumerable<LabelView>> labelsResult =
+        LabelAction.Result<IEnumerable<LabelView>> labelsResult =
             await labelAction.GetByBoardIdAsync(result.Object.BoardId, User);
 
         return new RazorComponentResult<LabelBoardRefreshResponse>(new
@@ -78,11 +78,11 @@ public class LabelController(LabelAction labelAction, BoardAction boardAction) :
         }
 
         // Fetch board columns to refresh the board view
-        BoardAction.Result<System.Collections.Generic.IEnumerable<ColumnView>> columnsResult =
+        BoardAction.Result<IEnumerable<ColumnView>> columnsResult =
             await boardAction.GetColumnsAsync(boardId, User);
 
         // Fetch filter labels
-        LabelAction.Result<System.Collections.Generic.IEnumerable<LabelView>> labelsResult =
+        LabelAction.Result<IEnumerable<LabelView>> labelsResult =
             await labelAction.GetByBoardIdAsync(boardId, User);
 
         return new RazorComponentResult<LabelBoardRefreshResponse>(new

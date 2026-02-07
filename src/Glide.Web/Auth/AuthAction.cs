@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using Glide.Data.Sessions;
+using Glide.Data.SiteSettings;
 using Glide.Data.UserOAuthProviders;
 using Glide.Data.Users;
 
@@ -15,16 +16,11 @@ public class AuthAction(
     IUserRepository userRepository,
     IUserOAuthProviderRepository oauthProviderRepository,
     ISessionRepository sessionRepository,
+    ISiteSettingsRepository siteSettingsRepository,
     AdminConfig adminConfig,
     PasswordAuthService passwordAuthService,
     ILogger<AuthAction> logger)
 {
-    public record Result<T>(T? Object, IResult? StatusResult = null)
-    {
-        public Result(IResult statusResult) : this(default, statusResult) { }
-        public bool IsError => StatusResult is not null;
-    }
-
     public async Task<Result<User>> HandleOAuthCallbackAsync(
         OAuthUserInfo oauthUser,
         string provider,
@@ -197,6 +193,17 @@ public class AuthAction(
     {
         logger.LogTrace("Registration attempt for email: {email}", email);
 
+        // Check if registration is open (unless this is the admin email)
+        SiteSetting? registrationSetting = await siteSettingsRepository.GetByKeyAsync("registration_open");
+        bool isRegistrationOpen = registrationSetting?.Value == "true";
+        bool isAdminEmail = email == adminConfig.AdminEmail;
+
+        if (!isRegistrationOpen && !isAdminEmail)
+        {
+            logger.LogWarning("Registration attempt rejected - registration is closed: {email}", email);
+            return new Result<User>(Results.BadRequest("Registration is currently disabled"));
+        }
+
         // Validate email
         if (string.IsNullOrWhiteSpace(email))
         {
@@ -260,7 +267,8 @@ public class AuthAction(
         // Check if user has a password set
         if (string.IsNullOrWhiteSpace(user.PasswordHash))
         {
-            return new Result<User>(Results.BadRequest("This account uses OAuth login. Please use the OAuth buttons to log in."));
+            return new Result<User>(
+                Results.BadRequest("This account uses OAuth login. Please use the OAuth buttons to log in."));
         }
 
         // Verify password
@@ -285,5 +293,11 @@ public class AuthAction(
     public async Task DeleteSessionAsync(string sessionId)
     {
         await sessionRepository.DeleteAsync(sessionId);
+    }
+
+    public record Result<T>(T? Object, IResult? StatusResult = null)
+    {
+        public Result(IResult statusResult) : this(default, statusResult) { }
+        public bool IsError => StatusResult is not null;
     }
 }

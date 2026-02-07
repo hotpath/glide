@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -40,7 +41,7 @@ public class CardAction(
             return new Result<CardView>(Results.NotFound("Card not found"));
         }
 
-        var labels = await labelRepository.GetLabelsByCardIdAsync(cardId);
+        IEnumerable<Label> labels = await labelRepository.GetLabelsByCardIdAsync(cardId);
         return new Result<CardView>(CardView.FromCard(card, labels));
     }
 
@@ -77,7 +78,7 @@ public class CardAction(
             return new Result<CardView>(Results.InternalServerError("Failed to retrieve updated card"));
         }
 
-        var labels = await labelRepository.GetLabelsByCardIdAsync(cardId);
+        IEnumerable<Label> labels = await labelRepository.GetLabelsByCardIdAsync(cardId);
         return new Result<CardView>(CardView.FromCard(updated, labels));
     }
 
@@ -151,7 +152,7 @@ public class CardAction(
             return new Result<CardView>(Results.InternalServerError("Could not retrieve moved card"));
         }
 
-        var labels = await labelRepository.GetLabelsByCardIdAsync(cardId);
+        IEnumerable<Label> labels = await labelRepository.GetLabelsByCardIdAsync(cardId);
         return new Result<CardView>(CardView.FromCard(moved, labels));
     }
 

@@ -12,7 +12,7 @@ public class PasswordAuthService
     private const int Iterations = 100000; // OWASP recommendation
 
     /// <summary>
-    /// Hashes a password using PBKDF2 with a random salt
+    ///     Hashes a password using PBKDF2 with a random salt
     /// </summary>
     /// <param name="password">The plain text password</param>
     /// <returns>Base64 encoded string: salt + hash</returns>
@@ -28,11 +28,11 @@ public class PasswordAuthService
 
         // Hash the password
         byte[] hash = KeyDerivation.Pbkdf2(
-            password: password,
-            salt: salt,
-            prf: KeyDerivationPrf.HMACSHA256,
-            iterationCount: Iterations,
-            numBytesRequested: HashSize);
+            password,
+            salt,
+            KeyDerivationPrf.HMACSHA256,
+            Iterations,
+            HashSize);
 
         // Combine salt + hash and encode as base64
         byte[] combined = new byte[SaltSize + HashSize];
@@ -43,7 +43,7 @@ public class PasswordAuthService
     }
 
     /// <summary>
-    /// Verifies a password against a hash
+    ///     Verifies a password against a hash
     /// </summary>
     /// <param name="password">The plain text password to verify</param>
     /// <param name="hashedPassword">The base64 encoded salt + hash</param>
@@ -75,11 +75,11 @@ public class PasswordAuthService
 
             // Hash the provided password with the extracted salt
             byte[] computedHash = KeyDerivation.Pbkdf2(
-                password: password,
-                salt: salt,
-                prf: KeyDerivationPrf.HMACSHA256,
-                iterationCount: Iterations,
-                numBytesRequested: HashSize);
+                password,
+                salt,
+                KeyDerivationPrf.HMACSHA256,
+                Iterations,
+                HashSize);
 
             // Compare hashes using constant-time comparison to prevent timing attacks
             return CryptographicOperations.FixedTimeEquals(storedHash, computedHash);
@@ -91,7 +91,7 @@ public class PasswordAuthService
     }
 
     /// <summary>
-    /// Validates password strength
+    ///     Validates password strength
     /// </summary>
     /// <param name="password">The password to validate</param>
     /// <returns>Error message if invalid, null if valid</returns>

@@ -2,9 +2,9 @@ name: Test
 
 on:
   push:
-    branches: ["**"]
+    branches: [ "**" ]
   pull_request:
-    branches: ["**"]
+    branches: [ "**" ]
 
 jobs:
   lint:
@@ -54,7 +54,7 @@ jobs:
 
   test:
     runs-on: ubuntu-latest
-    needs: [lint, security]
+    needs: [ lint, security ]
     name: Unit Tests
 
     steps:
