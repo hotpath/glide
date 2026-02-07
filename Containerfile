@@ -2,6 +2,9 @@
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /source
 
+# Copy Directory.Build.props first (contains version info)
+COPY Directory.Build.props .
+
 # Copy csproj files and restore dependencies
 COPY src/Glide.Data/Glide.Data.csproj src/Glide.Data/
 COPY src/Glide.Web/Glide.Web.csproj src/Glide.Web/
