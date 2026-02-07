@@ -28,6 +28,7 @@ using Glide.Web.Labels;
 
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -134,6 +135,12 @@ builder.Services
         .ScanIn(typeof(CreateInitialSchema).Assembly).For.All())
     .AddLogging(lb => lb.AddFluentMigratorConsole());
 
+// Configure data protection to persist keys (important for containers/restarts)
+string dataProtectionPath = Environment.GetEnvironmentVariable("GLIDE_DATA_PROTECTION_PATH") ?? "/app/keys";
+builder.Services.AddDataProtection()
+    .PersistKeysToFileSystem(new System.IO.DirectoryInfo(dataProtectionPath))
+    .SetApplicationName("Glide");
+
 // Configure forwarded headers for reverse proxy support
 builder.Services.Configure<ForwardedHeadersOptions>(options =>
 {
@@ -152,6 +159,15 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
             ? CookieSecurePolicy.SameAsRequest
             : CookieSecurePolicy.Always;
         options.Cookie.SameSite = SameSiteMode.Lax;
+        options.Cookie.Path = "/";
+
+        // Allow explicit domain override via environment variable for Cloudflare Tunnels
+        string? cookieDomain = Environment.GetEnvironmentVariable("GLIDE_COOKIE_DOMAIN");
+        if (!string.IsNullOrWhiteSpace(cookieDomain))
+        {
+            options.Cookie.Domain = cookieDomain;
+        }
+
         options.ExpireTimeSpan = TimeSpan.FromHours(720);
         options.SlidingExpiration = true;
         options.LoginPath = "/auth/login";
@@ -174,7 +190,8 @@ app.UseStaticFiles();
 
 app.UseMiddleware<SessionValidationMiddleware>();
 
-app.UseAuthentication();
+// UseAuthentication is not needed since we use custom SessionValidationMiddleware
+// app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

@@ -1,15 +1,11 @@
 using System;
-using System.Collections.Generic;
 using System.Net.Http;
-using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
 
 using Glide.Data.Sessions;
 using Glide.Data.Users;
 
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -103,35 +99,15 @@ public class AuthController(
 
         logger.LogTrace("Session created: {session}", session.Id);
 
-        // Set custom session cookie
+        // Set session cookie - SessionValidationMiddleware will handle authentication
         HttpContext.Response.Cookies.Append("glide_session", session.Id,
             new CookieOptions
             {
                 HttpOnly = true,
-                Secure = HttpContext.Request.IsHttps,
+                Secure = true, // Always secure in production
                 SameSite = SameSiteMode.Lax,
                 MaxAge = TimeSpan.FromSeconds(config.SessionDurationSeconds),
                 Path = "/"
-            });
-
-        // Sign in through ASP.NET Core authentication to avoid redirect loops
-        List<Claim> claims =
-        [
-            new(ClaimTypes.NameIdentifier, result.Object!.Id),
-            new(ClaimTypes.Email, result.Object!.Email),
-            new("SessionId", session.Id),
-            new("DisplayName", result.Object!.DisplayName ?? result.Object!.Email),
-            new("is_admin", result.Object!.IsAdmin.ToString())
-        ];
-
-        ClaimsIdentity identity = new(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-        ClaimsPrincipal principal = new(identity);
-
-        await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal,
-            new AuthenticationProperties
-            {
-                IsPersistent = true,
-                ExpiresUtc = DateTimeOffset.UtcNow.AddSeconds(config.SessionDurationSeconds)
             });
 
         return Redirect("/dashboard");
@@ -148,9 +124,6 @@ public class AuthController(
         }
 
         HttpContext.Response.Cookies.Delete("glide_session");
-
-        // Sign out from ASP.NET Core authentication
-        await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
 
         return Redirect("/");
     }
@@ -170,35 +143,15 @@ public class AuthController(
         Session session = await authAction.CreateSessionAsync(result.Object!.Id, sessionConfig.DurationSeconds);
         logger.LogTrace("Session created: {sessionId}", session.Id);
 
-        // Set custom session cookie
+        // Set session cookie - SessionValidationMiddleware will handle authentication
         HttpContext.Response.Cookies.Append("glide_session", session.Id,
             new CookieOptions
             {
                 HttpOnly = true,
-                Secure = HttpContext.Request.IsHttps,
+                Secure = true, // Always secure in production
                 SameSite = SameSiteMode.Lax,
                 MaxAge = TimeSpan.FromSeconds(sessionConfig.DurationSeconds),
                 Path = "/"
-            });
-
-        // Sign in through ASP.NET Core authentication
-        List<Claim> claims =
-        [
-            new(ClaimTypes.NameIdentifier, result.Object!.Id),
-            new(ClaimTypes.Email, result.Object!.Email),
-            new("SessionId", session.Id),
-            new("DisplayName", result.Object!.DisplayName ?? result.Object!.Email),
-            new("is_admin", result.Object!.IsAdmin.ToString())
-        ];
-
-        ClaimsIdentity identity = new(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-        ClaimsPrincipal principal = new(identity);
-
-        await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal,
-            new AuthenticationProperties
-            {
-                IsPersistent = true,
-                ExpiresUtc = DateTimeOffset.UtcNow.AddSeconds(sessionConfig.DurationSeconds)
             });
 
         return Redirect("/dashboard");
@@ -218,35 +171,15 @@ public class AuthController(
         Session session = await authAction.CreateSessionAsync(result.Object!.Id, sessionConfig.DurationSeconds);
         logger.LogTrace("Session created: {sessionId}", session.Id);
 
-        // Set custom session cookie
+        // Set session cookie - SessionValidationMiddleware will handle authentication
         HttpContext.Response.Cookies.Append("glide_session", session.Id,
             new CookieOptions
             {
                 HttpOnly = true,
-                Secure = HttpContext.Request.IsHttps,
+                Secure = true, // Always secure in production
                 SameSite = SameSiteMode.Lax,
                 MaxAge = TimeSpan.FromSeconds(sessionConfig.DurationSeconds),
                 Path = "/"
-            });
-
-        // Sign in through ASP.NET Core authentication
-        List<Claim> claims =
-        [
-            new(ClaimTypes.NameIdentifier, result.Object!.Id),
-            new(ClaimTypes.Email, result.Object!.Email),
-            new("SessionId", session.Id),
-            new("DisplayName", result.Object!.DisplayName ?? result.Object!.Email),
-            new("is_admin", result.Object!.IsAdmin.ToString())
-        ];
-
-        ClaimsIdentity identity = new(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-        ClaimsPrincipal principal = new(identity);
-
-        await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal,
-            new AuthenticationProperties
-            {
-                IsPersistent = true,
-                ExpiresUtc = DateTimeOffset.UtcNow.AddSeconds(sessionConfig.DurationSeconds)
             });
 
         return Redirect("/dashboard");
