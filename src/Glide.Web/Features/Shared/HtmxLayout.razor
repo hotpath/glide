@@ -30,6 +30,55 @@
                 hljs.highlightElement(el);
             });
         });
+
+        // Date format validation and preview
+        function validateDateFormat(event) {
+            const input = document.getElementById('date-format-input');
+            const errorDiv = document.getElementById('format-error');
+            const format = input.value.trim();
+
+            if (!format) {
+                errorDiv.textContent = 'Date format is required';
+                errorDiv.style.display = 'block';
+                event.preventDefault();
+                return false;
+            }
+
+            // Test the format with a sample date
+            try {
+                const testDate = new Date(2024, 11, 31); // December 31, 2024
+                // This is a basic validation - server will do the real validation
+                // Just check for some common patterns
+                if (!/[yMdHhmsf]/.test(format)) {
+                    throw new Error('Invalid format');
+                }
+                errorDiv.style.display = 'none';
+                return true;
+            } catch (e) {
+                errorDiv.textContent = 'Invalid date format. Use .NET format strings (e.g., yyyy-MM-dd, MM/dd/yyyy)';
+                errorDiv.style.display = 'block';
+                event.preventDefault();
+                return false;
+            }
+        }
+
+        function previewDateFormat(format) {
+            const previewDiv = document.getElementById('date-preview');
+            if (!format) {
+                previewDiv.textContent = 'Preview: ';
+                return;
+            }
+
+            // Send format to server for preview
+            fetch('/settings/preview-date-format?format=' + encodeURIComponent(format))
+                .then(response => response.text())
+                .then(text => {
+                    previewDiv.textContent = 'Preview: ' + text;
+                })
+                .catch(() => {
+                    previewDiv.textContent = 'Preview: Invalid format';
+                });
+        }
     </script>
 </head>
 <body class="@GetBodyClass()">

@@ -1,6 +1,8 @@
+@using System
 @{
     var isAdmin = IsAdmin;
     var isRegistrationOpen = IsRegistrationOpen;
+    var dateFormat = DateFormat;
 }
 
 <div id="settings-content">
@@ -32,6 +34,39 @@
             </div>
         </div>
 
+        <div class="settings-section">
+            <h3>Display Settings</h3>
+            <div class="setting-item">
+                <div class="setting-description">
+                    <strong>Date Display Format</strong>
+                    <p>Customize how dates are displayed throughout the application. Uses .NET date format strings.</p>
+                    <p class="help-text" style="margin-top: 0.5rem;">
+                        Examples: yyyy-MM-dd, MM/dd/yyyy, dd-MMM-yyyy, MMMM d, yyyy
+                    </p>
+                    <p class="date-preview" id="date-preview">
+                        Preview: @(DateOnly.FromDateTime(DateTime.Today).ToString(dateFormat))
+                    </p>
+                </div>
+                <div class="setting-control">
+                    <form hx-post="/settings/update-date-format"
+                          hx-target="#settings-content"
+                          hx-swap="outerHTML"
+                          onsubmit="return validateDateFormat(event)">
+                        <input type="text"
+                               id="date-format-input"
+                               name="date_format"
+                               value="@dateFormat"
+                               class="form-input"
+                               placeholder="yyyy-MM-dd"
+                               oninput="previewDateFormat(this.value)"
+                               required />
+                        <button type="submit" class="btn-primary" style="margin-top: 0.5rem;">Update Format</button>
+                        <div id="format-error" class="error-message" style="display: none;"></div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
         <div style="margin-top: 2rem;">
             <a href="/dashboard" class="btn-secondary">Back to Dashboard</a>
         </div>
@@ -42,4 +77,6 @@
     [Parameter] public bool IsAdmin { get; set; }
 
     [Parameter] public bool IsRegistrationOpen { get; set; }
+
+    [Parameter] public string DateFormat { get; set; } = "yyyy-MM-dd";
 }

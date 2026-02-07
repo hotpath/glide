@@ -129,7 +129,8 @@ builder.Services.AddSingleton<AuthAction>()
     .AddSingleton<CardAction>()
     .AddSingleton<ColumnAction>()
     .AddSingleton<LabelAction>()
-    .AddSingleton<SettingsAction>();
+    .AddSingleton<SettingsAction>()
+    .AddSingleton<DateFormatService>();
 
 builder.Services
     .AddFluentMigratorCore()

@@ -32,6 +32,12 @@ public class SettingsAction(ISiteSettingsRepository siteSettingsRepository)
             return new Result<SiteSetting>(Results.StatusCode(403));
         }
 
+        // Validate date_format setting
+        if (key == "date_format" && !DateFormatService.IsValidFormat(value))
+        {
+            return new Result<SiteSetting>(Results.BadRequest("Invalid date format"));
+        }
+
         await siteSettingsRepository.UpdateAsync(key, value);
         SiteSetting? updated = await siteSettingsRepository.GetByKeyAsync(key);
 

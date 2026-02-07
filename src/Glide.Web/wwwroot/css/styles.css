@@ -632,6 +632,23 @@ input:checked + .toggle-slider:before {
     min-width: 70px;
 }
 
+.error-message {
+    color: var(--accent-red);
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+    padding: 0.5rem;
+    background: rgba(224, 108, 117, 0.1);
+    border-radius: 4px;
+    border-left: 3px solid var(--accent-red);
+}
+
+.date-preview {
+    font-size: 0.875rem;
+    color: var(--accent-cyan);
+    font-weight: 500;
+    margin-top: 0.5rem;
+}
+
 main {
     max-width: 1200px;
     margin: 2rem auto;
