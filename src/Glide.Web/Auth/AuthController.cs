@@ -158,14 +158,14 @@ public class AuthController(
     }
 
     [HttpPost("login-password")]
-    public async Task<IActionResult> LoginWithPassword(
+    public async Task<IResult> LoginWithPassword(
         [FromForm] string email,
         [FromForm] string password)
     {
         AuthAction.Result<User> result = await authAction.LoginWithPasswordAsync(email, password);
         if (result.IsError)
         {
-            return (IActionResult)result.StatusResult!;
+            return result.StatusResult!;
         }
 
         Session session = await authAction.CreateSessionAsync(result.Object!.Id, sessionConfig.DurationSeconds);
@@ -182,6 +182,6 @@ public class AuthController(
                 Path = "/"
             });
 
-        return Redirect("/dashboard");
+        return Results.Redirect("/dashboard");
     }
 }
