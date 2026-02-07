@@ -42,7 +42,7 @@ public class GitHubOAuthProvider : IOAuthProvider
 
         FormUrlEncodedContent content = new(formData);
 
-        HttpRequestMessage request =
+        using HttpRequestMessage request =
             new(HttpMethod.Post, "https://github.com/login/oauth/access_token") { Content = content };
         request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
