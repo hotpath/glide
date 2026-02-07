@@ -29,17 +29,19 @@ public class CardRepository(IDbConnectionFactory connectionFactory) : ICardRepos
         return await conn.QuerySingleOrDefaultAsync<Card>(query, new { Id = id });
     }
 
-    public async Task UpdateAsync(string id, string title, string? description)
+    public async Task UpdateAsync(string id, string title, string? description, DateOnly? dueDate = null)
     {
         const string statement = """
                                  UPDATE cards
                                  SET title = @Title,
-                                     description = @Description
+                                     description = @Description,
+                                     due_date = @DueDate
                                  WHERE id = @Id
                                  """;
 
+        string? dueDateString = dueDate?.ToString("yyyy-MM-dd");
         using IDbConnection conn = connectionFactory.CreateConnection();
-        await conn.ExecuteAsync(statement, new { Id = id, Title = title, Description = description });
+        await conn.ExecuteAsync(statement, new { Id = id, Title = title, Description = description, DueDate = dueDateString });
     }
 
     public async Task MoveToColumnAsync(string id, string columnId, int? position = null)
@@ -98,4 +100,5 @@ public record Card
     public string? ColumnId { get; set; }
     public string? AssignedTo { get; set; }
     public int Position { get; set; }
+    public DateOnly? DueDate { get; set; }
 }

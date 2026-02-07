@@ -42,6 +42,10 @@ Env.Load();
 // Configure Dapper to honor snake_case columns
 DefaultTypeMap.MatchNamesWithUnderscores = true;
 
+// Register Dapper type handlers for DateOnly
+SqlMapper.AddTypeHandler(new DateOnlyTypeHandler());
+SqlMapper.AddTypeHandler(new NullableDateOnlyTypeHandler());
+
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 builder.Configuration.AddEnvironmentVariables();
 
