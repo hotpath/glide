@@ -20,7 +20,7 @@ public record OAuthProviderConfig(
         Uri baseUri = config.GetValue<Uri>($"{prefix}_BASE_URI") ??
                       new Uri(prefix == "GITHUB" ? "https://github.com" : "https://codeberg.org");
 
-        long durationHours = config.GetValue<long>("SESSION_DURATION_HOURS");
+        long durationHours = config.GetValue<long>("SESSION_DURATION_HOURS", 720); // Default: 30 days
         long durationSeconds = (long)TimeSpan.FromHours(durationHours).TotalSeconds;
 
         return new OAuthProviderConfig(clientId, clientSecret, redirectUri, baseUri, durationSeconds);
